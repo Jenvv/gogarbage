@@ -423,7 +423,7 @@
                         </svg>
                     </div>
                     <div style="flex:1;">
-                        <p style="font-size:15px;font-weight:800;color:#111827;">Budi Santoso</p>
+                        <p style="font-size:15px;font-weight:800;color:#111827;">{{ $pesanan->jasaAngkut->name ?? 'Menunggu Juru Angkut' }}</p>
                         <p style="font-size:12px;color:#9ca3af;font-weight:500;">Juru Angkut</p>
                         <p style="font-size:11px;color:#9ca3af;font-weight:500;">B 1234 XYZ</p>
                     </div>
@@ -439,21 +439,21 @@
                 <div class="status-card">
                     <p style="font-size:15px;font-weight:800;color:#111827;margin-bottom:16px;">Status Pesanan</p>
 
-                    <!-- Step 1: Pesanan Dikonfirmasi (done) -->
-                    <div class="timeline-item" style="position:relative;">
+                    <!-- Step 1: Pesanan Dikonfirmasi -->
+                    <div class="timeline-item" style="position:relative;" id="step1">
                         <div style="position:relative;flex-shrink:0;">
-                            <div class="timeline-dot done">
+                            <div class="timeline-dot pending" id="dot1">
                                 <svg width="16" height="16" fill="none" stroke="#fff" stroke-width="3"
                                     viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
                                 </svg>
                             </div>
-                            <div class="timeline-line done"></div>
+                            <div class="timeline-line pending" id="line1"></div>
                         </div>
                         <div class="timeline-content">
-                            <p style="font-size:14px;font-weight:700;color:#111827;">Pesanan Dikonfirmasi</p>
+                            <p id="label1" style="font-size:14px;font-weight:700;color:#111827;">Pesanan Dikonfirmasi</p>
                             <p style="font-size:12px;color:#9ca3af;margin-top:2px;">14:30</p>
-                            <p style="font-size:12px;color:#6b7280;margin-top:4px;font-weight:500;">Pesanan kamu telah
+                            <p id="desc1" style="font-size:12px;color:#6b7280;margin-top:4px;font-weight:500;">Pesanan kamu telah
                                 dikonfirmasi oleh sistem.</p>
                         </div>
                     </div>
@@ -514,8 +514,7 @@
 
                 <!-- ── ACTION BUTTONS ── -->
                 <div style="padding: 14px 16px 0;">
-                    <button class="btn-update" onclick="updateStatus()">Simulasi: Update Status</button>
-                    <button class="btn-home" onclick="alert('Kembali ke beranda')">Kembali ke Beranda</button>
+                    <button class="btn-home" onclick="window.location.href=''">Kembali ke Beranda</button>
                 </div>
 
             </div>
@@ -523,13 +522,13 @@
 
         <!-- ── BOTTOM NAV ── -->
         <div class="nav-bottom">
-            <div class="nav-btn">
+            <div class="nav-btn" onclick="window.location.href=''">
                 <svg width="22" height="22" fill="#9ca3af" viewBox="0 0 24 24">
                     <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
                 </svg>
                 <span style="font-size:10px;font-weight:500;color:#9ca3af;">Home</span>
             </div>
-            <div class="nav-btn">
+            <div class="nav-btn" onclick="window.location.href=''">
                 <svg width="22" height="22" fill="none" stroke="#16a34a" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round"
                         d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
@@ -562,162 +561,93 @@
     </div>
 
     <script>
-        // ── Canvas map (decorative road pattern) ──
-        const canvas = document.getElementById('mapCanvas');
-        const ctx = canvas.getContext('2d');
+        const statusOrder = '{{ $pesanan->status }}';
 
-        function drawMap() {
-            canvas.width = canvas.offsetWidth;
-            canvas.height = canvas.offsetHeight;
-            const w = canvas.width, h = canvas.height;
-
-            ctx.clearRect(0, 0, w, h);
-
-            // Draw grid of roads
-            ctx.strokeStyle = '#16a34a';
-            ctx.lineWidth = 3;
-            ctx.globalAlpha = 0.5;
-
-            // Horizontal roads
-            for (let y = 30; y < h; y += 50) {
-                ctx.beginPath();
-                ctx.moveTo(0, y);
-                ctx.lineTo(w, y);
-                ctx.stroke();
-            }
-
-            // Vertical roads
-            for (let x = 40; x < w; x += 60) {
-                ctx.beginPath();
-                ctx.moveTo(x, 0);
-                ctx.lineTo(x, h);
-                ctx.stroke();
-            }
-
-            // Draw a highlighted route
-            ctx.strokeStyle = '#15803d';
-            ctx.lineWidth = 5;
-            ctx.globalAlpha = 0.7;
-            ctx.beginPath();
-            ctx.moveTo(40, 150);
-            ctx.lineTo(40, 80);
-            ctx.lineTo(160, 80);
-            ctx.lineTo(160, 30);
-            ctx.lineTo(280, 30);
-            ctx.stroke();
-
-            // Draw dots at intersections
-            ctx.globalAlpha = 0.25;
-            ctx.fillStyle = '#166534';
-            for (let y = 30; y < h; y += 50) {
-                for (let x = 40; x < w; x += 60) {
-                    ctx.beginPath();
-                    ctx.arc(x, y, 3, 0, Math.PI * 2);
-                    ctx.fill();
-                }
-            }
-            ctx.globalAlpha = 1;
-        }
-
-        window.addEventListener('resize', drawMap);
-        drawMap();
-
-        // ── Simulasi Update Status ──
-        // States: 0 = step1 done, step2 active (image 1)
-        //         1 = step1,2 done, step3 active (image 2)
-        //         2 = all done
-        let currentStep = 0;
-
-        // Init: step 1 done, step 2 is "active" (live) — matches image 1 state
-        // Actually let's start from image 1 state: step1 done, step2 pending/live
-        // Per image 1: "Pesanan Dikonfirmasi" done, "Menuju Lokasi" pending with "Sedang berlangsung"
-
-        function initStep0() {
-            // Step 2 = active (pending dot but "sedang berlangsung")
-            dot2(false); line2(false);
-            document.getElementById('time2').style.display = 'none';
-            document.getElementById('live2').style.display = 'block';
-            document.getElementById('label2').style.color = '#111827';
-            document.getElementById('desc2').style.color = '#6b7280';
-            dot3(false); line3(false);
-            document.getElementById('label3').style.color = '#9ca3af';
-            document.getElementById('live3').style.display = 'none';
-            document.getElementById('desc3').style.color = '#9ca3af';
-            dot4(false);
-            document.getElementById('label4').style.color = '#9ca3af';
-            document.getElementById('desc4').style.color = '#9ca3af';
-        }
-
-        function applyStep1() {
-            // Step2 done, Step3 active
-            dot2(true); line2(true);
-            document.getElementById('time2').style.display = 'block';
-            document.getElementById('live2').style.display = 'none';
-            document.getElementById('label2').style.color = '#111827';
-            document.getElementById('desc2').style.color = '#6b7280';
-            dot3(false, true); line3(false);
-            document.getElementById('label3').style.color = '#111827';
-            document.getElementById('live3').style.display = 'block';
-            document.getElementById('desc3').style.color = '#6b7280';
-            dot4(false);
-            document.getElementById('label4').style.color = '#9ca3af';
-            document.getElementById('desc4').style.color = '#9ca3af';
-        }
-
-        function applyStep2() {
-            // Step 3 done, step 4 done
-            dot2(true); line2(true);
-            dot3(true); line3(true);
-            document.getElementById('label3').style.color = '#111827';
-            document.getElementById('live3').style.display = 'none';
-            document.getElementById('desc3').style.color = '#6b7280';
-            dot4(true);
-            document.getElementById('label4').style.color = '#111827';
-            document.getElementById('desc4').style.color = '#6b7280';
-        }
-
-        function dot2(done, active = false) {
-            const el = document.getElementById('dot2');
-            el.className = 'timeline-dot ' + (done ? 'done' : active ? 'active' : 'pending');
-            el.innerHTML = done ? checkIcon() : (active ? '' : '');
-        }
-        function dot3(done, active = false) {
-            const el = document.getElementById('dot3');
-            el.className = 'timeline-dot ' + (done ? 'done' : active ? 'active' : 'pending');
-            el.innerHTML = done ? checkIcon() : '';
-        }
-        function dot4(done) {
-            const el = document.getElementById('dot4');
-            el.className = 'timeline-dot ' + (done ? 'done' : 'pending');
-            el.innerHTML = done ? checkIcon() : '';
-        }
-        function line2(done) {
-            const el = document.getElementById('line2');
-            el.className = 'timeline-line ' + (done ? 'done' : 'pending');
-        }
-        function line3(done) {
-            const el = document.getElementById('line3');
-            el.className = 'timeline-line ' + (done ? 'done' : 'pending');
-        }
         function checkIcon() {
             return `<svg width="16" height="16" fill="none" stroke="#fff" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>`;
         }
 
-        function updateStatus() {
-            currentStep++;
-            if (currentStep === 1) {
-                applyStep1();
-            } else if (currentStep === 2) {
-                applyStep2();
-                document.querySelector('.btn-update').textContent = '✅ Pesanan Selesai';
-                document.querySelector('.btn-update').disabled = true;
-                document.querySelector('.btn-update').style.opacity = '0.6';
+        function setDot(id, state) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.className = 'timeline-dot ' + state;
+            el.innerHTML = state === 'done' ? checkIcon() : '';
+        }
+        function setLine(id, state) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.className = 'timeline-line ' + state;
+        }
+
+        function initUI() {
+            // Reset all
+            ['dot1','dot2','dot3','dot4'].forEach(id => setDot(id, 'pending'));
+            ['line1','line2','line3'].forEach(id => setLine(id, 'pending'));
+
+            if (statusOrder === 'menunggu') {
+                setDot('dot1', 'active');
+                document.getElementById('label1').textContent = 'Menunggu Konfirmasi';
+                document.getElementById('desc1').textContent = 'Menunggu jasa angkut mengonfirmasi pesanan kamu.';
+                document.getElementById('label2').style.color = '#9ca3af';
+                document.getElementById('desc2').style.color = '#9ca3af';
+                document.getElementById('live2').style.display = 'none';
+                document.getElementById('time2').style.display = 'none';
+            }
+            else if (statusOrder === 'diklaim') {
+                setDot('dot1', 'done'); setLine('line1', 'done');
+                document.getElementById('label2').style.color = '#9ca3af';
+                document.getElementById('desc2').style.color = '#9ca3af';
+                document.getElementById('live2').style.display = 'none';
+                document.getElementById('time2').style.display = 'none';
+            } 
+            else if (statusOrder === 'dalam_perjalanan') {
+                setDot('dot1', 'done'); setLine('line1', 'done');
+                setDot('dot2', 'active');
+                document.getElementById('label2').style.color = '#111827';
+                document.getElementById('desc2').style.color = '#6b7280';
+                document.getElementById('live2').style.display = 'block';
+                document.getElementById('time2').style.display = 'none';
+            }
+            else if (statusOrder === 'tiba' || statusOrder === 'penimbangan') {
+                setDot('dot1', 'done'); setLine('line1', 'done');
+                setDot('dot2', 'done'); setLine('line2', 'done');
+                setDot('dot3', 'active');
+                
+                document.getElementById('label2').style.color = '#111827';
+                document.getElementById('desc2').style.color = '#6b7280';
+                document.getElementById('live2').style.display = 'none';
+                document.getElementById('time2').style.display = 'block';
+
+                document.getElementById('label3').style.color = '#111827';
+                document.getElementById('desc3').style.color = '#6b7280';
+                document.getElementById('live3').style.display = 'block';
+            }
+            else if (statusOrder === 'selesai') {
+                setDot('dot1', 'done'); setLine('line1', 'done');
+                setDot('dot2', 'done'); setLine('line2', 'done');
+                setDot('dot3', 'done'); setLine('line3', 'done');
+                setDot('dot4', 'done');
+
+                document.getElementById('label2').style.color = '#111827';
+                document.getElementById('desc2').style.color = '#6b7280';
+                document.getElementById('live2').style.display = 'none';
+                document.getElementById('time2').style.display = 'block';
+
+                document.getElementById('label3').style.color = '#111827';
+                document.getElementById('desc3').style.color = '#6b7280';
+                document.getElementById('live3').style.display = 'none';
+
+                document.getElementById('label4').style.color = '#111827';
+                document.getElementById('desc4').style.color = '#6b7280';
             }
         }
 
-        // Init to image 1 state
-        initStep0();
+        initUI();
+
+        // Optional: Auto-refresh data status
+        setInterval(() => {
+            window.location.reload();
+        }, 10000);
     </script>
 </body>
-
 </html>
