@@ -25,6 +25,8 @@ class Pesanan extends Model
         'status',
         'tipe_pesanan',
         'biaya_jemput',
+        'metode_pembayaran',
+        'bukti_pembayaran',
         'total_berat',
         'total_pendapatan',
         'poin_didapat',

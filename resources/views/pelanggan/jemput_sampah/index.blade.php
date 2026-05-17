@@ -61,6 +61,7 @@
             overflow-y: auto;
             overflow-x: hidden;
             -webkit-overflow-scrolling: touch;
+            padding-bottom: 80px;
         }
 
         .scroll-area::-webkit-scrollbar {
@@ -85,7 +86,7 @@
 
         /* Jenis chip */
         .jenis-chip {
-            padding: 10px 22px;
+            padding: 10px 12px;
             border-radius: 50px;
             border: 1.5px solid #d1d5db;
             font-size: 13px;
@@ -209,7 +210,11 @@
             display: flex;
             align-items: center;
             justify-content: space-around;
-            flex-shrink: 0;
+            
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            z-index: 50;
         }
 
         .nav-btn {
@@ -303,7 +308,8 @@
 
                 {{-- Error messages --}}
                 @if ($errors->any())
-                    <div style="background:#fef2f2;border:1px solid #fca5a5;border-radius:12px;padding:12px 16px;margin:12px 20px 0;">
+                    <div
+                        style="background:#fef2f2;border:1px solid #fca5a5;border-radius:12px;padding:12px 16px;margin:12px 20px 0;">
                         <ul style="font-size:11px;color:#dc2626;font-weight:500;list-style:none;margin:0;padding:0;">
                             @foreach ($errors->all() as $error)
                                 <li style="margin-bottom:4px;">⚠️ {{ $error }}</li>
@@ -319,7 +325,7 @@
 
                         <!-- Jenis Sampah (dari database) -->
                         <label class="field-label">Jenis Sampah</label>
-                        <div style="display:flex;flex-wrap:wrap;gap:8px;padding-bottom:4px;" id="jenisRow">
+                        <div style="display:flex;flex-wrap:wrap;gap:6px;padding-bottom:4px;" id="jenisRow">
                             @forelse ($kategoriSampah as $kategori)
                                 <label class="jenis-chip" id="chip-{{ $kategori->id }}">
                                     <input type="checkbox" name="kategori_sampah[]" value="{{ $kategori->id }}"
@@ -342,7 +348,8 @@
                                 viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                     d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                             </svg>
                             <input type="text" name="alamat_jemput" placeholder="Jl. Gajah Mada No. 123, Pontianak"
                                 id="lokasiInput" value="{{ old('alamat_jemput') }}" />
@@ -368,8 +375,7 @@
                                     d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                             </svg>
                             <input type="date" name="tanggal_jemput" id="tanggalInput"
-                                value="{{ old('tanggal_jemput') }}"
-                                min="{{ date('Y-m-d') }}"
+                                value="{{ old('tanggal_jemput') }}" min="{{ date('Y-m-d') }}"
                                 style="color:{{ old('tanggal_jemput') ? '#374151' : '#9ca3af' }};"
                                 onchange="updateDateColor(this)" />
                         </div>
@@ -386,26 +392,31 @@
                             </svg>
                             <select name="jam_jemput" id="jamSelect" onchange="updateSelectColor(this)"
                                 class="{{ old('jam_jemput') ? 'selected' : '' }}">
-                                <option value="" disabled {{ old('jam_jemput') ? '' : 'selected' }}>Pilih Jam</option>
-                                <option value="08:00" {{ old('jam_jemput') == '08:00' ? 'selected' : '' }}>08:00 – 10:00</option>
-                                <option value="10:00" {{ old('jam_jemput') == '10:00' ? 'selected' : '' }}>10:00 – 12:00</option>
-                                <option value="13:00" {{ old('jam_jemput') == '13:00' ? 'selected' : '' }}>13:00 – 15:00</option>
-                                <option value="15:00" {{ old('jam_jemput') == '15:00' ? 'selected' : '' }}>15:00 – 17:00</option>
+                                <option value="" disabled {{ old('jam_jemput') ? '' : 'selected' }}>Pilih Jam
+                                </option>
+                                <option value="08:00" {{ old('jam_jemput') == '08:00' ? 'selected' : '' }}>08:00 –
+                                    10:00</option>
+                                <option value="10:00" {{ old('jam_jemput') == '10:00' ? 'selected' : '' }}>10:00 –
+                                    12:00</option>
+                                <option value="13:00" {{ old('jam_jemput') == '13:00' ? 'selected' : '' }}>13:00 –
+                                    15:00</option>
+                                <option value="15:00" {{ old('jam_jemput') == '15:00' ? 'selected' : '' }}>15:00 –
+                                    17:00</option>
                             </select>
                         </div>
 
                         <div style="height:20px;"></div>
 
                         <!-- Catatan -->
-                        <label class="field-label">Catatan <span style="font-weight:400;color:#9ca3af;">(opsional)</span></label>
+                        <label class="field-label">Catatan <span
+                                style="font-weight:400;color:#9ca3af;">(opsional)</span></label>
                         <div class="input-wrap" style="align-items:flex-start;">
                             <svg width="18" height="18" fill="none" stroke="#9ca3af" stroke-width="2"
                                 viewBox="0 0 24 24" style="margin-top:2px;">
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                     d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                             </svg>
-                            <textarea name="catatan" rows="2" placeholder="Contoh: Sampah di depan pagar"
-                                style="resize:none;">{{ old('catatan') }}</textarea>
+                            <textarea name="catatan" rows="2" placeholder="Contoh: Sampah di depan pagar" style="resize:none;">{{ old('catatan') }}</textarea>
                         </div>
 
                         <div style="height:24px;"></div>
@@ -425,11 +436,14 @@
                             <div id="biayaValue">
                                 @if ($isBerlangganan)
                                     <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;">
-                                        <span style="font-size:11px;color:#9ca3af;font-weight:500;text-decoration:line-through;">Rp 5.000</span>
+                                        <span
+                                            style="font-size:11px;color:#9ca3af;font-weight:500;text-decoration:line-through;">Rp
+                                            5.000</span>
                                         <div class="gratis-badge">GRATIS</div>
                                     </div>
                                 @else
-                                    <span style="font-size:20px;font-weight:800;color:#16a34a;">Rp {{ number_format($biayaJemput, 0, ',', '.') }}</span>
+                                    <span style="font-size:20px;font-weight:800;color:#16a34a;">Rp
+                                        {{ number_format($biayaJemput, 0, ',', '.') }}</span>
                                 @endif
                             </div>
                         </div>
@@ -441,12 +455,14 @@
                     @if ($isBerlangganan && $langgananAktif)
                         <!-- ── INFO LANGGANAN AKTIF ── -->
                         <div style="background:#fff;padding:16px 20px 20px;">
-                            <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:12px 14px;display:flex;gap:10px;align-items:flex-start;">
+                            <div
+                                style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:12px 14px;display:flex;gap:10px;align-items:flex-start;">
                                 <span style="font-size:16px;flex-shrink:0;">✅</span>
                                 <div>
                                     <p style="font-size:12px;font-weight:700;color:#15803d;">Paket Langganan Aktif</p>
                                     <p style="font-size:11px;color:#166534;margin-top:2px;line-height:1.55;">
-                                        Kamu mendapatkan <strong>jemput sampah gratis</strong> setiap hari sebagai bagian dari
+                                        Kamu mendapatkan <strong>jemput sampah gratis</strong> setiap hari sebagai
+                                        bagian dari
                                         paket {{ $langgananAktif->paket->nama ?? 'langganan' }}.
                                     </p>
                                 </div>
@@ -466,46 +482,8 @@
         </div><!-- end scroll-area -->
 
         <!-- ── BOTTOM NAV ── -->
-        <div class="nav-bottom">
-            <a href="{{ route('pelanggan.index') }}" class="nav-btn" style="text-decoration:none;">
-                <svg width="22" height="22" fill="#9ca3af" viewBox="0 0 24 24">
-                    <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
-                </svg>
-                <span style="font-size:10px;font-weight:500;color:#9ca3af;">Home</span>
-            </a>
-            <a href="{{ route('pelanggan.jemput-sampah') }}" class="nav-btn" style="text-decoration:none;">
-                <svg width="22" height="22" fill="none" stroke="#16a34a" stroke-width="2"
-                    viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                </svg>
-                <span style="font-size:10px;font-weight:700;color:#16a34a;">Order</span>
-            </a>
-            <a href="{{ route('pelanggan.riwayat') }}" class="nav-btn" style="text-decoration:none;">
-                <svg width="22" height="22" fill="none" stroke="#9ca3af" stroke-width="2"
-                    viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span style="font-size:10px;font-weight:500;color:#9ca3af;">History</span>
-            </a>
-            <a href="{{ route('pelanggan.langganan') }}" class="nav-btn" style="text-decoration:none;">
-                <svg width="22" height="22" fill="none" stroke="#9ca3af" stroke-width="2"
-                    viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                </svg>
-                <span style="font-size:10px;font-weight:500;color:#9ca3af;">Wallet</span>
-            </a>
-            <div class="nav-btn">
-                <svg width="22" height="22" fill="none" stroke="#9ca3af" stroke-width="2"
-                    viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-                <span style="font-size:10px;font-weight:500;color:#9ca3af;">Profile</span>
-            </div>
-        </div>
+        @include('pelanggan.partials.navigation')
+
 
         <!-- ── MAP MODAL ── -->
         <div id="mapModal"
@@ -518,8 +496,7 @@
                 <!-- Placeholder map image -->
                 <div
                     style="width:100%;height:220px;background:#e8f5e9;border-radius:16px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;position:relative;overflow:hidden;">
-                    <div id="mapPlaceholder"
-                        style="display:flex;flex-direction:column;align-items:center;gap:8px;">
+                    <div id="mapPlaceholder" style="display:flex;flex-direction:column;align-items:center;gap:8px;">
                         <span style="font-size:40px;">🗺️</span>
                         <p style="font-size:13px;color:#6b7280;font-weight:600;">Ketuk untuk memilih lokasi</p>
                     </div>

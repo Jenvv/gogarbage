@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="refresh" content="5;url={{ route('pelanggan.tracking-pesanan', $pesanan->id) }}">
     <title>Go Garbage – Pesanan Berhasil</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap"
@@ -25,7 +26,8 @@
 
         .phone-wrapper {
             width: 390px;
-            min-height: 100vh;
+            height: 100vh;
+            overflow: hidden;
             background: #f2f3f7;
             position: relative;
             box-shadow: 0 0 48px rgba(0, 0, 0, 0.18);
@@ -170,45 +172,13 @@
             border-radius: 99px;
         }
 
-        /* Buttons */
-        .btn-primary {
-            width: 100%;
-            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
-            color: #fff;
-            font-size: 15px;
-            font-weight: 700;
-            font-family: 'Poppins', sans-serif;
-            border: none;
-            border-radius: 16px;
-            padding: 17px;
-            cursor: pointer;
-            margin-top: 20px;
-            transition: opacity 0.2s, transform 0.15s;
-        }
-
-        .btn-primary:active {
-            transform: scale(0.98);
-            opacity: 0.9;
-        }
-
-        .btn-outline {
-            width: 100%;
-            background: #fff;
-            color: #16a34a;
-            font-size: 15px;
-            font-weight: 700;
-            font-family: 'Poppins', sans-serif;
-            border: 2px solid #22c55e;
-            border-radius: 16px;
-            padding: 15px;
-            cursor: pointer;
-            margin-top: 12px;
-            transition: background 0.2s, transform 0.15s;
-        }
-
-        .btn-outline:active {
-            transform: scale(0.98);
-            background: #f0fdf4;
+        /* Teks Countdown */
+        .countdown-text {
+            margin-top: 32px;
+            font-size: 12px;
+            color: #9ca3af;
+            text-align: center;
+            font-weight: 500;
         }
     </style>
 </head>
@@ -232,7 +202,7 @@
             <h1 style="font-size:22px;font-weight:800;color:#111827;text-align:center;margin-bottom:12px;">Pesanan
                 Berhasil!</h1>
             <p style="font-size:13px;color:#6b7280;text-align:center;line-height:1.75;font-weight:400;">
-                Pembayaran Anda telah berhasil<br />diproses.<br />
+                Pesanan Anda telah berhasil<br />diproses.<br />
                 Juru angkut sedang menuju lokasi<br />Anda.
             </p>
 
@@ -248,13 +218,30 @@
                 </div>
             </div>
 
-            <!-- Buttons -->
-            <a href="{{ route('pelanggan.tracking-pesanan', $pesanan->id) }}" class="btn-primary" style="text-decoration:none;text-align:center;">Lihat Tracking</a>
-            <a href="{{ route('pelanggan.index') }}" class="btn-outline" style="text-decoration:none;text-align:center;">Kembali ke Beranda</a>
+            <!-- Teks Notifikasi Redirect -->
+            <div class="countdown-text">
+                Kamu akan dialihkan dalam <span id="timer"
+                    style="color:#111827; font-weight:700;">5</span> detik...
+            </div>
 
         </div>
 
     </div>
+
+    <!-- Script Hitung Mundur -->
+    <script>
+        let timeLeft = 5;
+        const timerElement = document.getElementById('timer');
+
+        const countdown = setInterval(function() {
+            timeLeft--;
+            if (timeLeft > 0) {
+                timerElement.innerText = timeLeft;
+            } else {
+                clearInterval(countdown);
+            }
+        }, 1000); // Eksekusi setiap 1 detik (1000ms)
+    </script>
 </body>
 
 </html>

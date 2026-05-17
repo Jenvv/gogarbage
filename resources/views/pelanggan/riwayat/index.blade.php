@@ -24,7 +24,8 @@
 
         .phone-wrapper {
             width: 390px;
-            min-height: 100vh;
+            height: 100vh;
+            overflow: hidden;
             background: #f2f3f7;
             position: relative;
             box-shadow: 0 0 48px rgba(0, 0, 0, 0.15);
@@ -103,6 +104,7 @@
             overflow-y: auto;
             overflow-x: hidden;
             -webkit-overflow-scrolling: touch;
+            padding-bottom: 80px;
         }
 
         .scroll-area::-webkit-scrollbar {
@@ -220,7 +222,11 @@
             display: flex;
             align-items: center;
             justify-content: space-around;
-            flex-shrink: 0;
+            
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            z-index: 50;
         }
 
         .nav-btn {
@@ -287,6 +293,11 @@
         .modal-row:last-child {
             border-bottom: none;
         }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
     </style>
 </head>
 
@@ -298,7 +309,8 @@
             <div class="header-top">
                 <a href="#"
                     style="width:36px;height:36px;background:rgba(255,255,255,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                    <svg width="20" height="20" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24">
+                    <svg width="20" height="20" fill="none" stroke="#fff" stroke-width="2.5"
+                        viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
                     </svg>
                 </a>
@@ -322,42 +334,8 @@
         </div>
 
         <!-- ── BOTTOM NAV ── -->
-        <div class="nav-bottom">
-            <div class="nav-btn">
-                <svg width="22" height="22" fill="#9ca3af" viewBox="0 0 24 24">
-                    <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
-                </svg>
-                <span style="font-size:10px;font-weight:400;color:#9ca3af;">Home</span>
-            </div>
-            <div class="nav-btn">
-                <svg width="22" height="22" fill="none" stroke="#9ca3af" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                </svg>
-                <span style="font-size:10px;font-weight:400;color:#9ca3af;">Order</span>
-            </div>
-            <div class="nav-btn">
-                <svg width="22" height="22" fill="none" stroke="#16a34a" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span style="font-size:10px;font-weight:600;color:#16a34a;">History</span>
-            </div>
-            <div class="nav-btn">
-                <svg width="22" height="22" fill="none" stroke="#9ca3af" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                </svg>
-                <span style="font-size:10px;font-weight:400;color:#9ca3af;">Wallet</span>
-            </div>
-            <div class="nav-btn">
-                <svg width="22" height="22" fill="none" stroke="#9ca3af" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-                <span style="font-size:10px;font-weight:400;color:#9ca3af;">Profile</span>
-            </div>
-        </div>
+        @include('pelanggan.partials.navigation')
+
 
     </div>
 
@@ -382,121 +360,13 @@
             <!-- Rows -->
             <div id="mdlRows"></div>
 
-            <button onclick="closeModal()"
-                style="width:100%;border:none;border-radius:12px;padding:14px;font-size:13.5px;font-weight:600;color:#fff;background:linear-gradient(135deg,#22c55e,#16a34a);cursor:pointer;font-family:'Poppins',sans-serif;margin-top:20px;">
-                Tutup
-            </button>
+<div id="mdlActionBtns"></div>
         </div>
     </div>
 
     <script>
         /* ─── DATA ─── */
-        const riwayat = [
-            {
-                id: 1, filter: 'jemput',
-                title: 'Jemput Sampah Organik',
-                tanggal: '12 April 2026', waktu: '08:00 – 10:00',
-                nominal: 'Rp 6.000', nominalSign: 'neutral',
-                status: 'selesai',
-                iconBg: '#dcfce7', iconColor: '#16a34a', iconType: 'trash',
-                detail: {
-                    'Jenis Sampah': 'Organik',
-                    'Alamat': 'Jl. Gajah Mada No. 123, Pontianak',
-                    'Tanggal': '12 April 2026',
-                    'Waktu': '08:00 – 10:00',
-                    'Biaya Jemput': 'Rp 5.000',
-                    'Biaya Layanan': 'Rp 1.000',
-                    'Total': 'Rp 6.000',
-                    'Metode Bayar': 'GoPay',
-                }
-            },
-            {
-                id: 2, filter: 'jual',
-                title: 'Jual Sampah Plastik – 5 kg',
-                tanggal: '10 April 2026', waktu: '14:30',
-                nominal: '+Rp 10.000', nominalSign: 'plus',
-                status: 'selesai',
-                iconBg: '#ede9fe', iconColor: '#7c3aed', iconType: 'cart',
-                detail: {
-                    'Jenis Sampah': 'Plastik',
-                    'Berat': '5 kg',
-                    'Harga per kg': 'Rp 2.000',
-                    'Tanggal': '10 April 2026',
-                    'Waktu': '14:30',
-                    'Total Diterima': '+Rp 10.000',
-                    'Metode Pencairan': 'Saldo GoGarbage',
-                }
-            },
-            {
-                id: 3, filter: 'jemput',
-                title: 'Jemput Sampah Campuran',
-                tanggal: '8 April 2026', waktu: '10:00 – 12:00',
-                nominal: 'Rp 10.000', nominalSign: 'neutral',
-                status: 'selesai',
-                iconBg: '#dcfce7', iconColor: '#16a34a', iconType: 'trash',
-                detail: {
-                    'Jenis Sampah': 'Campuran',
-                    'Alamat': 'Jl. Diponegoro No. 45, Pontianak',
-                    'Tanggal': '8 April 2026',
-                    'Waktu': '10:00 – 12:00',
-                    'Biaya Jemput': 'Rp 9.000',
-                    'Biaya Layanan': 'Rp 1.000',
-                    'Total': 'Rp 10.000',
-                    'Metode Bayar': 'OVO',
-                }
-            },
-            {
-                id: 4, filter: 'paket',
-                title: 'Paket Langganan Bulanan',
-                tanggal: '1 April 2026', waktu: null,
-                nominal: 'Rp 30.000', nominalSign: 'neutral',
-                status: 'aktif',
-                iconBg: '#ede9fe', iconColor: '#7c3aed', iconType: 'box',
-                detail: {
-                    'Paket': 'Bulanan',
-                    'Mulai': '1 April 2026',
-                    'Berakhir': '30 April 2026',
-                    'Sisa Penjemputan': '5x lagi',
-                    'Biaya': 'Rp 30.000',
-                    'Metode Bayar': 'DANA',
-                }
-            },
-            {
-                id: 5, filter: 'jemput',
-                title: 'Jemput Sampah Anorganik',
-                tanggal: '28 Maret 2026', waktu: '09:00 – 11:00',
-                nominal: 'Rp 6.000', nominalSign: 'neutral',
-                status: 'selesai',
-                iconBg: '#dcfce7', iconColor: '#16a34a', iconType: 'trash',
-                detail: {
-                    'Jenis Sampah': 'Anorganik',
-                    'Alamat': 'Jl. Ahmad Yani No. 10, Pontianak',
-                    'Tanggal': '28 Maret 2026',
-                    'Waktu': '09:00 – 11:00',
-                    'Biaya Jemput': 'Rp 5.000',
-                    'Biaya Layanan': 'Rp 1.000',
-                    'Total': 'Rp 6.000',
-                    'Metode Bayar': 'Transfer Bank',
-                }
-            },
-            {
-                id: 6, filter: 'jual',
-                title: 'Jual Sampah Kertas – 3 kg',
-                tanggal: '25 Maret 2026', waktu: '13:00',
-                nominal: '+Rp 4.500', nominalSign: 'plus',
-                status: 'selesai',
-                iconBg: '#ede9fe', iconColor: '#7c3aed', iconType: 'cart',
-                detail: {
-                    'Jenis Sampah': 'Kertas',
-                    'Berat': '3 kg',
-                    'Harga per kg': 'Rp 1.500',
-                    'Tanggal': '25 Maret 2026',
-                    'Waktu': '13:00',
-                    'Total Diterima': '+Rp 4.500',
-                    'Metode Pencairan': 'Saldo GoGarbage',
-                }
-            },
-        ];
+        const riwayat = @json($riwayat_data);
 
         /* ─── ICONS ─── */
         function iconSVG(type, color) {
@@ -543,8 +413,26 @@
                 return;
             }
 
-            container.innerHTML = items.map((r, i) => `
-      <div class="hist-card" style="animation-delay:${i * 0.06}s;">
+            container.innerHTML = items.map((r, i) => {
+                const isActive = r.status_asli && !['selesai', 'dibatalkan'].includes(r.status_asli);
+                const borderStyle = isActive ? 'border-left:3px solid #22c55e;' : '';
+                const actionBtn = isActive
+                    ? `<a class="detail-link" href="/pelanggan/jemput-sampah/${r.pesanan_id || r.id}/tracking" style="color:#16a34a;font-weight:600;gap:5px;">
+                        <span style="width:6px;height:6px;background:#22c55e;border-radius:50%;animation:pulse 1.5s infinite;"></span>
+                        Tracking
+                        <svg width="13" height="13" fill="none" stroke="#16a34a" stroke-width="2.5" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+                        </svg>
+                      </a>`
+                    : `<a class="detail-link" onclick="openModal(${r.id})">
+                        Detail
+                        <svg width="13" height="13" fill="none" stroke="#6366f1" stroke-width="2.5" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+                        </svg>
+                      </a>`;
+
+                return `
+      <div class="hist-card" style="animation-delay:${i * 0.06}s;${borderStyle}">
         <!-- Icon -->
         <div class="hist-icon" style="background:${r.iconBg};">
           ${iconSVG(r.iconType, r.iconColor)}
@@ -561,20 +449,17 @@
           </p>
           <div style="display:flex;justify-content:space-between;align-items:center;">
             <span style="font-size:15px;font-weight:700;color:${r.nominalSign === 'plus' ? '#16a34a' : '#111827'};">${r.nominal}</span>
-            <a class="detail-link" onclick="openModal(${r.id})">
-              Detail
-              <svg width="13" height="13" fill="none" stroke="#6366f1" stroke-width="2.5" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
-              </svg>
-            </a>
+            ${actionBtn}
           </div>
         </div>
       </div>
-    `).join('');
+    `;
+            }).join('');
         }
 
         /* ─── TABS ─── */
         let activeFilter = 'semua';
+
         function setTab(el, filter) {
             document.querySelectorAll('.tab').forEach(t => {
                 t.classList.remove('active');
@@ -602,6 +487,18 @@
         <span style="font-size:13px;font-weight:600;color:#111827;text-align:right;max-width:55%;">${v}</span>
       </div>`).join('');
             document.getElementById('mdlRows').innerHTML = rows;
+
+            let footerBtns = `<div style="display:flex;gap:10px;margin-top:20px;">`;
+            footerBtns += `<button onclick="window.location.href='/pelanggan/jemput-sampah/${r.id}/tracking'" style="flex:1;border:none;border-radius:12px;padding:12px;font-size:13.5px;font-weight:600;color:#fff;background:#3b82f6;cursor:pointer;">Lihat Tracking</button>`;
+            
+            if(r.status_asli !== 'selesai' && r.status_asli !== 'dibatalkan' && r.no_hp_juru_angkut) {
+                 footerBtns += `<a href="tel:${r.no_hp_juru_angkut}" style="flex:1;text-align:center;text-decoration:none;border:none;border-radius:12px;padding:12px;font-size:13.5px;font-weight:600;color:#16a34a;background:#dcfce7;cursor:pointer;">Telepon Driver</a>`;
+            }
+
+            footerBtns += `</div>`;
+            footerBtns += `<button onclick="closeModal()" style="width:100%;border:none;border-radius:12px;padding:12px;font-size:13.5px;font-weight:600;color:#fff;background:linear-gradient(135deg,#22c55e,#16a34a);cursor:pointer;margin-top:10px;">Tutup</button>`;
+
+            document.getElementById('mdlActionBtns').innerHTML = footerBtns;
 
             document.getElementById('modalOverlay').classList.add('show');
         }

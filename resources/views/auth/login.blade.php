@@ -1,47 +1,216 @@
-<x-guest-layout>
-    <!-- Session Status -->
-    <x-auth-session-status class="mb-4" :status="session('status')" />
+<!DOCTYPE html>
+<html lang="id">
 
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Go Garbage – Masuk</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet" />
+    <style>
+        * {
+            font-family: 'Poppins', sans-serif;
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: #e8e8e8;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+
+        .phone-wrapper {
+            width: 390px;
+            min-height: 100vh;
+            background: #f2f3f7;
+            position: relative;
+            box-shadow: 0 0 48px rgba(0, 0, 0, 0.18);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 24px 40px;
+        }
+
+        @media (max-width: 390px) {
+            body {
+                background: #f2f3f7;
+            }
+
+            .phone-wrapper {
+                width: 100%;
+                box-shadow: none;
+            }
+        }
+
+        .input-field {
+            width: 100%;
+            background: #fff;
+            border: 1.5px solid #e5e7eb;
+            border-radius: 14px;
+            padding: 14px 16px 14px 50px;
+            font-size: 14px;
+            font-family: 'Poppins', sans-serif;
+            color: #111827;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .input-field::placeholder {
+            color: #9ca3af;
+            font-weight: 400;
+        }
+
+        .input-field:focus {
+            border-color: #22c55e;
+        }
+
+        .input-wrap {
+            position: relative;
+            width: 100%;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+        }
+
+        .btn-primary {
+            width: 100%;
+            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+            color: #fff;
+            font-size: 15px;
+            font-weight: 700;
+            font-family: 'Poppins', sans-serif;
+            border: none;
+            border-radius: 16px;
+            padding: 17px;
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.15s;
+        }
+
+        .btn-primary:active {
+            transform: scale(0.98);
+            opacity: 0.9;
+        }
+
+        .btn-outline {
+            width: 100%;
+            background: #fff;
+            color: #16a34a;
+            font-size: 15px;
+            font-weight: 700;
+            font-family: 'Poppins', sans-serif;
+            border: 2px solid #22c55e;
+            border-radius: 16px;
+            padding: 15px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: background 0.2s, transform 0.15s;
+        }
+
+        .btn-outline:active {
+            transform: scale(0.98);
+            background: #f0fdf4;
+        }
+    </style>
+</head>
+
+<body>
     <form method="POST" action="{{ route('login') }}">
         @csrf
+        <div class="phone-wrapper">
 
-        <!-- Email Address -->
-        <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus autocomplete="username" />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
+        <!-- Logo -->
+        <div style="display:flex;flex-direction:column;align-items:center;margin-bottom:28px;">
+            <!-- Logo circle -->
+            <div
+                style="width:90px;height:90px;background:linear-gradient(135deg,#2ecc71 0%,#16a34a 100%);border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:16px;box-shadow:0 8px 24px rgba(34,197,94,0.28);">
+                <!-- Leaf icon -->
+                <svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                        d="M22 8C22 8 10 14 10 26C10 32.627 15.373 38 22 38C28.627 38 34 32.627 34 26C34 14 22 8 22 8Z"
+                        fill="rgba(255,255,255,0.25)" />
+                    <path
+                        d="M22 8C22 8 10 14 10 26C10 32.627 15.373 38 22 38C28.627 38 34 32.627 34 26C34 14 22 8 22 8Z"
+                        stroke="white" stroke-width="2" stroke-linejoin="round" />
+                    <path d="M22 38V22" stroke="white" stroke-width="2" stroke-linecap="round" />
+                    <path d="M22 28C22 28 27 23 32 22" stroke="white" stroke-width="2" stroke-linecap="round" />
+                    <path d="M22 24C22 24 17 20 12 20" stroke="white" stroke-width="2" stroke-linecap="round" />
+                </svg>
+            </div>
+            <p style="font-size:22px;font-weight:800;color:#16a34a;letter-spacing:0.01em;">Go Garbage</p>
+            <p style="font-size:13px;color:#6b7280;font-weight:400;margin-top:2px;">Solusi Sampah Pintar</p>
         </div>
 
-        <!-- Password -->
-        <div class="mt-4">
-            <x-input-label for="password" :value="__('Password')" />
+        <!-- Card -->
+        <div
+            style="width:100%;background:#fff;border-radius:24px;padding:28px 24px 28px;box-shadow:0 2px 24px rgba(0,0,0,0.08);">
 
-            <x-text-input id="password" class="block mt-1 w-full"
-                            type="password"
-                            name="password"
-                            required autocomplete="current-password" />
+            <h2 style="font-size:20px;font-weight:800;color:#111827;margin-bottom:22px;">Masuk Go Garbage</h2>
 
-            <x-input-error :messages="$errors->get('password')" class="mt-2" />
+            <!-- Nomor HP -->
+            <div style="margin-bottom:16px;">
+                <label for="email" style="font-size:13px;font-weight:600;color:#374151;display:block;margin-bottom:8px;">Email</label>
+                <div class="input-wrap">
+                    <span class="input-icon">
+                        <svg width="18" height="18" fill="none" stroke="#9ca3af" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
+                    </span>
+                    <input id="email" type="email" name="email" value="{{ old('email') }}" required autofocus autocomplete="username" class="input-field" placeholder="contoh@email.com" />
+                </div>
+                <x-input-error :messages="$errors->get('email')" style="color:#ef4444;font-size:12px;margin-top:4px;" />
+            </div>
+
+            <!-- Password -->
+            <div style="margin-bottom:10px;">
+                <label for="password" style="font-size:13px;font-weight:600;color:#374151;display:block;margin-bottom:8px;">Password</label>
+                <div class="input-wrap">
+                    <span class="input-icon">
+                        <svg width="18" height="18" fill="none" stroke="#9ca3af" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                        </svg>
+                    </span>
+                    <input id="password" type="password" name="password" required autocomplete="current-password" class="input-field" placeholder="••••••••" />
+                </div>
+                <x-input-error :messages="$errors->get('password')" style="color:#ef4444;font-size:12px;margin-top:4px;" />
+            </div>
+
+            <!-- Lupa Password -->
+            <div style="text-align:right;margin-bottom:24px;">
+                @if (Route::has('password.request'))
+                    <a href="{{ route('password.request') }}" style="font-size:13px;font-weight:600;color:#22c55e;text-decoration:none;">Lupa Password?</a>
+                @endif
+            </div>
+
+            <!-- Masuk sebagai Pengguna -->
+            <button type="submit" class="btn-primary" style="margin-bottom:14px;">Masuk</button>
+
+
+
         </div>
 
-        <!-- Remember Me -->
-        <div class="block mt-4">
-            <label for="remember_me" class="inline-flex items-center">
-                <input id="remember_me" type="checkbox" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" name="remember">
-                <span class="ms-2 text-sm text-gray-600">{{ __('Remember me') }}</span>
-            </label>
-        </div>
+        <!-- Daftar -->
+        <p style="font-size:13px;color:#6b7280;margin-top:24px;text-align:center;">
+            Belum punya akun? <a href="{{ route('register') }}" style="font-weight:700;color:#22c55e;text-decoration:none;">Daftar</a>
+        </p>
 
-        <div class="flex items-center justify-end mt-4">
-            @if (Route::has('password.request'))
-                <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('password.request') }}">
-                    {{ __('Forgot your password?') }}
-                </a>
-            @endif
-
-            <x-primary-button class="ms-3">
-                {{ __('Log in') }}
-            </x-primary-button>
         </div>
     </form>
-</x-guest-layout>
+</body>
+
+</html>

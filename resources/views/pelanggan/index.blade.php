@@ -51,6 +51,7 @@
             overflow-y: auto;
             overflow-x: hidden;
             -webkit-overflow-scrolling: touch;
+            padding-bottom: 80px;
         }
 
         .scroll-area::-webkit-scrollbar {
@@ -127,7 +128,6 @@
         .aktiv-item+.aktiv-item {
             border-top: 1px solid #f3f4f6;
         }
-
         .aktiv-icon {
             width: 44px;
             height: 44px;
@@ -146,7 +146,11 @@
             display: flex;
             align-items: center;
             justify-content: space-around;
-            flex-shrink: 0;
+            
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            z-index: 50;
         }
 
         .nav-btn {
@@ -173,7 +177,8 @@
                         <div>
                             <p style="font-size:13px;color:rgba(255,255,255,0.8);font-weight:500;margin-bottom:4px;">
                                 Selamat Datang,</p>
-                            <p style="font-size:21px;font-weight:800;color:#fff;line-height:1.15;">Pengguna Go Garbage
+                            <p style="font-size:21px;font-weight:800;color:#fff;line-height:1.15;">
+                                {{ auth()->user()->name ?? 'Pengguna' }}
                             </p>
                         </div>
                         <!-- Bell -->
@@ -204,7 +209,8 @@
                                 </svg>
                                 <span style="font-size:12px;color:rgba(255,255,255,0.8);font-weight:500;">Saldo</span>
                             </div>
-                            <p style="font-size:19px;font-weight:800;color:#fff;">Rp 150.000</p>
+                            <p style="font-size:19px;font-weight:800;color:#fff;">Rp
+                                {{ number_format(auth()->user()->saldo ?? 0, 0, ',', '.') }}</p>
                         </div>
                         <div class="balance-card">
                             <div style="display:flex;align-items:center;gap:7px;margin-bottom:7px;">
@@ -215,7 +221,7 @@
                                 </svg>
                                 <span style="font-size:12px;color:rgba(255,255,255,0.8);font-weight:500;">Poin</span>
                             </div>
-                            <p style="font-size:19px;font-weight:800;color:#fff;">2.500 Poin</p>
+                            <p style="font-size:19px;font-weight:800;color:#fff;">{{ number_format(auth()->user()->poin ?? 0, 0, ',', '.') }} Poin</p>
                         </div>
                     </div>
                 </div>
@@ -227,7 +233,7 @@
 
                     <!-- Grid 3 kolom -->
                     <div
-                        style="display:grid;grid-template-columns:repeat(3,1fr);row-gap:20px;column-gap:4px;text-align:center;">
+                        style="display:grid;grid-template-columns:repeat(4,1fr);row-gap:20px;column-gap:4px;text-align:center;">
 
                         {{-- ── Jemput Sampah → route: jemput-sampah.index ── --}}
                         <div style="display:flex;flex-direction:column;align-items:center;gap:9px;">
@@ -244,7 +250,7 @@
                         </div>
 
                         {{-- ── Jual Sampah → route: jual-sampah.index ── --}}
-                        <div style="display:flex;flex-direction:column;align-items:center;gap:9px;">
+                        {{-- <div style="display:flex;flex-direction:column;align-items:center;gap:9px;">
                             <a href="" class="svc-box" style="background:#dbeafe;">
                                 <svg width="28" height="28" fill="none" stroke="#2563eb" stroke-width="2"
                                     viewBox="0 0 24 24">
@@ -254,7 +260,7 @@
                             </a>
                             <p style="font-size:11.5px;font-weight:600;color:#374151;line-height:1.35;">Jual<br />Sampah
                             </p>
-                        </div>
+                        </div> --}}
 
                         {{-- ── Paket Langganan → route: langganan.index ── --}}
                         <div style="display:flex;flex-direction:column;align-items:center;gap:9px;">
@@ -267,18 +273,6 @@
                             </a>
                             <p style="font-size:11.5px;font-weight:600;color:#374151;line-height:1.35;">
                                 Paket<br />Langganan</p>
-                        </div>
-
-                        {{-- ── Riwayat → route: riwayat.index ── --}}
-                        <div style="display:flex;flex-direction:column;align-items:center;gap:9px;">
-                            <a href="{{ route('pelanggan.riwayat') }}" class="svc-box" style="background:#ffedd5;">
-                                <svg width="28" height="28" fill="none" stroke="#ea580c" stroke-width="2"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                            </a>
-                            <p style="font-size:11.5px;font-weight:600;color:#374151;line-height:1.35;">Riwayat</p>
                         </div>
 
                         {{-- ── Poin & Reward → route: poin.index ── --}}
@@ -294,8 +288,20 @@
                                 &<br />Reward</p>
                         </div>
 
-                        {{-- ── Berita → route: berita.index ── --}}
+                        {{-- ── Riwayat → route: riwayat.index ── --}}
                         <div style="display:flex;flex-direction:column;align-items:center;gap:9px;">
+                            <a href="{{ route('pelanggan.riwayat') }}" class="svc-box" style="background:#ffedd5;">
+                                <svg width="28" height="28" fill="none" stroke="#ea580c" stroke-width="2"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </a>
+                            <p style="font-size:11.5px;font-weight:600;color:#374151;line-height:1.35;">Riwayat</p>
+                        </div>
+
+                        {{-- ── Berita → route: berita.index ── --}}
+                        {{-- <div style="display:flex;flex-direction:column;align-items:center;gap:9px;">
                             <a href="" class="svc-box" style="background:#fce7f3;">
                                 <svg width="28" height="28" fill="none" stroke="#be185d" stroke-width="2"
                                     viewBox="0 0 24 24">
@@ -304,7 +310,7 @@
                                 </svg>
                             </a>
                             <p style="font-size:11.5px;font-weight:600;color:#374151;line-height:1.35;">Berita</p>
-                        </div>
+                        </div> --}}
 
                     </div>
                 </div>
@@ -329,89 +335,85 @@
                 <div class="aktiv-card">
                     <div style="display:flex;align-items:center;justify-content:space-between;padding-bottom:4px;">
                         <p style="font-size:15px;font-weight:700;color:#111827;">Aktivitas Terakhir</p>
-                        <a href=""
+                        <a href="{{ route('pelanggan.riwayat') }}"
                             style="font-size:12px;font-weight:600;color:#16a34a;text-decoration:none;">Lihat Semua</a>
                     </div>
 
-                    <!-- Item 1 -->
-                    <div class="aktiv-item">
-                        <div class="aktiv-icon" style="background:#d1fae5;">
-                            <svg width="20" height="20" fill="none" stroke="#059669" stroke-width="2"
-                                viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
+                    @forelse($aktivitas as $item)
+                        @php
+                            $jenis = $item->detailPesanan->pluck('kategoriSampah.nama')->filter()->implode(', ') ?: 'Sampah';
+                            $statusMap = [
+                                'menunggu' => ['Menunggu', '#f59e0b'],
+                                'diklaim' => ['Diklaim', '#3b82f6'],
+                                'dalam_perjalanan' => ['Dalam Perjalanan', '#3b82f6'],
+                                'tiba' => ['Tiba', '#8b5cf6'],
+                                'penimbangan' => ['Penimbangan', '#8b5cf6'],
+                                'selesai' => ['Selesai', '#16a34a'],
+                                'dibatalkan' => ['Dibatalkan', '#dc2626'],
+                            ];
+                            $statusLabel = $statusMap[$item->status][0] ?? ucfirst($item->status);
+                            $statusColor = $statusMap[$item->status][1] ?? '#6b7280';
+                            $isActive = !in_array($item->status, ['selesai', 'dibatalkan']);
+                        @endphp
+                        <div class="aktiv-item">
+                            <div class="aktiv-icon" style="background:{{ $isActive ? '#dbeafe' : '#d1fae5' }};">
+                                @if($isActive)
+                                    <svg width="20" height="20" fill="none" stroke="#2563eb" stroke-width="2" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"/>
+                                    </svg>
+                                @else
+                                    <svg width="20" height="20" fill="none" stroke="#059669" stroke-width="2" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                @endif
+                            </div>
+                            <div style="flex:1;min-width:0;">
+                                <p style="font-size:13px;font-weight:700;color:#111827;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ $jenis }}</p>
+                                <p style="font-size:11px;color:#9ca3af;margin-top:3px;">{{ $item->tanggal_jemput ? $item->tanggal_jemput->format('d M Y') : '-' }}</p>
+                            </div>
+                            <span style="font-size:12px;font-weight:700;color:{{ $statusColor }};flex-shrink:0;">{{ $statusLabel }}</span>
                         </div>
-                        <div style="flex:1;">
-                            <p style="font-size:13px;font-weight:700;color:#111827;">Jemput Sampah</p>
-                            <p style="font-size:11px;color:#9ca3af;margin-top:3px;">12 April 2026</p>
+                    @empty
+                        <div style="padding:20px 0;text-align:center;">
+                            <p style="font-size:13px;color:#9ca3af;font-weight:500;">Belum ada aktivitas</p>
                         </div>
-                        <span style="font-size:13px;font-weight:700;color:#16a34a;">Selesai</span>
-                    </div>
-
-                    <!-- Item 2 -->
-                    <div class="aktiv-item">
-                        <div class="aktiv-icon" style="background:#dbeafe;">
-                            <svg width="20" height="20" fill="none" stroke="#2563eb" stroke-width="2"
-                                viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                            </svg>
-                        </div>
-                        <div style="flex:1;">
-                            <p style="font-size:13px;font-weight:700;color:#111827;">Jual Sampah Plastik</p>
-                            <p style="font-size:11px;color:#9ca3af;margin-top:3px;">10 April 2026</p>
-                        </div>
-                        <span style="font-size:13px;font-weight:700;color:#16a34a;">+Rp 25.000</span>
-                    </div>
+                    @endforelse
                 </div>
                 <!-- ── END AKTIVITAS ── -->
-
             </div>
         </div><!-- end scroll-area -->
 
-        <!-- ── BOTTOM NAV ── -->
-        <div class="nav-bottom">
-            <a href="" class="nav-btn" style="text-decoration:none;">
-                <svg width="22" height="22" fill="#16a34a" viewBox="0 0 24 24">
-                    <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
-                </svg>
-                <span style="font-size:10px;font-weight:700;color:#16a34a;">Home</span>
-            </a>
-            <a href="" class="nav-btn" style="text-decoration:none;">
-                <svg width="22" height="22" fill="none" stroke="#9ca3af" stroke-width="2"
-                    viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                </svg>
-                <span style="font-size:10px;font-weight:500;color:#9ca3af;">Order</span>
-            </a>
-            <a href="" class="nav-btn" style="text-decoration:none;">
-                <svg width="22" height="22" fill="none" stroke="#9ca3af" stroke-width="2"
-                    viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span style="font-size:10px;font-weight:500;color:#9ca3af;">History</span>
-            </a>
-            <a href="" class="nav-btn" style="text-decoration:none;">
-                <svg width="22" height="22" fill="none" stroke="#9ca3af" stroke-width="2"
-                    viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                </svg>
-                <span style="font-size:10px;font-weight:500;color:#9ca3af;">Wallet</span>
-            </a>
-            <a href="" class="nav-btn" style="text-decoration:none;">
-                <svg width="22" height="22" fill="none" stroke="#9ca3af" stroke-width="2"
-                    viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-                <span style="font-size:10px;font-weight:500;color:#9ca3af;">Profile</span>
+        <!-- ── FLOATING ACTIVE ORDER BAR ── -->
+        @if(isset($pesananAktif) && $pesananAktif)
+        <div style="position:absolute;bottom:64px;left:0;right:0;z-index:60;padding:0 12px 8px;">
+            <a href="{{ route('pelanggan.tracking-pesanan', $pesananAktif->id) }}" style="text-decoration:none;display:flex;align-items:center;gap:12px;background:linear-gradient(135deg,#22c55e 0%,#16a34a 100%);border-radius:16px;padding:12px 16px;box-shadow:0 4px 20px rgba(22,163,74,0.35);">
+                <div style="position:relative;flex-shrink:0;">
+                    <div style="width:36px;height:36px;background:rgba(255,255,255,0.2);border-radius:12px;display:flex;align-items:center;justify-content:center;">
+                        <svg width="18" height="18" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"/>
+                        </svg>
+                    </div>
+                    <span style="position:absolute;top:-2px;right:-2px;width:10px;height:10px;background:#fbbf24;border-radius:50%;border:2px solid #16a34a;animation:pulseDot 1.5s infinite;"></span>
+                </div>
+                <div style="flex:1;min-width:0;">
+                    <p style="font-size:12px;font-weight:700;color:#fff;margin-bottom:1px;">Transaksi Berlangsung</p>
+                    <p style="font-size:10.5px;color:rgba(255,255,255,0.8);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ ucfirst(str_replace('_', ' ', $pesananAktif->status)) }} · #{{ $pesananAktif->nomor_pesanan }}</p>
+                </div>
+                <div style="background:rgba(255,255,255,0.25);border-radius:10px;padding:7px 14px;flex-shrink:0;">
+                    <span style="font-size:12px;font-weight:700;color:#fff;">Lihat</span>
+                </div>
             </a>
         </div>
+        <style>
+            @keyframes pulseDot {
+                0%, 100% { opacity: 1; transform: scale(1); }
+                50% { opacity: 0.5; transform: scale(1.3); }
+            }
+        </style>
+        @endif
 
+        <!-- ── BOTTOM NAV ── -->
+        @include('pelanggan.partials.navigation')
     </div>
 </body>
 

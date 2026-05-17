@@ -24,7 +24,8 @@
 
         .phone-wrapper {
             width: 390px;
-            min-height: 100vh;
+            height: 100vh;
+            overflow: hidden;
             background: #f2f3f7;
             position: relative;
             box-shadow: 0 0 48px rgba(0, 0, 0, 0.15);
@@ -59,6 +60,7 @@
             overflow-y: auto;
             overflow-x: hidden;
             -webkit-overflow-scrolling: touch;
+            padding-bottom: 80px;
         }
 
         .scroll-area::-webkit-scrollbar {
@@ -209,7 +211,11 @@
             display: flex;
             align-items: center;
             justify-content: space-around;
-            flex-shrink: 0;
+
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            z-index: 50;
         }
 
         .nav-btn {
@@ -281,16 +287,24 @@
 
                 {{-- Error / Success messages --}}
                 @if ($errors->any())
-                    <div style="background:#fef2f2;border:1px solid #fca5a5;border-radius:12px;padding:12px 16px;margin:12px 16px 0;">
+                    <div
+                        style="background:#fef2f2;border:1px solid #fca5a5;border-radius:12px;padding:12px 16px;margin:12px 16px 0;">
                         @foreach ($errors->all() as $error)
                             <p style="font-size:12px;color:#dc2626;font-weight:500;">⚠️ {{ $error }}</p>
                         @endforeach
                     </div>
                 @endif
                 @if (session('success'))
-                    <div style="background:#dcfce7;border:1px solid #86efac;border-radius:12px;padding:12px 16px;margin:12px 16px 0;">
+                    <div id="successAlert"
+                        style="background:#dcfce7;border:1px solid #86efac;border-radius:12px;padding:12px 16px;margin:12px 16px 0;transition:opacity 0.5s;">
                         <p style="font-size:12px;color:#15803d;font-weight:600;">{{ session('success') }}</p>
                     </div>
+                    <script>
+                        setTimeout(function() {
+                            var el = document.getElementById('successAlert');
+                            if (el) { el.style.opacity = '0'; setTimeout(function() { el.remove(); }, 500); }
+                        }, 5000);
+                    </script>
                 @endif
 
                 <!-- Info banner -->
@@ -302,117 +316,155 @@
 
                 {{-- Langganan Aktif (jika ada) --}}
                 @if ($langgananAktif)
-                <div class="aktif-card" style="border:1.5px solid #22c55e;">
-                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
-                        <span style="font-size:16px;">✅</span>
-                        <p style="font-size:14px;font-weight:600;color:#15803d;">Langganan Aktif</p>
-                    </div>
-                    <p style="font-size:12px;font-weight:400;color:#6b7280;margin-bottom:14px;">{{ $langgananAktif->paket->nama ?? '-' }}</p>
-                    <div style="display:flex;align-items:stretch;">
-                        <div style="flex:1;">
-                            <p style="font-size:11px;font-weight:400;color:#9ca3af;margin-bottom:4px;">Mulai</p>
-                            <p style="font-size:13.5px;font-weight:600;color:#111827;">{{ $langgananAktif->tanggal_mulai->translatedFormat('d M Y') }}</p>
+                    <div class="aktif-card" style="border:1.5px solid #22c55e;">
+                        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+                            <span style="font-size:16px;">✅</span>
+                            <p style="font-size:14px;font-weight:600;color:#15803d;">Langganan Aktif</p>
                         </div>
-                        <div style="width:1px;background:#e5e7eb;margin:0 16px;"></div>
-                        <div style="flex:1;">
-                            <p style="font-size:11px;font-weight:400;color:#9ca3af;margin-bottom:4px;">Berakhir</p>
-                            <p style="font-size:13.5px;font-weight:600;color:#16a34a;">{{ $langgananAktif->tanggal_selesai->translatedFormat('d M Y') }}</p>
+                        <p style="font-size:12px;font-weight:400;color:#6b7280;margin-bottom:14px;">
+                            {{ $langgananAktif->paket->nama ?? '-' }}</p>
+                        <div style="display:flex;align-items:stretch;">
+                            <div style="flex:1;">
+                                <p style="font-size:11px;font-weight:400;color:#9ca3af;margin-bottom:4px;">Mulai</p>
+                                <p style="font-size:13.5px;font-weight:600;color:#111827;">
+                                    {{ $langgananAktif->tanggal_mulai->translatedFormat('d M Y') }}</p>
+                            </div>
+                            <div style="width:1px;background:#e5e7eb;margin:0 16px;"></div>
+                            <div style="flex:1;">
+                                <p style="font-size:11px;font-weight:400;color:#9ca3af;margin-bottom:4px;">Berakhir</p>
+                                <p style="font-size:13.5px;font-weight:600;color:#16a34a;">
+                                    {{ $langgananAktif->tanggal_selesai->translatedFormat('d M Y') }}</p>
+                            </div>
                         </div>
                     </div>
-                </div>
+                @endif
+
+                {{-- Langganan Menunggu Konfirmasi --}}
+                @if (isset($langgananMenunggu) && $langgananMenunggu)
+                    <div class="aktif-card" style="border:1.5px solid #f59e0b;">
+                        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+                            <span style="font-size:16px;">⏳</span>
+                            <p style="font-size:14px;font-weight:600;color:#d97706;">Menunggu Konfirmasi</p>
+                        </div>
+                        <p style="font-size:12px;font-weight:500;color:#6b7280;margin-bottom:6px;">
+                            Paket: <strong style="color:#111827;">{{ $langgananMenunggu->paket->nama ?? '-' }}</strong>
+                        </p>
+                        <p style="font-size:12px;font-weight:500;color:#6b7280;margin-bottom:6px;">
+                            Metode: <strong style="color:#111827;">{{ ucfirst($langgananMenunggu->metode_pembayaran) }}</strong>
+                        </p>
+                        <p style="font-size:12px;font-weight:500;color:#6b7280;margin-bottom:10px;">
+                            Total: <strong style="color:#16a34a;">Rp {{ number_format($langgananMenunggu->jumlah_bayar, 0, ',', '.') }}</strong>
+                        </p>
+                        <div style="background:#fef3c7;border-radius:10px;padding:10px 12px;">
+                            @if($langgananMenunggu->status === 'menunggu_tunai')
+                                <p style="font-size:11.5px;font-weight:500;color:#92400e;line-height:1.5;">
+                                    💵 Silakan bayar tunai ke juru angkut saat penjemputan berikutnya. Setelah juru angkut mengkonfirmasi, admin akan mengaktifkan langganan Anda.
+                                </p>
+                            @else
+                                <p style="font-size:11.5px;font-weight:500;color:#92400e;line-height:1.5;">
+                                    📋 Pembayaran sedang diverifikasi oleh admin. Langganan akan aktif setelah dikonfirmasi.
+                                </p>
+                            @endif
+                        </div>
+
+                        {{-- Tombol Batalkan --}}
+                        <form action="{{ route('pelanggan.langganan.batalkan', $langgananMenunggu->id) }}" method="POST" style="margin-top:12px;"
+                            onsubmit="return confirm('Yakin ingin membatalkan langganan {{ $langgananMenunggu->paket->nama ?? '' }}?')">
+                            @csrf
+                            <button type="submit"
+                                style="width:100%;background:#fee2e2;color:#dc2626;font-size:13px;font-weight:700;padding:12px;border-radius:12px;border:1.5px solid #fca5a5;cursor:pointer;transition:background 0.2s;"
+                                onmouseover="this.style.background='#fecaca'" onmouseout="this.style.background='#fee2e2'">
+                                Batalkan Langganan
+                            </button>
+                        </form>
+                    </div>
                 @endif
 
                 {{-- Paket dari database --}}
                 @php $colors = ['green', 'purple', 'green', 'purple']; @endphp
                 @foreach ($paketList as $i => $paket)
-                @php $theme = $colors[$i % 2]; @endphp
-                <div class="pkg-card">
-                    <div class="pkg-header pkg-header-{{ $theme }}">
-                        @if ($i === 1)
-                            <div class="pkg-badge">⭐ Terbaik</div>
-                        @endif
-                        <p style="font-size:18px;font-weight:700;color:#fff;margin-bottom:3px;">{{ $paket->nama }}</p>
-                        <p style="font-size:12px;font-weight:400;color:rgba(255,255,255,0.75);margin-bottom:13px;">{{ $paket->frekuensi_jemput }}x jemput/{{ $paket->satuan_frekuensi }} &nbsp;·&nbsp; {{ $paket->durasi_hari }} hari</p>
-                        <div style="display:flex;align-items:baseline;gap:5px;">
-                            <span style="font-size:27px;font-weight:700;color:#fff;letter-spacing:-0.5px;">Rp {{ number_format($paket->harga, 0, ',', '.') }}</span>
+                    @php $theme = $colors[$i % 2]; @endphp
+                    <div class="pkg-card">
+                        <div class="pkg-header pkg-header-{{ $theme }}">
+                            @if ($i === 1)
+                                <div class="pkg-badge">⭐ Terbaik</div>
+                            @endif
+                            <p style="font-size:18px;font-weight:700;color:#fff;margin-bottom:3px;">{{ $paket->nama }}
+                            </p>
+                            <p style="font-size:12px;font-weight:400;color:rgba(255,255,255,0.75);margin-bottom:13px;">
+                                {{ $paket->frekuensi_jemput }}x jemput/{{ $paket->satuan_frekuensi }} &nbsp;·&nbsp;
+                                {{ $paket->durasi_hari }} hari</p>
+                            <div style="display:flex;align-items:baseline;gap:5px;">
+                                <span style="font-size:27px;font-weight:700;color:#fff;letter-spacing:-0.5px;">Rp
+                                    {{ number_format($paket->harga, 0, ',', '.') }}</span>
+                            </div>
+                            @if ($paket->info_tong)
+                                <div
+                                    style="margin-top:9px;display:inline-flex;align-items:center;background:rgba(255,255,255,0.15);border-radius:20px;padding:3px 10px;gap:4px;">
+                                    <span style="font-size:10px;font-weight:500;color:rgba(255,255,255,0.9);">🗑️
+                                        {{ $paket->info_tong }}</span>
+                                </div>
+                            @endif
                         </div>
-                        @if ($paket->info_tong)
-                        <div style="margin-top:9px;display:inline-flex;align-items:center;background:rgba(255,255,255,0.15);border-radius:20px;padding:3px 10px;gap:4px;">
-                            <span style="font-size:10px;font-weight:500;color:rgba(255,255,255,0.9);">🗑️ {{ $paket->info_tong }}</span>
+                        <div class="pkg-body">
+                            <div class="feat">
+                                <svg width="16" height="16" fill="none" stroke="#16a34a" stroke-width="2.5"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                                </svg>
+                                <span
+                                    style="font-size:13px;font-weight:400;color:#374151;">{{ $paket->frekuensi_jemput }}x
+                                    penjemputan per {{ $paket->satuan_frekuensi }}</span>
+                            </div>
+                            <div class="feat">
+                                <svg width="16" height="16" fill="none" stroke="#16a34a" stroke-width="2.5"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                                </svg>
+                                <span style="font-size:13px;font-weight:400;color:#374151;">Gratis biaya jemput</span>
+                            </div>
+                            @if ($paket->info_tong)
+                                <div class="feat">
+                                    <svg width="16" height="16" fill="none" stroke="#16a34a"
+                                        stroke-width="2.5" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                    <span
+                                        style="font-size:13px;font-weight:400;color:#374151;">{{ $paket->info_tong }}</span>
+                                    <span class="pill"
+                                        style="background:{{ $theme === 'purple' ? 'linear-gradient(135deg,#6366f1,#a855f7)' : '#16a34a' }};">Gratis</span>
+                                </div>
+                            @endif
+                            @if ($paket->deskripsi)
+                                <div class="feat">
+                                    <svg width="16" height="16" fill="none" stroke="#16a34a"
+                                        stroke-width="2.5" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                    <span
+                                        style="font-size:13px;font-weight:400;color:#374151;">{{ $paket->deskripsi }}</span>
+                                </div>
+                            @endif
+                            @if ($langgananAktif)
+                                <button class="btn-pilih" style="background:#9ca3af;cursor:not-allowed;" disabled>Sudah
+                                    Berlangganan</button>
+                            @elseif(isset($langgananMenunggu) && $langgananMenunggu)
+                                <button class="btn-pilih" style="background:#f59e0b;cursor:not-allowed;" disabled>Menunggu Konfirmasi</button>
+                            @else
+                                <button class="btn-pilih btn-{{ $theme }}"
+                                    onclick="openModal({{ $paket->id }}, '{{ $paket->nama }}', '{{ number_format($paket->harga, 0, ',', '.') }}', {{ $paket->harga }}, '{{ $theme }}')">Pilih
+                                    Paket</button>
+                            @endif
                         </div>
-                        @endif
                     </div>
-                    <div class="pkg-body">
-                        <div class="feat">
-                            <svg width="16" height="16" fill="none" stroke="#16a34a" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-                            <span style="font-size:13px;font-weight:400;color:#374151;">{{ $paket->frekuensi_jemput }}x penjemputan per {{ $paket->satuan_frekuensi }}</span>
-                        </div>
-                        <div class="feat">
-                            <svg width="16" height="16" fill="none" stroke="#16a34a" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-                            <span style="font-size:13px;font-weight:400;color:#374151;">Gratis biaya jemput</span>
-                        </div>
-                        @if ($paket->info_tong)
-                        <div class="feat">
-                            <svg width="16" height="16" fill="none" stroke="#16a34a" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-                            <span style="font-size:13px;font-weight:400;color:#374151;">{{ $paket->info_tong }}</span>
-                            <span class="pill" style="background:{{ $theme === 'purple' ? 'linear-gradient(135deg,#6366f1,#a855f7)' : '#16a34a' }};">Gratis</span>
-                        </div>
-                        @endif
-                        @if ($paket->deskripsi)
-                        <div class="feat">
-                            <svg width="16" height="16" fill="none" stroke="#16a34a" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-                            <span style="font-size:13px;font-weight:400;color:#374151;">{{ $paket->deskripsi }}</span>
-                        </div>
-                        @endif
-                        @if ($langgananAktif)
-                            <button class="btn-pilih" style="background:#9ca3af;cursor:not-allowed;" disabled>Sudah Berlangganan</button>
-                        @else
-                            <button class="btn-pilih btn-{{ $theme }}" onclick="openModal({{ $paket->id }}, '{{ $paket->nama }}', '{{ number_format($paket->harga, 0, ',', '.') }}', '{{ $theme }}')">Pilih Paket</button>
-                        @endif
-                    </div>
-                </div>
                 @endforeach
 
             </div>
         </div>
 
         <!-- BOTTOM NAV -->
-        <div class="nav-bottom">
-            <div class="nav-btn">
-                <svg width="22" height="22" fill="#9ca3af" viewBox="0 0 24 24">
-                    <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
-                </svg>
-                <span style="font-size:10px;font-weight:400;color:#9ca3af;">Home</span>
-            </div>
-            <div class="nav-btn">
-                <svg width="22" height="22" fill="none" stroke="#16a34a" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                </svg>
-                <span style="font-size:10px;font-weight:600;color:#16a34a;">Order</span>
-            </div>
-            <div class="nav-btn">
-                <svg width="22" height="22" fill="none" stroke="#9ca3af" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span style="font-size:10px;font-weight:400;color:#9ca3af;">History</span>
-            </div>
-            <div class="nav-btn">
-                <svg width="22" height="22" fill="none" stroke="#9ca3af" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                </svg>
-                <span style="font-size:10px;font-weight:400;color:#9ca3af;">Wallet</span>
-            </div>
-            <div class="nav-btn">
-                <svg width="22" height="22" fill="none" stroke="#9ca3af" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-                <span style="font-size:10px;font-weight:400;color:#9ca3af;">Profile</span>
-            </div>
-        </div>
+        @include('pelanggan.partials.navigation')
+
 
     </div>
 
@@ -446,9 +498,96 @@
                 </div>
             </div>
 
-            <form id="formLangganan" action="{{ route('pelanggan.langganan.store') }}" method="POST">
+            <form id="formLangganan" action="{{ route('pelanggan.langganan.store') }}" method="POST"
+                enctype="multipart/form-data">
                 @csrf
                 <input type="hidden" name="paket_id" id="inputPaketId" value="">
+
+                <p style="font-size:12.5px;font-weight:600;color:#374151;margin-bottom:10px;">Metode Pembayaran</p>
+                <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:14px;">
+                    <!-- Saldo -->
+                    <label
+                        style="display:flex;align-items:center;gap:10px;border:1.5px solid #e5e7eb;border-radius:12px;padding:12px 14px;cursor:pointer;background:#fff;transition:all 0.18s;"
+                        id="labelSaldo" onclick="setTimeout(handleMetodeChange, 50)">
+                        <input type="radio" name="metode_pembayaran" value="saldo" id="radioSaldo"
+                            style="accent-color:#16a34a;width:16px;height:16px;flex-shrink:0;">
+                        <div style="flex:1;">
+                            <p style="font-size:13px;font-weight:600;color:#111827;">Saldo GoGarbage</p>
+                            <p style="font-size:11px;color:#6b7280;">Sisa: Rp
+                                {{ number_format($saldoUser ?? 0, 0, ',', '.') }}</p>
+                        </div>
+                    </label>
+                    <!-- Transfer -->
+                    <label
+                        style="display:flex;align-items:center;gap:10px;border:1.5px solid #e5e7eb;border-radius:12px;padding:12px 14px;cursor:pointer;background:#fff;transition:all 0.18s;"
+                        id="labelTransfer" onclick="setTimeout(handleMetodeChange, 50)">
+                        <input type="radio" name="metode_pembayaran" value="transfer" id="radioTransfer"
+                            style="accent-color:#16a34a;width:16px;height:16px;flex-shrink:0;">
+                        <div style="flex:1;">
+                            <p style="font-size:13px;font-weight:600;color:#111827;">Transfer Bank</p>
+                            <p style="font-size:11px;color:#6b7280;">BCA, Mandiri, BRI</p>
+                        </div>
+                    </label>
+                    <!-- Tunai -->
+                    <label
+                        style="display:flex;align-items:center;gap:10px;border:1.5px solid #e5e7eb;border-radius:12px;padding:12px 14px;cursor:pointer;background:#fff;transition:all 0.18s;"
+                        onclick="setTimeout(handleMetodeChange, 50)">
+                        <input type="radio" name="metode_pembayaran" value="tunai" checked id="radioTunai"
+                            style="accent-color:#16a34a;width:16px;height:16px;flex-shrink:0;">
+                        <div style="flex:1;">
+                            <p style="font-size:13px;font-weight:600;color:#111827;">Tunai / Cash</p>
+                            <p style="font-size:11px;color:#6b7280;">Bayar langsung saat penjemputan</p>
+                        </div>
+                    </label>
+                </div>
+
+                <!-- Saldo Error -->
+                <p id="saldoError"
+                    style="font-size:11.5px;color:#dc2626;margin-bottom:14px;display:none;font-weight:500;">⚠️ Saldo
+                    kamu tidak mencukupi untuk paket ini.</p>
+
+                <!-- Transfer Info (hidden by default) -->
+                <div id="transferInfo" style="display:none;margin-bottom:16px;">
+                    <div
+                        style="background:#fffbeb;border:1px solid #fde68a;border-radius:12px;padding:14px 16px;margin-bottom:12px;">
+                        <p style="font-size:11px;font-weight:700;color:#92400e;margin-bottom:8px;">Transfer ke salah
+                            satu rekening berikut:</p>
+                        <div style="display:flex;flex-direction:column;gap:6px;">
+                            <div style="display:flex;justify-content:space-between;align-items:center;">
+                                <span style="font-size:12px;font-weight:600;color:#78350f;">BCA</span>
+                                <span style="font-size:12px;font-weight:700;color:#111827;letter-spacing:0.04em;">1234
+                                    5678 90</span>
+                            </div>
+                            <div style="display:flex;justify-content:space-between;align-items:center;">
+                                <span style="font-size:12px;font-weight:600;color:#78350f;">Mandiri</span>
+                                <span style="font-size:12px;font-weight:700;color:#111827;letter-spacing:0.04em;">0987
+                                    6543 21</span>
+                            </div>
+                            <div style="display:flex;justify-content:space-between;align-items:center;">
+                                <span style="font-size:12px;font-weight:600;color:#78350f;">BRI</span>
+                                <span style="font-size:12px;font-weight:700;color:#111827;letter-spacing:0.04em;">1122
+                                    3344 5566</span>
+                            </div>
+                        </div>
+                        <p style="font-size:10.5px;color:#92400e;margin-top:8px;">a.n. <strong>PT GoGarbage
+                                Indonesia</strong></p>
+                    </div>
+                    <p style="font-size:12px;font-weight:600;color:#374151;margin-bottom:8px;">Upload Bukti Transfer
+                    </p>
+                    <label id="uploadLabel"
+                        style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;border:2px dashed #d1d5db;border-radius:12px;padding:20px;cursor:pointer;background:#f9fafb;transition:all 0.2s;">
+                        <svg width="28" height="28" fill="none" stroke="#9ca3af" stroke-width="1.5"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <span style="font-size:12px;color:#9ca3af;font-weight:500;" id="uploadText">Ketuk untuk upload
+                            bukti transfer</span>
+                        <input type="file" name="bukti_pembayaran" id="inputBukti" accept="image/*"
+                            style="display:none;" onchange="handleFileChange(this)">
+                    </label>
+                </div>
+
                 <button type="submit" id="modalBtn"
                     style="width:100%;border:none;border-radius:12px;padding:15px;font-size:13.5px;font-weight:600;color:#fff;cursor:pointer;font-family:'Poppins',sans-serif;letter-spacing:0.01em;transition:opacity 0.2s;">
                     Konfirmasi Berlangganan
@@ -467,16 +606,83 @@
             purple: 'linear-gradient(135deg,#6366f1,#a855f7)'
         };
 
-        function openModal(paketId, nama, harga, theme) {
+        let currentHargaPaket = 0;
+        const userSaldo = {{ $saldoUser ?? 0 }};
+
+        function handleMetodeChange() {
+            const isSaldo = document.getElementById('radioSaldo').checked;
+            const isTransfer = document.getElementById('radioTransfer').checked;
+            const btn = document.getElementById('modalBtn');
+            const err = document.getElementById('saldoError');
+            const transferInfo = document.getElementById('transferInfo');
+
+            // Saldo check
+            if (isSaldo && userSaldo < currentHargaPaket) {
+                err.style.display = 'block';
+                btn.disabled = true;
+                btn.style.opacity = '0.5';
+                btn.style.cursor = 'not-allowed';
+            } else {
+                err.style.display = 'none';
+                btn.disabled = false;
+                btn.style.opacity = '1';
+                btn.style.cursor = 'pointer';
+            }
+
+            // Transfer info
+            transferInfo.style.display = isTransfer ? 'block' : 'none';
+
+            // Active label styling
+            document.querySelectorAll('#formLangganan label[id^="label"], #formLangganan label:not([id])').forEach(l => {
+                l.style.borderColor = '#e5e7eb';
+                l.style.background = '#fff';
+            });
+            const activeRadio = document.querySelector('#formLangganan input[name="metode_pembayaran"]:checked');
+            if (activeRadio) {
+                const activeLabel = activeRadio.closest('label');
+                if (activeLabel) {
+                    activeLabel.style.borderColor = '#22c55e';
+                    activeLabel.style.background = '#f0fdf4';
+                }
+            }
+        }
+
+        function handleFileChange(input) {
+            const label = document.getElementById('uploadText');
+            if (input.files.length > 0) {
+                label.textContent = '✅ ' + input.files[0].name;
+                label.style.color = '#16a34a';
+                document.getElementById('uploadLabel').style.borderColor = '#22c55e';
+                document.getElementById('uploadLabel').style.background = '#f0fdf4';
+            } else {
+                label.textContent = 'Ketuk untuk upload bukti transfer';
+                label.style.color = '#9ca3af';
+                document.getElementById('uploadLabel').style.borderColor = '#d1d5db';
+                document.getElementById('uploadLabel').style.background = '#f9fafb';
+            }
+        }
+
+        function openModal(paketId, nama, harga, hargaAsli, theme) {
+            currentHargaPaket = parseInt(hargaAsli);
             document.getElementById('inputPaketId').value = paketId;
             document.getElementById('modalTitle').textContent = nama;
-            document.getElementById('modalDesc').textContent = 'Kamu akan berlangganan ' + nama + '. Nikmati semua benefit paket ini!';
+            document.getElementById('modalDesc').textContent = 'Kamu akan berlangganan ' + nama +
+                '. Nikmati semua benefit paket ini!';
             document.getElementById('modalPrice').textContent = 'Rp ' + harga;
             document.getElementById('modalTotal').textContent = 'Rp ' + harga;
             const icon = document.getElementById('modalIcon');
             icon.style.background = gradients[theme];
             icon.innerHTML = '<span style="font-size:24px;">' + (theme === 'purple' ? '⭐' : '🌿') + '</span>';
             document.getElementById('modalBtn').style.background = gradients[theme];
+            // Reset form state
+            document.getElementById('radioTunai').checked = true;
+            document.getElementById('transferInfo').style.display = 'none';
+            document.getElementById('inputBukti').value = '';
+            document.getElementById('uploadText').textContent = 'Ketuk untuk upload bukti transfer';
+            document.getElementById('uploadText').style.color = '#9ca3af';
+            document.getElementById('uploadLabel').style.borderColor = '#d1d5db';
+            document.getElementById('uploadLabel').style.background = '#f9fafb';
+            handleMetodeChange();
             document.getElementById('modalOverlay').classList.add('show');
         }
 

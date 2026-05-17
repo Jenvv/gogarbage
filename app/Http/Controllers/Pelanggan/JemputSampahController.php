@@ -114,11 +114,11 @@ class JemputSampahController extends Controller
         ));
     }
 
-    
+
     //  * Step 3: User klik "Pesan Sekarang" → INSERT ke database.
     //  * Data masuk ke 3 tabel: pesanan, detail_pesanan, transaksi.
     //  * Dibungkus DB::transaction agar atomik.
-    
+
     public function confirm_pesanan(Request $request)
     {
         $draft = session('pesanan_draft');
@@ -129,6 +129,8 @@ class JemputSampahController extends Controller
         }
 
         $user = Auth::user();
+        $metode = $request->input('metode_pembayaran', 'tunai');
+        $totalBiaya = $draft['biaya_jemput'] + 1000;
 
         // Validasi ulang: 1 user = 1 pesanan aktif
         $pesananAktif = Pesanan::where('user_id', $user->id)
@@ -142,7 +144,29 @@ class JemputSampahController extends Controller
             ]);
         }
 
-        $pesanan = DB::transaction(function () use ($draft, $user) {
+        // Validasi saldo
+        if ($metode === 'saldo' && $user->saldo < $totalBiaya) {
+            return redirect()->route('pelanggan.konfirmasi-pesanan')->withErrors([
+                'saldo' => 'Saldo kamu tidak mencukupi.'
+            ]);
+        }
+
+        // Handle bukti pembayaran upload
+        $buktiPath = null;
+        if ($request->hasFile('bukti_pembayaran')) {
+            $buktiPath = $request->file('bukti_pembayaran')->store('bukti_pembayaran', 'public');
+        }
+
+        $pesanan = DB::transaction(function () use ($draft, $user, $metode, $totalBiaya, $buktiPath) {
+
+            $saldoSebelum = $user->saldo;
+
+            // Potong saldo jika bayar via saldo
+            if ($metode === 'saldo') {
+                $user->update(['saldo' => $user->saldo - $totalBiaya]);
+            }
+
+            $saldoSesudah = $user->saldo;
 
             // 1. Insert ke tabel pesanan
             $pesanan = Pesanan::create([
@@ -157,6 +181,8 @@ class JemputSampahController extends Controller
                 'status'          => 'menunggu',
                 'tipe_pesanan'    => $draft['tipe_pesanan'],
                 'biaya_jemput'    => $draft['biaya_jemput'],
+                'metode_pembayaran' => $metode,
+                'bukti_pembayaran'  => $buktiPath,
                 'catatan'         => $draft['catatan'],
             ]);
 
@@ -184,12 +210,12 @@ class JemputSampahController extends Controller
                 'user_id'        => $user->id,
                 'tipe'           => 'keluar',
                 'jumlah'         => $draft['biaya_jemput'],
-                'saldo_sebelum'  => $user->saldo,
-                'saldo_sesudah'  => $user->saldo,
+                'saldo_sebelum'  => $saldoSebelum,
+                'saldo_sesudah'  => $saldoSesudah,
                 'status'         => 'selesai',
                 'referensi_type' => Pesanan::class,
                 'referensi_id'   => $pesanan->id,
-                'deskripsi'      => 'Biaya jemput pesanan ' . $pesanan->nomor_pesanan,
+                'deskripsi'      => 'Biaya jemput pesanan ' . $pesanan->nomor_pesanan . ' via ' . ucfirst($metode),
             ]);
 
             return $pesanan;
@@ -217,7 +243,14 @@ class JemputSampahController extends Controller
         $pesanan = Pesanan::with('detailPesanan.kategoriSampah', 'pengangkut')
             ->where('user_id', Auth::id())
             ->findOrFail($id);
-
         return view('pelanggan.jemput_sampah.tracking_pesanan', compact('pesanan'));
+    }
+
+    public function order_selesai($id)
+    {
+        $pesanan = Pesanan::with('detailPesanan.kategoriSampah', 'pengangkut')
+            ->where('user_id', Auth::id())
+            ->findOrFail($id);
+        return view('pelanggan.jemput_sampah.order_selesai', compact('pesanan'));
     }
 }

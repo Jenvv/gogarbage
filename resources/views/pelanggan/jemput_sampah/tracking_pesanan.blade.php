@@ -25,7 +25,8 @@
 
         .phone-wrapper {
             width: 390px;
-            min-height: 100vh;
+            height: 100vh;
+            overflow: hidden;
             background: #f2f3f7;
             position: relative;
             box-shadow: 0 0 48px rgba(0, 0, 0, 0.18);
@@ -212,13 +213,67 @@
             background: #d1d5db;
         }
 
-        .timeline-dot.active {
-            background: #16a34a;
-            box-shadow: 0 0 0 5px rgba(22, 163, 74, 0.15);
-            animation: pulse 2s ease-in-out infinite;
+        .timeline-dot.active-menunggu {
+            background: #f59e0b;
+            box-shadow: 0 0 0 5px rgba(245, 158, 11, 0.15);
+            animation: pulse-menunggu 2s ease-in-out infinite;
         }
 
-        @keyframes pulse {
+        @keyframes pulse-menunggu {
+
+            0%,
+            100% {
+                box-shadow: 0 0 0 5px rgba(245, 158, 11, 0.15);
+            }
+
+            50% {
+                box-shadow: 0 0 0 10px rgba(245, 158, 11, 0.08);
+            }
+        }
+
+        .timeline-dot.active-menuju {
+            background: #3b82f6;
+            box-shadow: 0 0 0 5px rgba(59, 130, 246, 0.15);
+            animation: pulse-menuju 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-menuju {
+
+            0%,
+            100% {
+                box-shadow: 0 0 0 5px rgba(59, 130, 246, 0.15);
+            }
+
+            50% {
+                box-shadow: 0 0 0 10px rgba(59, 130, 246, 0.08);
+            }
+        }
+
+        .timeline-dot.active-mengambil {
+            background: #8b5cf6;
+            box-shadow: 0 0 0 5px rgba(139, 92, 246, 0.15);
+            animation: pulse-mengambil 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-mengambil {
+
+            0%,
+            100% {
+                box-shadow: 0 0 0 5px rgba(139, 92, 246, 0.15);
+            }
+
+            50% {
+                box-shadow: 0 0 0 10px rgba(139, 92, 246, 0.08);
+            }
+        }
+
+        .timeline-dot.active-selesai {
+            background: #16a34a;
+            box-shadow: 0 0 0 5px rgba(22, 163, 74, 0.15);
+            animation: pulse-selesai 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-selesai {
 
             0%,
             100% {
@@ -231,6 +286,7 @@
         }
 
         .timeline-line {
+
             position: absolute;
             left: 16px;
             top: 34px;
@@ -258,6 +314,7 @@
             overflow-y: auto;
             overflow-x: hidden;
             -webkit-overflow-scrolling: touch;
+            padding-bottom: 80px;
         }
 
         .scroll-area::-webkit-scrollbar {
@@ -310,7 +367,11 @@
             display: flex;
             align-items: center;
             justify-content: space-around;
-            flex-shrink: 0;
+            
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            z-index: 50;
         }
 
         .nav-btn {
@@ -417,18 +478,21 @@
                 <!-- ── DRIVER CARD ── -->
                 <div class="driver-card">
                     <div class="driver-avatar">
-                        <svg width="24" height="24" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24">
+                        <svg width="24" height="24" fill="none" stroke="#fff" stroke-width="2"
+                            viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                         </svg>
                     </div>
                     <div style="flex:1;">
-                        <p style="font-size:15px;font-weight:800;color:#111827;">{{ $pesanan->jasaAngkut->name ?? 'Menunggu Juru Angkut' }}</p>
+                        <p style="font-size:15px;font-weight:800;color:#111827;">
+                            {{ $pesanan->pengangkut->name ?? 'Menunggu Juru Angkut' }}</p>
                         <p style="font-size:12px;color:#9ca3af;font-weight:500;">Juru Angkut</p>
                         <p style="font-size:11px;color:#9ca3af;font-weight:500;">B 1234 XYZ</p>
                     </div>
                     <div class="call-btn">
-                        <svg width="20" height="20" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24">
+                        <svg width="20" height="20" fill="none" stroke="#fff" stroke-width="2"
+                            viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                         </svg>
@@ -451,9 +515,11 @@
                             <div class="timeline-line pending" id="line1"></div>
                         </div>
                         <div class="timeline-content">
-                            <p id="label1" style="font-size:14px;font-weight:700;color:#111827;">Pesanan Dikonfirmasi</p>
+                            <p id="label1" style="font-size:14px;font-weight:700;color:#111827;">Pesanan Dikonfirmasi
+                            </p>
                             <p style="font-size:12px;color:#9ca3af;margin-top:2px;">14:30</p>
-                            <p id="desc1" style="font-size:12px;color:#6b7280;margin-top:4px;font-weight:500;">Pesanan kamu telah
+                            <p id="desc1" style="font-size:12px;color:#6b7280;margin-top:4px;font-weight:500;">
+                                Pesanan kamu telah
                                 dikonfirmasi oleh sistem.</p>
                         </div>
                     </div>
@@ -488,12 +554,14 @@
                             <div class="timeline-line pending" id="line3"></div>
                         </div>
                         <div class="timeline-content">
-                            <p style="font-size:14px;font-weight:700;color:#9ca3af;" id="label3">Mengambil Sampah</p>
+                            <p style="font-size:14px;font-weight:700;color:#9ca3af;" id="label3">Mengambil Sampah
+                            </p>
                             <p id="live3"
                                 style="display:none;font-size:12px;color:#16a34a;font-weight:600;margin-top:3px;">
                                 <span class="status-live"><span class="live-dot"></span>Sedang berlangsung...</span>
                             </p>
-                            <p style="font-size:12px;color:#9ca3af;margin-top:4px;font-weight:500;" id="desc3">Juru
+                            <p style="font-size:12px;color:#9ca3af;margin-top:4px;font-weight:500;" id="desc3">
+                                Juru
                                 angkut akan mengambil sampah di lokasi kamu.</p>
                         </div>
                     </div>
@@ -505,8 +573,9 @@
                         </div>
                         <div class="timeline-content" style="padding-bottom:6px;">
                             <p style="font-size:14px;font-weight:700;color:#9ca3af;" id="label4">Selesai</p>
-                            <p style="font-size:12px;color:#9ca3af;margin-top:4px;font-weight:500;" id="desc4">Sampah
-                                berhasil diambil. Terima kasih! 🎉</p>
+                            <p style="font-size:12px;color:#9ca3af;margin-top:4px;font-weight:500;" id="desc4">
+                                Sampah
+                                berhasil diambil. Terima kasih!</p>
                         </div>
                     </div>
 
@@ -521,98 +590,91 @@
         </div><!-- end scroll-area -->
 
         <!-- ── BOTTOM NAV ── -->
-        <div class="nav-bottom">
-            <div class="nav-btn" onclick="window.location.href=''">
-                <svg width="22" height="22" fill="#9ca3af" viewBox="0 0 24 24">
-                    <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
-                </svg>
-                <span style="font-size:10px;font-weight:500;color:#9ca3af;">Home</span>
-            </div>
-            <div class="nav-btn" onclick="window.location.href=''">
-                <svg width="22" height="22" fill="none" stroke="#16a34a" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                </svg>
-                <span style="font-size:10px;font-weight:700;color:#16a34a;">Order</span>
-            </div>
-            <div class="nav-btn">
-                <svg width="22" height="22" fill="none" stroke="#9ca3af" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span style="font-size:10px;font-weight:500;color:#9ca3af;">History</span>
-            </div>
-            <div class="nav-btn">
-                <svg width="22" height="22" fill="none" stroke="#9ca3af" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                </svg>
-                <span style="font-size:10px;font-weight:500;color:#9ca3af;">Wallet</span>
-            </div>
-            <div class="nav-btn">
-                <svg width="22" height="22" fill="none" stroke="#9ca3af" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-                <span style="font-size:10px;font-weight:500;color:#9ca3af;">Profile</span>
-            </div>
-        </div>
+        @include('pelanggan.partials.navigation')
 
     </div>
 
     <script>
-        const statusOrder = '{{ $pesanan->status }}';
+        let currentStatus = '{{ $pesanan->status }}';
+        const pesananId = '{{ $pesanan->id }}';
 
-        function checkIcon() {
-            return `<svg width="16" height="16" fill="none" stroke="#fff" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>`;
-        }
+        const icons = {
+            menunggu: `<svg width="18" height="18" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2"></path></svg>`,
+            menuju: `<svg width="18" height="18" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>`,
+            mengambil: `<svg width="18" height="18" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>`,
+            selesai: `<svg width="18" height="18" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>`,
+            check: `<svg width="16" height="16" fill="none" stroke="#fff" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>`
+        };
 
         function setDot(id, state) {
             const el = document.getElementById(id);
             if (!el) return;
-            el.className = 'timeline-dot ' + state;
-            el.innerHTML = state === 'done' ? checkIcon() : '';
+
+            // Map the state to dot class
+            el.className = 'timeline-dot';
+            if (state === 'pending') {
+                el.classList.add('pending');
+                el.innerHTML = '';
+            } else if (state === 'done') {
+                el.classList.add('done');
+                el.innerHTML = icons.check;
+            } else {
+                // state is like 'active-menunggu', 'active-menuju', etc.
+                el.classList.add(state);
+
+                if (state.includes('menunggu')) el.innerHTML = icons.menunggu;
+                else if (state.includes('menuju')) el.innerHTML = icons.menuju;
+                else if (state.includes('mengambil')) el.innerHTML = icons.mengambil;
+                else if (state.includes('selesai')) el.innerHTML = icons.selesai;
+            }
         }
+
         function setLine(id, state) {
             const el = document.getElementById(id);
             if (!el) return;
             el.className = 'timeline-line ' + state;
         }
 
-        function initUI() {
+        function initUI(statusOrder) {
             // Reset all
-            ['dot1','dot2','dot3','dot4'].forEach(id => setDot(id, 'pending'));
-            ['line1','line2','line3'].forEach(id => setLine(id, 'pending'));
+            ['dot1', 'dot2', 'dot3', 'dot4'].forEach(id => setDot(id, 'pending'));
+            ['line1', 'line2', 'line3'].forEach(id => setLine(id, 'pending'));
 
             if (statusOrder === 'menunggu') {
-                setDot('dot1', 'active');
+                setDot('dot1', 'active-menunggu');
                 document.getElementById('label1').textContent = 'Menunggu Konfirmasi';
-                document.getElementById('desc1').textContent = 'Menunggu jasa angkut mengonfirmasi pesanan kamu.';
+                document.getElementById('desc1').textContent = 'Menunggu Juru Angkut mengonfirmasi pesanan kamu.';
+
                 document.getElementById('label2').style.color = '#9ca3af';
                 document.getElementById('desc2').style.color = '#9ca3af';
                 document.getElementById('live2').style.display = 'none';
                 document.getElementById('time2').style.display = 'none';
-            }
-            else if (statusOrder === 'diklaim') {
-                setDot('dot1', 'done'); setLine('line1', 'done');
+            } else if (statusOrder === 'diklaim') {
+                setDot('dot1', 'done');
+                setLine('line1', 'done');
+
+                // Still waiting for journey to start
+                setDot('dot2', 'pending');
                 document.getElementById('label2').style.color = '#9ca3af';
                 document.getElementById('desc2').style.color = '#9ca3af';
                 document.getElementById('live2').style.display = 'none';
                 document.getElementById('time2').style.display = 'none';
-            } 
-            else if (statusOrder === 'dalam_perjalanan') {
-                setDot('dot1', 'done'); setLine('line1', 'done');
-                setDot('dot2', 'active');
+            } else if (statusOrder === 'dalam_perjalanan') {
+                setDot('dot1', 'done');
+                setLine('line1', 'done');
+                setDot('dot2', 'active-menuju');
+
                 document.getElementById('label2').style.color = '#111827';
                 document.getElementById('desc2').style.color = '#6b7280';
                 document.getElementById('live2').style.display = 'block';
                 document.getElementById('time2').style.display = 'none';
-            }
-            else if (statusOrder === 'tiba' || statusOrder === 'penimbangan') {
-                setDot('dot1', 'done'); setLine('line1', 'done');
-                setDot('dot2', 'done'); setLine('line2', 'done');
-                setDot('dot3', 'active');
-                
+            } else if (statusOrder === 'tiba' || statusOrder === 'penimbangan') {
+                setDot('dot1', 'done');
+                setLine('line1', 'done');
+                setDot('dot2', 'done');
+                setLine('line2', 'done');
+                setDot('dot3', 'active-mengambil');
+
                 document.getElementById('label2').style.color = '#111827';
                 document.getElementById('desc2').style.color = '#6b7280';
                 document.getElementById('live2').style.display = 'none';
@@ -621,12 +683,14 @@
                 document.getElementById('label3').style.color = '#111827';
                 document.getElementById('desc3').style.color = '#6b7280';
                 document.getElementById('live3').style.display = 'block';
-            }
-            else if (statusOrder === 'selesai') {
-                setDot('dot1', 'done'); setLine('line1', 'done');
-                setDot('dot2', 'done'); setLine('line2', 'done');
-                setDot('dot3', 'done'); setLine('line3', 'done');
-                setDot('dot4', 'done');
+            } else if (statusOrder === 'selesai') {
+                setDot('dot1', 'done');
+                setLine('line1', 'done');
+                setDot('dot2', 'done');
+                setLine('line2', 'done');
+                setDot('dot3', 'done');
+                setLine('line3', 'done');
+                setDot('dot4', 'active-selesai'); // using pulse-selesai animation
 
                 document.getElementById('label2').style.color = '#111827';
                 document.getElementById('desc2').style.color = '#6b7280';
@@ -642,12 +706,29 @@
             }
         }
 
-        initUI();
+        initUI(currentStatus);
 
-        // Optional: Auto-refresh data status
+        // AJAX Polling every 3 seconds
         setInterval(() => {
-            window.location.reload();
-        }, 10000);
+            fetch(`/api/pesanan/${pesananId}/status`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status && data.status !== currentStatus) {
+                        currentStatus = data.status;
+                        initUI(currentStatus);
+
+                        // Check if order is completed successfully, redirect to receipt
+                        if (currentStatus === 'selesai') {
+                            setTimeout(() => {
+                                window.location.href =
+                                    `/pelanggan/jemput-sampah/${pesananId}/order_selesai`;
+                            }, 2500);
+                        }
+                    }
+                })
+                .catch(err => console.error('Error fetching status:', err));
+        }, 3000);
     </script>
 </body>
+
 </html>
