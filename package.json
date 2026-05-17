@@ -4,6 +4,7 @@
     "type": "module",
     "scripts": {
         "build": "vite build",
+        "build:admin": "npx @tailwindcss/cli -i resources/admin/css/app.css -o public/assets/admin/css/app.css --minify && npx esbuild resources/admin/js/static.js --bundle --outfile=public/assets/admin/js/app.js --format=iife",
         "dev": "vite"
     },
     "devDependencies": {

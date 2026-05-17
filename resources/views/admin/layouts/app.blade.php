@@ -8,8 +8,10 @@
 
     <title>{{ $title ?? 'Dashboard' }} | Go Garbage Admin</title>
 
-    <!-- Scripts -->
-    @vite(['resources/admin/css/app.css', 'resources/admin/js/app.js'])
+    <link rel="icon" href="{{ asset('assets/admin/images/favicon.ico') }}" type="image/x-icon">
+    <link rel="stylesheet" href="{{ asset('assets/admin/css/app.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/admin/css/flatpickr.min.css') }}">
+    <script src="{{ asset('assets/admin/js/app.js') }}" defer></script>
 
     <!-- Theme Store -->
     <script>
