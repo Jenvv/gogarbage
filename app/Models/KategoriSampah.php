@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class KategoriSampah extends Model
 {
@@ -40,5 +41,15 @@ class KategoriSampah extends Model
     public function detailPesanan(): HasMany
     {
         return $this->hasMany(DetailPesanan::class, 'kategori_sampah_id');
+    }
+
+    public function stokGudang(): HasOne
+    {
+        return $this->hasOne(StokGudang::class, 'kategori_sampah_id');
+    }
+
+    public function detailPenjualan(): HasMany
+    {
+        return $this->hasMany(DetailPenjualanPengepul::class, 'kategori_sampah_id');
     }
 }

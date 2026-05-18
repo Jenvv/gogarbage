@@ -43,6 +43,11 @@ class Langganan extends Model
             ->where('tanggal_selesai', '>=', now()->toDateString());
     }
 
+    public function scopeMenungguVerifikasi($query)
+    {
+        return $query->whereIn('status', ['menunggu', 'menunggu_tunai']);
+    }
+
     // ── Relationships ──
 
     public function pengguna(): BelongsTo
@@ -53,5 +58,10 @@ class Langganan extends Model
     public function paket(): BelongsTo
     {
         return $this->belongsTo(Paket::class, 'paket_id');
+    }
+
+    public function disetujuiOleh(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'disetujui_oleh');
     }
 }

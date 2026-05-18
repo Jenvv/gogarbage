@@ -1,0 +1,53 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
+class Penarikan extends Model
+{
+    protected $table = 'penarikan';
+
+    protected $fillable = [
+        'user_id',
+        'jumlah',
+        'metode',
+        'nama_rekening',
+        'nomor_rekening',
+        'nama_bank',
+        'status',
+        'disetujui_oleh',
+        'disetujui_pada',
+        'alasan_penolakan',
+        'catatan',
+    ];
+
+    protected function casts(): array
+    {
+        return [
+            'jumlah' => 'decimal:2',
+            'disetujui_pada' => 'datetime',
+        ];
+    }
+
+    public function scopeMenunggu($query)
+    {
+        return $query->where('status', 'menunggu');
+    }
+
+    public function pengguna(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function penyetuju(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'disetujui_oleh');
+    }
+
+    public function transaksi(): MorphMany
+    {
+        return $this->morphMany(Transaksi::class, 'referensi');
+    }
+}

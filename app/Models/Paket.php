@@ -36,6 +36,11 @@ class Paket extends Model
 
     // ── Relationships ──
 
+    public function scopeAktif($query)
+    {
+        return $query->where('aktif', true);
+    }
+
     public function langganan(): HasMany
     {
         return $this->hasMany(Langganan::class, 'paket_id');

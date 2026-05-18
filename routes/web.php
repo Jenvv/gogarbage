@@ -8,6 +8,10 @@ use App\Http\Controllers\Pelanggan\JemputSampahController;
 use App\Http\Controllers\Pelanggan\LanggananController;
 use App\Http\Controllers\Pelanggan\RiwayatController;
 use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\PesananController;
+use App\Http\Controllers\Admin\LanggananController as AdminLanggananController;
+use App\Http\Controllers\Admin\StokController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -52,13 +56,20 @@ Route::middleware(['auth', 'role:juru_angkut'])->group(function () {
 
 // Admin
 Route::middleware(['auth', 'role:admin_gudang'])->prefix('admin')->group(function () {
-    Route::get('/', [AdminController::class, 'dashboard'])->name('admin.dashboard');
+    // Dashboard Admin
+    Route::get('/', [DashboardController::class, 'index'])->name('admin.dashboard');
+    // 
     Route::get('/pengguna/pelanggan', [AdminController::class, 'pelanggan'])->name('admin.pengguna.pelanggan');
     Route::get('/pengguna/juru-angkut', [AdminController::class, 'juruAngkut'])->name('admin.pengguna.juru-angkut');
     Route::get('/pengguna/pengepul', [AdminController::class, 'pengepul'])->name('admin.pengguna.pengepul');
-    Route::get('/pesanan', [AdminController::class, 'pesanan'])->name('admin.pesanan');
-    Route::get('/langganan', [AdminController::class, 'langganan'])->name('admin.langganan');
-    Route::get('/stok', [AdminController::class, 'stok'])->name('admin.stok');
+    Route::get('/pesanan', [PesananController::class, 'index'])->name('admin.pesanan');
+    Route::post('/pesanan/{pesanan}/batalkan', [PesananController::class, 'batalkan'])->name('admin.pesanan.batalkan');
+    Route::post('/pesanan/{pesanan}/verifikasi', [PesananController::class, 'verifikasi'])->name('admin.pesanan.verifikasi');
+    Route::get('/langganan', [AdminLanggananController::class, 'index'])->name('admin.langganan');
+    Route::post('/langganan/{langganan}/setujui', [AdminLanggananController::class, 'setujui'])->name('admin.langganan.setujui');
+    Route::post('/langganan/{langganan}/tolak', [AdminLanggananController::class, 'tolak'])->name('admin.langganan.tolak');
+    Route::get('/stok', [StokController::class, 'index'])->name('admin.stok');
+    Route::post('/stok/adjust', [StokController::class, 'adjust'])->name('admin.stok.adjust');
     Route::get('/transaksi-pengepul', [AdminController::class, 'transaksiPengepul'])->name('admin.transaksi-pengepul');
     Route::get('/keuangan', [AdminController::class, 'keuangan'])->name('admin.keuangan');
     Route::get('/hadiah', [AdminController::class, 'hadiah'])->name('admin.hadiah');

@@ -63,6 +63,36 @@ class User extends Authenticatable
         return $this->hasMany(Transaksi::class, 'user_id');
     }
 
+    public function pesananSebagaiPengangkut(): HasMany
+    {
+        return $this->hasMany(Pesanan::class, 'pengangkut_id');
+    }
+
+    public function penjualanSebagaiPembeli(): HasMany
+    {
+        return $this->hasMany(PenjualanPengepul::class, 'pembeli_id');
+    }
+
+    public function penjualanSebagaiAdmin(): HasMany
+    {
+        return $this->hasMany(PenjualanPengepul::class, 'admin_id');
+    }
+
+    public function penarikan(): HasMany
+    {
+        return $this->hasMany(Penarikan::class, 'user_id');
+    }
+
+    public function klaimHadiah(): HasMany
+    {
+        return $this->hasMany(KlaimHadiah::class, 'user_id');
+    }
+
+    public function langgananDisetujui(): HasMany
+    {
+        return $this->hasMany(Langganan::class, 'disetujui_oleh');
+    }
+
     /**
      * Cek apakah user punya langganan aktif.
      */
