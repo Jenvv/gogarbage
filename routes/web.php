@@ -149,7 +149,7 @@ Route::get('/api/pesanan/{id}/status', function ($id) {
 });
 
 Route::get('/dashboard', function () {
-    return view('dashboard');
+    return redirect()->route(auth()->user()->getDashboardRoute());
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {

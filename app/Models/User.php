@@ -111,4 +111,23 @@ class User extends Authenticatable
     {
         return $this->langgananAktif() !== null;
     }
+
+    /**
+     * Get the dashboard route name based on user's role.
+     */
+    public function getDashboardRoute(): string
+    {
+        switch ($this->role) {
+            case 'pengguna':
+                return 'pelanggan.index';
+            case 'juru_angkut':
+                return 'juru-angkut.index';
+            case 'pengepul':
+                return 'pengepul.index';
+            case 'admin_gudang':
+                return 'admin.dashboard';
+            default:
+                return 'login';
+        }
+    }
 }
