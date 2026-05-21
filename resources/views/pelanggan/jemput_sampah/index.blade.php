@@ -547,18 +547,41 @@
             el.classList.toggle('selected', !!el.value);
         }
 
-        // ── Map modal ──
+        // ── Map modal & Geolocation ──
         function pilihPeta() {
-            const modal = document.getElementById('mapModal');
-            modal.style.display = 'flex';
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        const lat = position.coords.latitude;
+                        const lng = position.coords.longitude;
+                        
+                        document.getElementById('latitudeInput').value = lat;
+                        document.getElementById('longitudeInput').value = lng;
+                        
+                        document.getElementById('mapSelectedLoc').textContent = `Terdeteksi (Lat: ${lat.toFixed(5)}, Lng: ${lng.toFixed(5)})`;
+                        
+                        if (!document.getElementById('lokasiInput').value) {
+                            document.getElementById('lokasiInput').value = `Titik GPS: ${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+                        }
+
+                        const modal = document.getElementById('mapModal');
+                        modal.style.display = 'flex';
+                    },
+                    function(error) {
+                        let msg = 'Gagal mengambil lokasi.';
+                        if (error.code === 1) msg = 'Izin lokasi ditolak. Silakan izinkan akses lokasi di browser Anda.';
+                        else if (error.code === 2) msg = 'Sinyal GPS tidak tersedia.';
+                        else if (error.code === 3) msg = 'Waktu pengambilan lokasi habis.';
+                        alert(msg);
+                    },
+                    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+                );
+            } else {
+                alert('Geolocation tidak didukung oleh browser Anda.');
+            }
         }
 
         function confirmMap() {
-            const selectedLoc = document.getElementById('mapSelectedLoc').textContent;
-            document.getElementById('lokasiInput').value = selectedLoc;
-            // Set dummy coordinates (replace with real map API later)
-            document.getElementById('latitudeInput').value = '-0.0263';
-            document.getElementById('longitudeInput').value = '109.3425';
             document.getElementById('mapModal').style.display = 'none';
         }
 

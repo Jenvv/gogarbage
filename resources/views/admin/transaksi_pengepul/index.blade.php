@@ -276,11 +276,23 @@
 
 
 @section('content')
+    {{-- Flash Messages --}}
+    @if(session('success'))
+        <div class="mb-4 rounded-lg bg-green-50 border border-green-200 p-4 text-sm font-medium text-green-700 dark:bg-green-900/20 dark:border-green-800 dark:text-green-400">
+            {{ session('success') }}
+        </div>
+    @endif
+    @if(session('error'))
+        <div class="mb-4 rounded-lg bg-red-50 border border-red-200 p-4 text-sm font-medium text-red-700 dark:bg-red-900/20 dark:border-red-800 dark:text-red-400">
+            {{ session('error') }}
+        </div>
+    @endif
+
     {{-- ── Page Header ── --}}
     <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
         <div>
             <h2 class="text-xl font-semibold text-gray-800 dark:text-white/90">Transaksi Pengepul</h2>
-            <p class="text-sm text-gray-500 dark:text-gray-400">Transaksi terbaru dari juru angkut ke pengepul</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">Kelola request dan riwayat transaksi pengepul</p>
         </div>
         <button onclick="modalPenjualan.open()"
             class="inline-flex items-center gap-2 rounded-lg bg-green-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-green-600 transition">
@@ -295,47 +307,165 @@
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-3 md:gap-6 mb-6">
         <div class="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03]">
             <p class="text-sm text-gray-500 dark:text-gray-400">Total Transaksi</p>
-            <h4 class="mt-2 text-2xl font-bold text-gray-800 dark:text-white/90">-</h4>
-            <p class="text-xs text-gray-400 mt-1">Bulan ini</p>
+            <h4 class="mt-2 text-2xl font-bold text-gray-800 dark:text-white/90">{{ $totalTransaksi }}</h4>
+            <p class="text-xs text-gray-400 mt-1">Bulan ini (selesai)</p>
         </div>
         <div class="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03]">
             <p class="text-sm text-gray-500 dark:text-gray-400">Total Berat</p>
-            <h4 class="mt-2 text-2xl font-bold text-gray-800 dark:text-white/90">- kg</h4>
+            <h4 class="mt-2 text-2xl font-bold text-gray-800 dark:text-white/90">{{ number_format($totalBerat, 1, ',', '.') }} kg</h4>
             <p class="text-xs text-gray-400 mt-1">Bulan ini</p>
         </div>
         <div class="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03]">
             <p class="text-sm text-gray-500 dark:text-gray-400">Total Pendapatan</p>
-            <h4 class="mt-2 text-2xl font-bold text-gray-800 dark:text-white/90">-</h4>
+            <h4 class="mt-2 text-2xl font-bold text-gray-800 dark:text-white/90">Rp {{ number_format($totalPendapatan, 0, ',', '.') }}</h4>
             <p class="text-xs text-gray-400 mt-1">Bulan ini</p>
         </div>
     </div>
 
-    {{-- ── Riwayat Transaksi ── --}}
+    {{-- ── Tab Navigation ── --}}
     <div class="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
-        <div class="px-5 pt-5 md:px-6 md:pt-6">
-            <h3 class="text-lg font-semibold text-gray-800 dark:text-white/90">Riwayat Transaksi</h3>
+        <div class="flex border-b border-gray-200 dark:border-gray-800 px-5 pt-2">
+            <a href="{{ route('admin.transaksi-pengepul', ['tab' => 'request']) }}"
+                class="px-4 py-3 text-sm font-medium border-b-2 transition {{ $tab === 'request' ? 'text-green-600 border-green-500' : 'text-gray-500 border-transparent hover:text-gray-700' }}">
+                Request Masuk
+                @if($countMenunggu + $countDisetujui > 0)
+                    <span class="ml-1.5 inline-flex items-center justify-center rounded-full bg-amber-100 text-amber-700 text-xs font-bold px-2 py-0.5">
+                        {{ $countMenunggu + $countDisetujui }}
+                    </span>
+                @endif
+            </a>
+            <a href="{{ route('admin.transaksi-pengepul', ['tab' => 'riwayat']) }}"
+                class="px-4 py-3 text-sm font-medium border-b-2 transition {{ $tab === 'riwayat' ? 'text-green-600 border-green-500' : 'text-gray-500 border-transparent hover:text-gray-700' }}">
+                Riwayat Transaksi
+            </a>
         </div>
-        <div class="p-5 md:p-6 overflow-x-auto">
-            <table class="min-w-full">
-                <thead>
-                    <tr class="border-b border-gray-200 dark:border-gray-800">
-                        <th class="pb-3 text-left text-sm font-medium text-gray-500 dark:text-gray-400">No. Invoice</th>
-                        <th class="pb-3 text-left text-sm font-medium text-gray-500 dark:text-gray-400">Tanggal</th>
-                        <th class="pb-3 text-left text-sm font-medium text-gray-500 dark:text-gray-400">Pengepul</th>
-                        <th class="pb-3 text-left text-sm font-medium text-gray-500 dark:text-gray-400">Jenis Sampah</th>
-                        <th class="pb-3 text-left text-sm font-medium text-gray-500 dark:text-gray-400">Berat</th>
-                        <th class="pb-3 text-left text-sm font-medium text-gray-500 dark:text-gray-400">Harga</th>
-                        <th class="pb-3 text-left text-sm font-medium text-gray-500 dark:text-gray-400">Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td colspan="7" class="py-8 text-center text-sm text-gray-400">
-                            Data akan ditampilkan setelah integrasi
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+
+        <div class="p-5 md:p-6">
+
+            {{-- ══ TAB: REQUEST MASUK ══ --}}
+            @if($tab === 'request')
+                @forelse($requestMasuk as $req)
+                    <div class="rounded-xl border {{ $req->status === 'menunggu' ? 'border-amber-200 bg-amber-50/30 dark:border-amber-800 dark:bg-amber-900/10' : 'border-green-200 bg-green-50/30 dark:border-green-800 dark:bg-green-900/10' }} p-4 mb-4">
+                        {{-- Header row --}}
+                        <div class="flex flex-wrap items-start justify-between gap-2 mb-3">
+                            <div>
+                                <p class="text-sm font-bold text-gray-800 dark:text-white/90">{{ $req->nomor_invoice }}</p>
+                                <p class="text-xs text-gray-500 mt-0.5">{{ $req->created_at->format('d M Y, H:i') }} · {{ $req->pembeli?->name ?? '-' }} ({{ $req->pembeli?->email ?? '-' }})</p>
+                            </div>
+                            @if($req->status === 'menunggu')
+                                <span class="inline-flex items-center gap-1 text-xs font-semibold bg-amber-100 text-amber-700 px-2.5 py-1 rounded-full">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> Menunggu
+                                </span>
+                            @else
+                                <span class="inline-flex items-center gap-1 text-xs font-semibold bg-blue-100 text-blue-700 px-2.5 py-1 rounded-full">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span> Disetujui
+                                </span>
+                            @endif
+                        </div>
+
+                        {{-- Items --}}
+                        <div class="flex flex-wrap gap-1.5 mb-3">
+                            @foreach($req->detail as $d)
+                                <span class="text-xs bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-2 py-1 text-gray-600 dark:text-gray-300">
+                                    {{ $d->kategori?->nama ?? '-' }} · {{ number_format($d->berat, 1, ',', '.') }} kg
+                                </span>
+                            @endforeach
+                        </div>
+
+                        {{-- Footer: totals + actions --}}
+                        <div class="flex flex-wrap items-center justify-between gap-2">
+                            <div class="text-sm text-gray-600 dark:text-gray-400">
+                                <span class="font-semibold text-gray-800 dark:text-white/90">{{ number_format($req->total_berat, 1, ',', '.') }} kg</span>
+                                · ~Rp {{ number_format($req->total_harga, 0, ',', '.') }}
+                                @if($req->catatan)
+                                    <span class="text-xs italic ml-2">📝 {{ Str::limit($req->catatan, 40) }}</span>
+                                @endif
+                            </div>
+                            <div class="flex gap-2">
+                                @if($req->status === 'menunggu')
+                                    <form action="{{ route('admin.transaksi-pengepul.approve', $req->id) }}" method="POST" class="inline">
+                                        @csrf
+                                        <button type="submit" class="inline-flex items-center gap-1 rounded-lg bg-green-500 px-3 py-1.5 text-xs font-medium text-white hover:bg-green-600 transition">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                                            Setujui
+                                        </button>
+                                    </form>
+                                    <form action="{{ route('admin.transaksi-pengepul.reject', $req->id) }}" method="POST" class="inline" onsubmit="return confirm('Tolak request ini?')">
+                                        @csrf
+                                        <button type="submit" class="inline-flex items-center gap-1 rounded-lg border border-red-300 bg-white px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50 transition dark:bg-transparent dark:border-red-700 dark:hover:bg-red-900/20">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                                            Tolak
+                                        </button>
+                                    </form>
+                                @elseif($req->status === 'disetujui')
+                                    <form action="{{ route('admin.transaksi-pengepul.complete', $req->id) }}" method="POST" class="inline" onsubmit="return confirm('Selesaikan transaksi ini? Stok gudang akan dipotong.')">
+                                        @csrf
+                                        <button type="submit" class="inline-flex items-center gap-1 rounded-lg bg-blue-500 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-600 transition">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                            Selesaikan
+                                        </button>
+                                    </form>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                @empty
+                    <div class="text-center py-12">
+                        <svg class="w-12 h-12 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                        <p class="text-sm text-gray-400">Belum ada request masuk dari pengepul</p>
+                    </div>
+                @endforelse
+
+            {{-- ══ TAB: RIWAYAT TRANSAKSI ══ --}}
+            @else
+                <div class="overflow-x-auto">
+                    <table class="min-w-full">
+                        <thead>
+                            <tr class="border-b border-gray-200 dark:border-gray-800">
+                                <th class="pb-3 text-left text-sm font-medium text-gray-500 dark:text-gray-400">No. Invoice</th>
+                                <th class="pb-3 text-left text-sm font-medium text-gray-500 dark:text-gray-400">Tanggal</th>
+                                <th class="pb-3 text-left text-sm font-medium text-gray-500 dark:text-gray-400">Pengepul</th>
+                                <th class="pb-3 text-left text-sm font-medium text-gray-500 dark:text-gray-400">Item</th>
+                                <th class="pb-3 text-right text-sm font-medium text-gray-500 dark:text-gray-400">Berat</th>
+                                <th class="pb-3 text-right text-sm font-medium text-gray-500 dark:text-gray-400">Total Harga</th>
+                                <th class="pb-3 text-center text-sm font-medium text-gray-500 dark:text-gray-400">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($riwayat as $tx)
+                                <tr class="border-b border-gray-100 dark:border-gray-800">
+                                    <td class="py-3 text-sm font-semibold text-gray-800 dark:text-white/90">{{ $tx->nomor_invoice }}</td>
+                                    <td class="py-3 text-sm text-gray-500">{{ $tx->created_at->format('d M Y') }}</td>
+                                    <td class="py-3 text-sm text-gray-600 dark:text-gray-300">{{ $tx->pembeli?->name ?? '-' }}</td>
+                                    <td class="py-3">
+                                        <div class="flex flex-wrap gap-1">
+                                            @foreach($tx->detail as $d)
+                                                <span class="text-xs bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 px-1.5 py-0.5 rounded">{{ $d->kategori?->nama ?? '-' }}</span>
+                                            @endforeach
+                                        </div>
+                                    </td>
+                                    <td class="py-3 text-sm text-right text-gray-800 dark:text-white/90 font-medium">{{ number_format($tx->total_berat, 1, ',', '.') }} kg</td>
+                                    <td class="py-3 text-sm text-right font-semibold text-gray-800 dark:text-white/90">Rp {{ number_format($tx->total_harga, 0, ',', '.') }}</td>
+                                    <td class="py-3 text-center">
+                                        @if($tx->status === 'selesai')
+                                            <span class="inline-flex items-center gap-1 text-xs font-semibold bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 px-2 py-0.5 rounded-full">✓ Selesai</span>
+                                        @else
+                                            <span class="inline-flex items-center gap-1 text-xs font-semibold bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 px-2 py-0.5 rounded-full">✗ Ditolak</span>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="7" class="py-8 text-center text-sm text-gray-400">
+                                        Belum ada riwayat transaksi
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            @endif
+
         </div>
     </div>
 
@@ -398,7 +528,7 @@
 
             {{-- ── Body scrollable ── --}}
             <div class="flex-1 overflow-y-auto px-5 py-5" style="scrollbar-width:thin">
-                <form id="formPenjualan" action="" {{-- action="{{ route('admin.transaksi-pengepul.store') }}" --}} method="POST" novalidate>
+                <form id="formPenjualan" action="{{ route('admin.transaksi-pengepul.store') }}" method="POST" novalidate>
                     @csrf
 
                     {{-- Hidden: admin_id diisi via server (Auth::id()), tidak perlu input --}}
@@ -434,9 +564,9 @@
                                                focus:outline-none focus:ring-2 focus:ring-green-500/20
                                                focus:border-green-400 transition">
                                         <option value="">— Pilih pengepul —</option>
-                                        {{-- @foreach ($pengepul as $p)
-                                        <option value="{{ $p->id }}">{{ $p->name }}</option>
-                                        @endforeach --}}
+                                        @foreach ($pengepul as $p)
+                                        <option value="{{ $p->id }}">{{ $p->name }} ({{ $p->email }})</option>
+                                        @endforeach
                                     </select>
                                     <span
                                         class="tp-chevron pointer-events-none absolute top-1/2
@@ -732,9 +862,17 @@
             /* ── 3. REPEATER BARIS ITEM ── */
             var tpRowIndex = 0;
 
-            var tpKategoriData = [
-              
-            ];
+            @php
+                $kategoriJson = $kategori->map(function($k) {
+                    return [
+                        'id' => $k->id,
+                        'nama' => $k->nama,
+                        'harga_per_kg' => $k->harga_per_kg,
+                        'stok_tersedia' => $k->stokGudang ? $k->stokGudang->stok_kg : 0,
+                    ];
+                })->values();
+            @endphp
+            var tpKategoriData = @json($kategoriJson);
 
             /* Bangun <option> dari tpKategoriData */
             function tpBuildOptions(excludeIds) {

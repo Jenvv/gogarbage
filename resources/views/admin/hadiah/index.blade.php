@@ -230,6 +230,22 @@
         </button>
     </div>
 
+    {{-- Flash Messages --}}
+    @if(session('success'))
+        <div class="mb-4 rounded-lg bg-green-50 p-4 text-sm text-green-700 dark:bg-green-500/10 dark:text-green-400">
+            {{ session('success') }}
+        </div>
+    @endif
+    @if($errors->any())
+        <div class="mb-4 rounded-lg bg-red-50 p-4 text-sm text-red-700 dark:bg-red-500/10 dark:text-red-400">
+            <ul class="list-disc list-inside">
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
     {{-- ── Katalog Hadiah ── --}}
     <div class="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03] mb-6">
         <div class="px-5 pt-5 md:px-6 md:pt-6">
@@ -248,11 +264,39 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td colspan="6" class="py-8 text-center text-sm text-gray-400">
-                            Data akan ditampilkan setelah integrasi
-                        </td>
-                    </tr>
+                    @forelse($hadiah as $h)
+                        <tr class="border-b border-gray-100 dark:border-gray-800">
+                            <td class="py-3 text-sm text-gray-700 dark:text-gray-300">{{ $h->nama }}</td>
+                            <td class="py-3 text-sm text-gray-700 dark:text-gray-300">
+                                <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium
+                                    {{ $h->tipe === 'voucher' ? 'bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400' : ($h->tipe === 'fisik' ? 'bg-purple-50 text-purple-700 dark:bg-purple-500/10 dark:text-purple-400' : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300') }}">
+                                    {{ ucfirst($h->tipe) }}
+                                </span>
+                            </td>
+                            <td class="py-3 text-sm font-semibold text-gray-700 dark:text-gray-300">{{ number_format($h->biaya_poin) }} poin</td>
+                            <td class="py-3 text-sm text-gray-700 dark:text-gray-300">{{ number_format($h->stok) }}</td>
+                            <td class="py-3 text-sm">
+                                @if($h->aktif)
+                                    <span class="inline-flex items-center rounded-full bg-green-50 px-2 py-0.5 text-xs font-medium text-green-700 dark:bg-green-500/10 dark:text-green-400">Aktif</span>
+                                @else
+                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-500 dark:bg-gray-700 dark:text-gray-400">Nonaktif</span>
+                                @endif
+                            </td>
+                            <td class="py-3 text-sm">
+                                <form method="POST" action="{{ route('admin.hadiah.destroy', $h) }}" onsubmit="return confirm('Yakin ingin menghapus hadiah ini?')" style="display:inline">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="text-red-500 hover:text-red-700 text-xs font-medium transition">Hapus</button>
+                                </form>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="6" class="py-8 text-center text-sm text-gray-400">
+                                Belum ada data hadiah
+                            </td>
+                        </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>
@@ -277,11 +321,59 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td colspan="6" class="py-8 text-center text-sm text-gray-400">
-                            Data akan ditampilkan setelah integrasi
-                        </td>
-                    </tr>
+                    @forelse($klaim as $k)
+                        <tr class="border-b border-gray-100 dark:border-gray-800">
+                            <td class="py-3 text-sm text-gray-700 dark:text-gray-300">{{ $k->pengguna->name ?? '-' }}</td>
+                            <td class="py-3 text-sm text-gray-700 dark:text-gray-300">{{ $k->hadiah->nama ?? '-' }}</td>
+                            <td class="py-3 text-sm font-semibold text-gray-700 dark:text-gray-300">{{ number_format($k->poin_digunakan) }}</td>
+                            <td class="py-3 text-sm">
+                                @php
+                                    $statusClass = match($k->status) {
+                                        'menunggu'  => 'bg-yellow-50 text-yellow-700 dark:bg-yellow-500/10 dark:text-yellow-400',
+                                        'disetujui' => 'bg-green-50 text-green-700 dark:bg-green-500/10 dark:text-green-400',
+                                        'dikirim'   => 'bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400',
+                                        'ditolak'   => 'bg-red-50 text-red-700 dark:bg-red-500/10 dark:text-red-400',
+                                        default     => 'bg-gray-100 text-gray-600',
+                                    };
+                                @endphp
+                                <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium {{ $statusClass }}">
+                                    {{ ucfirst($k->status) }}
+                                </span>
+                            </td>
+                            <td class="py-3 text-sm text-gray-500 dark:text-gray-400">{{ $k->created_at->format('d/m/Y H:i') }}</td>
+                            <td class="py-3 text-sm">
+                                @if($k->status === 'menunggu')
+                                    <div class="flex items-center gap-2">
+                                        <form method="POST" action="{{ route('admin.hadiah.klaim.proses', $k) }}">
+                                            @csrf
+                                            <input type="hidden" name="status" value="disetujui">
+                                            <button type="submit" class="text-green-600 hover:text-green-800 text-xs font-medium transition">Setujui</button>
+                                        </form>
+                                        <form method="POST" action="{{ route('admin.hadiah.klaim.proses', $k) }}" onsubmit="var c=prompt('Alasan penolakan:'); if(!c){return false;} this.querySelector('[name=catatan]').value=c;">
+                                            @csrf
+                                            <input type="hidden" name="status" value="ditolak">
+                                            <input type="hidden" name="catatan" value="">
+                                            <button type="submit" class="text-red-500 hover:text-red-700 text-xs font-medium transition">Tolak</button>
+                                        </form>
+                                    </div>
+                                @elseif($k->status === 'disetujui')
+                                    <form method="POST" action="{{ route('admin.hadiah.klaim.proses', $k) }}">
+                                        @csrf
+                                        <input type="hidden" name="status" value="dikirim">
+                                        <button type="submit" class="text-blue-600 hover:text-blue-800 text-xs font-medium transition">Tandai Dikirim</button>
+                                    </form>
+                                @else
+                                    <span class="text-xs text-gray-400">—</span>
+                                @endif
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="6" class="py-8 text-center text-sm text-gray-400">
+                                Belum ada klaim hadiah
+                            </td>
+                        </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>
@@ -347,7 +439,7 @@
 
             {{-- ── Body scrollable ── --}}
             <div class="flex-1 overflow-y-auto px-5 py-5" style="scrollbar-width:thin">
-                <form id="formHadiah" action="" {{-- action="{{ route('admin.hadiah.store') }}" --}} method="POST" enctype="multipart/form-data"
+                <form id="formHadiah" action="{{ route('admin.hadiah.store') }}" method="POST" enctype="multipart/form-data"
                     novalidate>
                     @csrf
                     <div style="display:flex;flex-direction:column;gap:1.25rem;">

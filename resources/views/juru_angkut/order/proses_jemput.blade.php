@@ -511,7 +511,14 @@
                         </svg>
                         <p style="font-size:13px;color:#6b7280;line-height:1.65;">{{ $pesanan->alamat_jemput }}</p>
                     </div>
-                    <a href="https://maps.google.com/?q={{ urlencode($pesanan->alamat_jemput) }}" target="_blank" class="btn-navigasi" style="text-decoration:none;">
+                    @php
+                        if ($pesanan->latitude && $pesanan->longitude) {
+                            $mapUrl = "https://www.google.com/maps/dir/?api=1&destination={$pesanan->latitude},{$pesanan->longitude}";
+                        } else {
+                            $mapUrl = "https://maps.google.com/?q=" . urlencode($pesanan->alamat_jemput);
+                        }
+                    @endphp
+                    <a href="{{ $mapUrl }}" target="_blank" class="btn-navigasi" style="text-decoration:none;">
                         <svg width="17" height="17" fill="none" stroke="#fff" stroke-width="2.2" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                         </svg>

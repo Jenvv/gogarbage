@@ -224,6 +224,22 @@
         </button>
     </div>
 
+    {{-- Flash Messages --}}
+    @if(session('success'))
+        <div class="mb-4 rounded-lg bg-green-50 p-4 text-sm text-green-700 dark:bg-green-500/10 dark:text-green-400">
+            {{ session('success') }}
+        </div>
+    @endif
+    @if($errors->any())
+        <div class="mb-4 rounded-lg bg-red-50 p-4 text-sm text-red-700 dark:bg-red-500/10 dark:text-red-400">
+            <ul class="list-disc list-inside">
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
     {{-- ── Tabel ── --}}
     <div class="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
         <div class="overflow-x-auto p-5 md:p-6">
@@ -238,11 +254,42 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td colspan="5" class="py-8 text-center text-sm text-gray-400">
-                            Data akan ditampilkan setelah integrasi
-                        </td>
-                    </tr>
+                    @forelse($kategori as $ks)
+                        <tr class="border-b border-gray-100 dark:border-gray-800">
+                            <td class="py-3 text-sm text-gray-700 dark:text-gray-300">
+                                <div>
+                                    <p class="font-medium">{{ $ks->nama }}</p>
+                                    <p class="text-xs text-gray-400">/kategori/{{ $ks->slug }}</p>
+                                </div>
+                            </td>
+                            <td class="py-3 text-sm text-gray-700 dark:text-gray-300">
+                                @if($ks->aktif)
+                                    <span class="inline-flex items-center rounded-full bg-green-50 px-2 py-0.5 text-xs font-medium text-green-700 dark:bg-green-500/10 dark:text-green-400">Aktif</span>
+                                @else
+                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-500 dark:bg-gray-700 dark:text-gray-400">Nonaktif</span>
+                                @endif
+                            </td>
+                            <td class="py-3 text-sm font-semibold text-gray-700 dark:text-gray-300">Rp {{ number_format($ks->harga_per_kg, 0, ',', '.') }}</td>
+                            <td class="py-3 text-sm text-gray-700 dark:text-gray-300">{{ $ks->satuan }}</td>
+                            <td class="py-3 text-sm">
+                                @if($ks->aktif)
+                                    <form method="POST" action="{{ route('admin.master-data.kategori-sampah.destroy', $ks) }}" onsubmit="return confirm('Yakin ingin menonaktifkan kategori ini?')" style="display:inline">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="text-red-500 hover:text-red-700 text-xs font-medium transition">Nonaktifkan</button>
+                                    </form>
+                                @else
+                                    <span class="text-xs text-gray-400">&mdash;</span>
+                                @endif
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="5" class="py-8 text-center text-sm text-gray-400">
+                                Belum ada data kategori sampah
+                            </td>
+                        </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>
@@ -302,7 +349,7 @@
 
             {{-- ── Body scrollable ── --}}
             <div class="flex-1 overflow-y-auto px-5 py-5" style="scrollbar-width:thin">
-                <form id="formKategoriSampah" action="" {{-- action="{{ route('admin.kategori-sampah.store') }}" --}} method="POST"
+                <form id="formKategoriSampah" action="{{ route('admin.master-data.kategori-sampah.store') }}" method="POST"
                     enctype="multipart/form-data" novalidate>
                     @csrf
                     <div style="display:flex;flex-direction:column;gap:1.25rem;">

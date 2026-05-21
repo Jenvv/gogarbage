@@ -143,7 +143,7 @@ class OrderController extends Controller
             // Hapus detail lama, kita replace dengan hasil timbangan real dari Jasa Angkut
             $pesanan->detailPesanan()->delete();
 
-            // Update berat per detail pesanan
+            // Update berat per detail pesanan & Tambahkan ke Stok Gudang
             foreach ($trashItems as $item) {
                 $berat = floatval($item['kg'] ?? 0);
                 $jenis = $item['jenis'] ?? ''; // Nama kategori (Organik, Anorganik, dll)
@@ -165,6 +165,35 @@ class OrderController extends Controller
                     'harga_per_kg' => $harga_per_kg,
                     'subtotal' => $subtotal,
                 ]);
+
+                // OTO-UPDATE STOK GUDANG
+                if ($kategori_id && $berat > 0) {
+                    $stok = \App\Models\StokGudang::firstOrCreate(
+                        ['kategori_sampah_id' => $kategori_id],
+                        ['stok_kg' => 0, 'total_masuk' => 0, 'total_keluar' => 0]
+                    );
+
+                    $stokSebelum = $stok->stok_kg;
+                    $stokSesudah = $stokSebelum + $berat;
+
+                    $stok->update([
+                        'stok_kg' => $stokSesudah,
+                        'total_masuk' => $stok->total_masuk + $berat,
+                    ]);
+
+                    \App\Models\LogStokGudang::create([
+                        'stok_gudang_id' => $stok->id,
+                        'kategori_sampah_id' => $kategori_id,
+                        'tipe' => 'masuk',
+                        'jumlah_kg' => $berat,
+                        'stok_sebelum' => $stokSebelum,
+                        'stok_sesudah' => $stokSesudah,
+                        'sumber_type' => Pesanan::class,
+                        'sumber_id' => $pesanan->id,
+                        'deskripsi' => 'Penambahan otomatis dari pesanan #' . $pesanan->nomor_pesanan,
+                        'dibuat_oleh' => Auth::id(), // Juru Angkut
+                    ]);
+                }
 
                 $totalBerat += $berat;
                 $totalPendapatan += $subtotal;

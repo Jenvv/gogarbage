@@ -191,6 +191,22 @@
         </button>
     </div>
 
+    {{-- Flash Messages --}}
+    @if(session('success'))
+        <div class="mb-4 rounded-lg bg-green-50 p-4 text-sm text-green-700 dark:bg-green-500/10 dark:text-green-400">
+            {{ session('success') }}
+        </div>
+    @endif
+    @if($errors->any())
+        <div class="mb-4 rounded-lg bg-red-50 p-4 text-sm text-red-700 dark:bg-red-500/10 dark:text-red-400">
+            <ul class="list-disc list-inside">
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
     {{-- ── Tabel ── --}}
     <div class="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
         <div class="p-5 md:p-6 overflow-x-auto">
@@ -207,11 +223,46 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td colspan="7" class="py-8 text-center text-sm text-gray-400">
-                            Data akan ditampilkan setelah integrasi
-                        </td>
-                    </tr>
+                    @forelse($paket as $p)
+                        <tr class="border-b border-gray-100 dark:border-gray-800">
+                            <td class="py-3 text-sm text-gray-700 dark:text-gray-300">
+                                <div>
+                                    <p class="font-medium">{{ $p->nama }}</p>
+                                    @if($p->info_tong)
+                                        <p class="text-xs text-gray-400">{{ $p->info_tong }}</p>
+                                    @endif
+                                </div>
+                            </td>
+                            <td class="py-3 text-sm font-semibold text-gray-700 dark:text-gray-300">Rp {{ number_format($p->harga, 0, ',', '.') }}</td>
+                            <td class="py-3 text-sm text-gray-700 dark:text-gray-300">{{ $p->durasi_hari }} hari</td>
+                            <td class="py-3 text-sm text-gray-700 dark:text-gray-300">{{ $p->frekuensi_jemput }}x/{{ $p->satuan_frekuensi }}</td>
+                            <td class="py-3 text-sm text-gray-700 dark:text-gray-300">Rp {{ number_format($p->biaya_jemput, 0, ',', '.') }}</td>
+                            <td class="py-3 text-sm">
+                                @if($p->aktif)
+                                    <span class="inline-flex items-center rounded-full bg-green-50 px-2 py-0.5 text-xs font-medium text-green-700 dark:bg-green-500/10 dark:text-green-400">Aktif</span>
+                                @else
+                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-500 dark:bg-gray-700 dark:text-gray-400">Nonaktif</span>
+                                @endif
+                            </td>
+                            <td class="py-3 text-sm">
+                                @if($p->aktif)
+                                    <form method="POST" action="{{ route('admin.master-data.paket.destroy', $p) }}" onsubmit="return confirm('Yakin ingin menonaktifkan paket ini?')" style="display:inline">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="text-red-500 hover:text-red-700 text-xs font-medium transition">Nonaktifkan</button>
+                                    </form>
+                                @else
+                                    <span class="text-xs text-gray-400">&mdash;</span>
+                                @endif
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="7" class="py-8 text-center text-sm text-gray-400">
+                                Belum ada data paket langganan
+                            </td>
+                        </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>
@@ -273,7 +324,7 @@
 
             {{-- ── Body scrollable ── --}}
             <div class="flex-1 overflow-y-auto px-5 py-5" style="scrollbar-width:thin">
-                <form id="formPaketLangganan" action="" {{-- action="{{ route('admin.paket.store') }}" --}} method="POST" novalidate>
+                <form id="formPaketLangganan" action="{{ route('admin.master-data.paket.store') }}" method="POST" novalidate>
                     @csrf
                     <div style="display:flex;flex-direction:column;gap:1.25rem;">
 

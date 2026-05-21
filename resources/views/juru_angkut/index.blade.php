@@ -470,7 +470,7 @@
             </svg>
             <span style="font-size:10px;font-weight:500;color:#9ca3af;">History</span>
         </a>
-        <a href="#" class="nav-btn">
+        <a href="{{ route('juru-angkut.profil') }}" class="nav-btn">
             <svg width="22" height="22" fill="none" stroke="#9ca3af" stroke-width="2"
                 viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round"

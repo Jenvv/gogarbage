@@ -21,9 +21,20 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td colspan="6" class="py-8 text-center text-sm text-gray-400">Data akan ditampilkan setelah integrasi</td>
-                    </tr>
+                    @forelse($pelanggan as $user)
+                        <tr class="border-b border-gray-100 dark:border-gray-800">
+                            <td class="py-3 text-sm text-gray-700 dark:text-gray-300">{{ $user->name }}</td>
+                            <td class="py-3 text-sm text-gray-700 dark:text-gray-300">{{ $user->email }}</td>
+                            <td class="py-3 text-sm text-gray-700 dark:text-gray-300">{{ $user->telepon ?? '-' }}</td>
+                            <td class="py-3 text-sm font-semibold text-gray-700 dark:text-gray-300">Rp {{ number_format($user->saldo, 0, ',', '.') }}</td>
+                            <td class="py-3 text-sm text-gray-700 dark:text-gray-300">{{ number_format($user->poin) }}</td>
+                            <td class="py-3 text-sm text-gray-400">Read-only</td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="6" class="py-8 text-center text-sm text-gray-400">Belum ada data pelanggan</td>
+                        </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>

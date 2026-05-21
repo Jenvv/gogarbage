@@ -5,20 +5,16 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
-use App\Models\User;
-use App\Models\Transaksi;
 
-class Penarikan extends Model
+class TopUp extends Model
 {
-    protected $table = 'penarikan';
+    protected $table = 'top_up';
 
     protected $fillable = [
         'user_id',
         'jumlah',
-        'metode',
-        'nama_rekening',
-        'nomor_rekening',
-        'nama_bank',
+        'metode_pembayaran',
+        'bukti_pembayaran',
         'status',
         'disetujui_oleh',
         'disetujui_pada',

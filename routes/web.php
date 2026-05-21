@@ -3,15 +3,27 @@
 use App\Http\Controllers\JuruAngkut\DashboardController as JuruAngkutDashboardController;
 use App\Http\Controllers\JuruAngkut\OrderController as JuruAngkutOrderController;
 use App\Http\Controllers\JuruAngkut\RiwayatController as JuruAngkutRiwayatController;
+use App\Http\Controllers\JuruAngkut\ProfilController as JuruAngkutProfilController;
 use App\Http\Controllers\Pelanggan\BerandaController;
 use App\Http\Controllers\Pelanggan\JemputSampahController;
 use App\Http\Controllers\Pelanggan\LanggananController;
 use App\Http\Controllers\Pelanggan\RiwayatController;
+use App\Http\Controllers\Pelanggan\ProfilController as PelangganProfilController;
+use App\Http\Controllers\Pelanggan\DompetController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\KeuanganController;
 use App\Http\Controllers\Admin\PesananController;
 use App\Http\Controllers\Admin\LanggananController as AdminLanggananController;
 use App\Http\Controllers\Admin\StokController;
+use App\Http\Controllers\Admin\PenggunaController;
+use App\Http\Controllers\Admin\HadiahController;
+use App\Http\Controllers\Admin\KategoriSampahController;
+use App\Http\Controllers\Admin\TransaksiPengepulController;
+use App\Http\Controllers\Pengepul\DashboardController as PengepulDashboardController;
+use App\Http\Controllers\Pengepul\StokController as PengepulStokController;
+use App\Http\Controllers\Pengepul\RequestController as PengepulRequestController;
+use App\Http\Controllers\Pengepul\RiwayatController as PengepulRiwayatController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -35,6 +47,16 @@ Route::middleware(['auth', 'role:pengguna'])->group(function () {
     Route::get('/pelanggan/langganan', [LanggananController::class, 'index'])->name('pelanggan.langganan');
     Route::post('/pelanggan/langganan', [LanggananController::class, 'store'])->name('pelanggan.langganan.store');
     Route::post('/pelanggan/langganan/{id}/batalkan', [LanggananController::class, 'batalkan'])->name('pelanggan.langganan.batalkan');
+
+    // Profil Pelanggan
+    Route::get('/pelanggan/profil', [PelangganProfilController::class, 'index'])->name('pelanggan.profil');
+    Route::post('/pelanggan/profil', [PelangganProfilController::class, 'update'])->name('pelanggan.profil.update');
+
+    // Dompet Pelanggan
+    Route::get('/pelanggan/dompet', [DompetController::class, 'index'])->name('pelanggan.dompet');
+    Route::post('/pelanggan/dompet/topup', [DompetController::class, 'topUp'])->name('pelanggan.dompet.topup');
+    Route::post('/pelanggan/dompet/tarik', [DompetController::class, 'tarikSaldo'])->name('pelanggan.dompet.tarik');
+    Route::post('/pelanggan/dompet/rekening', [DompetController::class, 'simpanRekening'])->name('pelanggan.dompet.rekening');
 });
 
 // juru Angkut
@@ -52,6 +74,10 @@ Route::middleware(['auth', 'role:juru_angkut'])->group(function () {
     Route::get('/juru-angkut/riwayat', [JuruAngkutRiwayatController::class, 'index'])->name('juru-angkut.riwayat');
     Route::get('/juru-angkut/langganan-tunai', [JuruAngkutOrderController::class, 'langgananTunai'])->name('juru-angkut.langganan-tunai');
     Route::post('/juru-angkut/langganan-tunai/{id}/konfirmasi', [JuruAngkutOrderController::class, 'konfirmasiTunai'])->name('juru-angkut.langganan-tunai.konfirmasi');
+
+    // Profil Juru Angkut
+    Route::get('/juru-angkut/profil', [JuruAngkutProfilController::class, 'index'])->name('juru-angkut.profil');
+    Route::post('/juru-angkut/profil', [JuruAngkutProfilController::class, 'update'])->name('juru-angkut.profil.update');
 });
 
 // Admin
@@ -59,9 +85,15 @@ Route::middleware(['auth', 'role:admin_gudang'])->prefix('admin')->group(functio
     // Dashboard Admin
     Route::get('/', [DashboardController::class, 'index'])->name('admin.dashboard');
     // 
-    Route::get('/pengguna/pelanggan', [AdminController::class, 'pelanggan'])->name('admin.pengguna.pelanggan');
-    Route::get('/pengguna/juru-angkut', [AdminController::class, 'juruAngkut'])->name('admin.pengguna.juru-angkut');
-    Route::get('/pengguna/pengepul', [AdminController::class, 'pengepul'])->name('admin.pengguna.pengepul');
+    Route::get('/pengguna/pelanggan', [PenggunaController::class, 'pelanggan'])->name('admin.pengguna.pelanggan');
+    Route::get('/pengguna/juru-angkut', [PenggunaController::class, 'juruAngkut'])->name('admin.pengguna.juru-angkut');
+    Route::post('/pengguna/juru-angkut', [PenggunaController::class, 'storeJuruAngkut'])->name('admin.pengguna.juru-angkut.store');
+    Route::put('/pengguna/juru-angkut/{user}', [PenggunaController::class, 'updateJuruAngkut'])->name('admin.pengguna.juru-angkut.update');
+    Route::delete('/pengguna/juru-angkut/{user}', [PenggunaController::class, 'destroyJuruAngkut'])->name('admin.pengguna.juru-angkut.destroy');
+    Route::get('/pengguna/pengepul', [PenggunaController::class, 'pengepul'])->name('admin.pengguna.pengepul');
+    Route::post('/pengguna/pengepul', [PenggunaController::class, 'storePengepul'])->name('admin.pengguna.pengepul.store');
+    Route::put('/pengguna/pengepul/{user}', [PenggunaController::class, 'updatePengepul'])->name('admin.pengguna.pengepul.update');
+    Route::delete('/pengguna/pengepul/{user}', [PenggunaController::class, 'destroyPengepul'])->name('admin.pengguna.pengepul.destroy');
     Route::get('/pesanan', [PesananController::class, 'index'])->name('admin.pesanan');
     Route::post('/pesanan/{pesanan}/batalkan', [PesananController::class, 'batalkan'])->name('admin.pesanan.batalkan');
     Route::post('/pesanan/{pesanan}/verifikasi', [PesananController::class, 'verifikasi'])->name('admin.pesanan.verifikasi');
@@ -70,11 +102,42 @@ Route::middleware(['auth', 'role:admin_gudang'])->prefix('admin')->group(functio
     Route::post('/langganan/{langganan}/tolak', [AdminLanggananController::class, 'tolak'])->name('admin.langganan.tolak');
     Route::get('/stok', [StokController::class, 'index'])->name('admin.stok');
     Route::post('/stok/adjust', [StokController::class, 'adjust'])->name('admin.stok.adjust');
-    Route::get('/transaksi-pengepul', [AdminController::class, 'transaksiPengepul'])->name('admin.transaksi-pengepul');
-    Route::get('/keuangan', [AdminController::class, 'keuangan'])->name('admin.keuangan');
-    Route::get('/hadiah', [AdminController::class, 'hadiah'])->name('admin.hadiah');
-    Route::get('/master-data/kategori-sampah', [AdminController::class, 'kategoriSampah'])->name('admin.master-data.kategori-sampah');
-    Route::get('/master-data/paket', [AdminController::class, 'paket'])->name('admin.master-data.paket');
+    Route::get('/transaksi-pengepul', [TransaksiPengepulController::class, 'index'])->name('admin.transaksi-pengepul');
+    Route::post('/transaksi-pengepul', [TransaksiPengepulController::class, 'store'])->name('admin.transaksi-pengepul.store');
+    Route::post('/transaksi-pengepul/{id}/approve', [TransaksiPengepulController::class, 'approve'])->name('admin.transaksi-pengepul.approve');
+    Route::post('/transaksi-pengepul/{id}/reject', [TransaksiPengepulController::class, 'reject'])->name('admin.transaksi-pengepul.reject');
+    Route::post('/transaksi-pengepul/{id}/complete', [TransaksiPengepulController::class, 'complete'])->name('admin.transaksi-pengepul.complete');
+    Route::get('/keuangan', [KeuanganController::class, 'index'])->name('admin.keuangan');
+    Route::post('/keuangan/{penarikan}/approve', [KeuanganController::class, 'approve'])->name('admin.keuangan.approve');
+    Route::post('/keuangan/{penarikan}/reject', [KeuanganController::class, 'reject'])->name('admin.keuangan.reject');
+    Route::post('/keuangan/topup/{topUp}/approve', [KeuanganController::class, 'approveTopUp'])->name('admin.keuangan.topup.approve');
+    Route::post('/keuangan/topup/{topUp}/reject', [KeuanganController::class, 'rejectTopUp'])->name('admin.keuangan.topup.reject');
+    Route::post('/keuangan/koreksi-saldo', [KeuanganController::class, 'koreksiSaldo'])->name('admin.keuangan.koreksi-saldo');
+    Route::get('/hadiah', [HadiahController::class, 'index'])->name('admin.hadiah');
+    Route::post('/hadiah', [HadiahController::class, 'store'])->name('admin.hadiah.store');
+    Route::put('/hadiah/{hadiah}', [HadiahController::class, 'update'])->name('admin.hadiah.update');
+    Route::delete('/hadiah/{hadiah}', [HadiahController::class, 'destroy'])->name('admin.hadiah.destroy');
+    Route::post('/hadiah/klaim/{klaim}', [HadiahController::class, 'prosesKlaim'])->name('admin.hadiah.klaim.proses');
+    Route::get('/master-data/kategori-sampah', [KategoriSampahController::class, 'index'])->name('admin.master-data.kategori-sampah');
+    Route::post('/master-data/kategori-sampah', [KategoriSampahController::class, 'store'])->name('admin.master-data.kategori-sampah.store');
+    Route::put('/master-data/kategori-sampah/{kategoriSampah}', [KategoriSampahController::class, 'update'])->name('admin.master-data.kategori-sampah.update');
+    Route::delete('/master-data/kategori-sampah/{kategoriSampah}', [KategoriSampahController::class, 'destroy'])->name('admin.master-data.kategori-sampah.destroy');
+    Route::get('/master-data/paket', [AdminLanggananController::class, 'paketIndex'])->name('admin.master-data.paket');
+    Route::post('/master-data/paket', [AdminLanggananController::class, 'storePaket'])->name('admin.master-data.paket.store');
+    Route::put('/master-data/paket/{paket}', [AdminLanggananController::class, 'updatePaket'])->name('admin.master-data.paket.update');
+    Route::delete('/master-data/paket/{paket}', [AdminLanggananController::class, 'destroyPaket'])->name('admin.master-data.paket.destroy');
+});
+
+// ══════════════════════════════════════════
+//  PENGEPUL
+// ══════════════════════════════════════════
+Route::middleware(['auth', 'role:pengepul'])->prefix('pengepul')->group(function () {
+    Route::get('/', [PengepulDashboardController::class, 'index'])->name('pengepul.index');
+    Route::get('/stok', [PengepulStokController::class, 'index'])->name('pengepul.stok');
+    Route::get('/request', [PengepulRequestController::class, 'index'])->name('pengepul.request');
+    Route::post('/request', [PengepulRequestController::class, 'store'])->name('pengepul.request.store');
+    Route::get('/riwayat', [PengepulRiwayatController::class, 'index'])->name('pengepul.riwayat');
+    Route::get('/riwayat/{id}', [PengepulRiwayatController::class, 'show'])->name('pengepul.riwayat.show');
 });
 
 

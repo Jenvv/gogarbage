@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             KategoriSampahSeeder::class,
             PaketDanLanggananSeeder::class,
             HadiahSeeder::class,
+            UserSeeder::class,
         ]);
 
         // // Test user

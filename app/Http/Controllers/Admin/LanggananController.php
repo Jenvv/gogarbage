@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Langganan;
+use App\Models\Paket;
 
 use Illuminate\Support\Facades\Auth;
 
@@ -76,5 +77,76 @@ class LanggananController extends Controller
         $langganan->save();
 
         return redirect()->back()->with('success', 'Langganan ditolak.');
+    }
+
+    // ══════════════════════════════════════════
+    //  PAKET LANGGANAN — CRUD
+    //  Fields: nama, deskripsi, harga, durasi_hari, frekuensi_jemput,
+    //          satuan_frekuensi, info_tong, biaya_jemput,
+    //          persentase_bagi_hasil, aktif
+    // ══════════════════════════════════════════
+
+    public function paketIndex()
+    {
+        $paket = Paket::latest()->get();
+
+        return view('admin.master_data.paket', compact('paket'));
+    }
+
+    public function storePaket(Request $request)
+    {
+        $validated = $request->validate([
+            'nama'                  => 'required|string|max:255',
+            'deskripsi'             => 'nullable|string',
+            'harga'                 => 'required|numeric|min:0',
+            'durasi_hari'           => 'required|integer|min:1',
+            'frekuensi_jemput'      => 'required|integer|min:1',
+            'satuan_frekuensi'      => 'required|in:minggu,bulan',
+            'info_tong'             => 'nullable|string|max:255',
+            'biaya_jemput'          => 'nullable|numeric|min:0',
+            'persentase_bagi_hasil' => 'nullable|numeric|min:0|max:100',
+            'aktif'                 => 'required|boolean',
+        ]);
+
+        // Defaults
+        $validated['biaya_jemput'] = $validated['biaya_jemput'] ?? 0;
+        $validated['persentase_bagi_hasil'] = $validated['persentase_bagi_hasil'] ?? 100;
+
+        Paket::create($validated);
+
+        return redirect()->route('admin.master-data.paket')
+            ->with('success', 'Paket langganan berhasil ditambahkan.');
+    }
+
+    public function updatePaket(Request $request, Paket $paket)
+    {
+        $validated = $request->validate([
+            'nama'                  => 'required|string|max:255',
+            'deskripsi'             => 'nullable|string',
+            'harga'                 => 'required|numeric|min:0',
+            'durasi_hari'           => 'required|integer|min:1',
+            'frekuensi_jemput'      => 'required|integer|min:1',
+            'satuan_frekuensi'      => 'required|in:minggu,bulan',
+            'info_tong'             => 'nullable|string|max:255',
+            'biaya_jemput'          => 'nullable|numeric|min:0',
+            'persentase_bagi_hasil' => 'nullable|numeric|min:0|max:100',
+            'aktif'                 => 'required|boolean',
+        ]);
+
+        $validated['biaya_jemput'] = $validated['biaya_jemput'] ?? 0;
+        $validated['persentase_bagi_hasil'] = $validated['persentase_bagi_hasil'] ?? 100;
+
+        $paket->update($validated);
+
+        return redirect()->route('admin.master-data.paket')
+            ->with('success', 'Paket langganan berhasil diperbarui.');
+    }
+
+    public function destroyPaket(Paket $paket)
+    {
+        $paket->update(['aktif' => false]);
+
+        return redirect()->route('admin.master-data.paket')
+            ->with('success', 'Paket langganan telah dinonaktifkan.');
     }
 }

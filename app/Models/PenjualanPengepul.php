@@ -18,6 +18,7 @@ class PenjualanPengepul extends Model
         'total_harga',
         'status_pembayaran',
         'metode_pembayaran',
+        'status',
         'catatan',
     ];
 

@@ -66,9 +66,9 @@ class RiwayatController extends Controller
             }
             if($p->pengangkut) {
                 $detail['Juru Angkut'] = $p->pengangkut->name;
-                $no_hp = $p->pengangkut->no_hp ?? '-';
-                if($no_hp !== '-') {
-                    $detail['No. Telp Juru Angkut'] = $no_hp;
+                $telepon = $p->pengangkut->telepon ?? '-';
+                if($telepon !== '-') {
+                    $detail['No. Telp Juru Angkut'] = $telepon;
                 }
             }
             $detail['Status'] = ucfirst($p->status);
@@ -87,7 +87,7 @@ class RiwayatController extends Controller
                 'iconColor' => $iconColor,
                 'iconType' => $iconType,
                 'detail' => $detail,
-                'no_hp_juru_angkut' => $p->pengangkut ? ($p->pengangkut->no_hp ?? '') : ''
+                'telepon_juru_angkut' => $p->pengangkut ? ($p->pengangkut->telepon ?? '') : ''
             ];
         }
 

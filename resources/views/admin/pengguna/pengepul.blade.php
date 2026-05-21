@@ -150,15 +150,57 @@
         </button>
     </div>
 
+    {{-- Flash Messages --}}
+    @if(session('success'))
+        <div class="mb-4 rounded-lg bg-green-50 p-4 text-sm text-green-700 dark:bg-green-500/10 dark:text-green-400">
+            {{ session('success') }}
+        </div>
+    @endif
+    @if($errors->any())
+        <div class="mb-4 rounded-lg bg-red-50 p-4 text-sm text-red-700 dark:bg-red-500/10 dark:text-red-400">
+            <ul class="list-disc list-inside">
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
     <div class="space-y-4">
-        <div class="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] md:p-6">
-            <div class="flex items-start justify-between mb-4">
-                <div>
-                    <p class="text-sm text-gray-400 dark:text-gray-500">Belum ada data pengepul</p>
+        @forelse($pengepul as $p)
+            <div class="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] md:p-6">
+                <div class="flex items-start justify-between mb-4">
+                    <div>
+                        <h4 class="text-base font-semibold text-gray-800 dark:text-white/90">{{ $p->name }}</h4>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ $p->email }}</p>
+                        @if($p->telepon)
+                            <p class="text-sm text-gray-500 dark:text-gray-400">{{ $p->telepon }}</p>
+                        @endif
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <form method="POST" action="{{ route('admin.pengguna.pengepul.destroy', $p) }}" onsubmit="return confirm('Yakin ingin menghapus pengepul ini?')">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="text-red-500 hover:text-red-700 text-xs font-medium transition">Hapus</button>
+                        </form>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <p class="text-xs text-gray-400 dark:text-gray-500">Total Transaksi</p>
+                        <p class="text-sm font-semibold text-gray-700 dark:text-gray-300">{{ $p->total_transaksi ?? 0 }}</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-400 dark:text-gray-500">Total Berat</p>
+                        <p class="text-sm font-semibold text-gray-700 dark:text-gray-300">{{ number_format($p->total_berat ?? 0, 2, ',', '.') }} kg</p>
+                    </div>
                 </div>
             </div>
-            <p class="text-sm text-gray-500 dark:text-gray-400">Data pengepul akan ditampilkan sebagai card dengan informasi kontak, total transaksi, dan total berat sampah yang dibeli.</p>
-        </div>
+        @empty
+            <div class="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] md:p-6">
+                <p class="text-sm text-gray-400 dark:text-gray-500">Belum ada data pengepul</p>
+            </div>
+        @endforelse
     </div>
 
 
@@ -215,7 +257,7 @@
 
             {{-- Body --}}
             <div class="flex-1 overflow-y-auto px-5 py-5" style="scrollbar-width:thin">
-                <form id="formPengepul" action="" method="POST" enctype="multipart/form-data" novalidate>
+                <form id="formPengepul" action="{{ route('admin.pengguna.pengepul.store') }}" method="POST" enctype="multipart/form-data" novalidate>
                     @csrf
                     <input type="hidden" name="role" value="pengepul">
 

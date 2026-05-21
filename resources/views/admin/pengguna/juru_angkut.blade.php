@@ -153,6 +153,22 @@
         </button>
     </div>
 
+    {{-- Flash Messages --}}
+    @if(session('success'))
+        <div class="mb-4 rounded-lg bg-green-50 p-4 text-sm text-green-700 dark:bg-green-500/10 dark:text-green-400">
+            {{ session('success') }}
+        </div>
+    @endif
+    @if($errors->any())
+        <div class="mb-4 rounded-lg bg-red-50 p-4 text-sm text-red-700 dark:bg-red-500/10 dark:text-red-400">
+            <ul class="list-disc list-inside">
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
     <div class="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
         <div class="p-5 md:p-6 overflow-x-auto">
             <table class="min-w-full">
@@ -167,11 +183,30 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td colspan="6" class="py-8 text-center text-sm text-gray-400">
-                            Data akan ditampilkan setelah integrasi
-                        </td>
-                    </tr>
+                    @forelse($juruAngkut as $ja)
+                        <tr class="border-b border-gray-100 dark:border-gray-800">
+                            <td class="py-3 text-sm text-gray-700 dark:text-gray-300">{{ $ja->name }}</td>
+                            <td class="py-3 text-sm text-gray-700 dark:text-gray-300">{{ $ja->email }}</td>
+                            <td class="py-3 text-sm text-gray-700 dark:text-gray-300">{{ $ja->telepon ?? '-' }}</td>
+                            <td class="py-3 text-sm font-semibold text-gray-700 dark:text-gray-300">Rp {{ number_format($ja->saldo, 0, ',', '.') }}</td>
+                            <td class="py-3 text-sm text-gray-700 dark:text-gray-300">{{ $ja->total_order ?? 0 }}</td>
+                            <td class="py-3 text-sm">
+                                <div class="flex items-center gap-2">
+                                    <form method="POST" action="{{ route('admin.pengguna.juru-angkut.destroy', $ja) }}" onsubmit="return confirm('Yakin ingin menghapus juru angkut ini?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="text-red-500 hover:text-red-700 text-xs font-medium transition">Hapus</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="6" class="py-8 text-center text-sm text-gray-400">
+                                Belum ada data juru angkut
+                            </td>
+                        </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>
@@ -237,7 +272,7 @@
                     telepon nullable max:20, alamat nullable, foto nullable image max:2048
                     role di-set hardcode di controller, BUKAN dari form.
                 --}}
-                <form id="formJuruAngkut" action="" method="POST" enctype="multipart/form-data" novalidate>
+                <form id="formJuruAngkut" action="{{ route('admin.pengguna.juru-angkut.store') }}" method="POST" enctype="multipart/form-data" novalidate>
                     @csrf
                     <input type="hidden" name="role" value="juru_angkut">
 

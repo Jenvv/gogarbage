@@ -491,8 +491,8 @@
             let footerBtns = `<div style="display:flex;gap:10px;margin-top:20px;">`;
             footerBtns += `<button onclick="window.location.href='/pelanggan/jemput-sampah/${r.id}/tracking'" style="flex:1;border:none;border-radius:12px;padding:12px;font-size:13.5px;font-weight:600;color:#fff;background:#3b82f6;cursor:pointer;">Lihat Tracking</button>`;
             
-            if(r.status_asli !== 'selesai' && r.status_asli !== 'dibatalkan' && r.no_hp_juru_angkut) {
-                 footerBtns += `<a href="tel:${r.no_hp_juru_angkut}" style="flex:1;text-align:center;text-decoration:none;border:none;border-radius:12px;padding:12px;font-size:13.5px;font-weight:600;color:#16a34a;background:#dcfce7;cursor:pointer;">Telepon Driver</a>`;
+            if(r.status_asli !== 'selesai' && r.status_asli !== 'dibatalkan' && r.telepon_juru_angkut) {
+                 footerBtns += `<a href="tel:${r.telepon_juru_angkut}" style="flex:1;text-align:center;text-decoration:none;border:none;border-radius:12px;padding:12px;font-size:13.5px;font-weight:600;color:#16a34a;background:#dcfce7;cursor:pointer;">Telepon Driver</a>`;
             }
 
             footerBtns += `</div>`;
