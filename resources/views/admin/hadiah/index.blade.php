@@ -342,29 +342,18 @@
                             </td>
                             <td class="py-3 text-sm text-gray-500 dark:text-gray-400">{{ $k->created_at->format('d/m/Y H:i') }}</td>
                             <td class="py-3 text-sm">
-                                @if($k->status === 'menunggu')
-                                    <div class="flex items-center gap-2">
-                                        <form method="POST" action="{{ route('admin.hadiah.klaim.proses', $k) }}">
-                                            @csrf
-                                            <input type="hidden" name="status" value="disetujui">
-                                            <button type="submit" class="text-green-600 hover:text-green-800 text-xs font-medium transition">Setujui</button>
-                                        </form>
-                                        <form method="POST" action="{{ route('admin.hadiah.klaim.proses', $k) }}" onsubmit="var c=prompt('Alasan penolakan:'); if(!c){return false;} this.querySelector('[name=catatan]').value=c;">
-                                            @csrf
-                                            <input type="hidden" name="status" value="ditolak">
-                                            <input type="hidden" name="catatan" value="">
-                                            <button type="submit" class="text-red-500 hover:text-red-700 text-xs font-medium transition">Tolak</button>
-                                        </form>
-                                    </div>
-                                @elseif($k->status === 'disetujui')
-                                    <form method="POST" action="{{ route('admin.hadiah.klaim.proses', $k) }}">
-                                        @csrf
-                                        <input type="hidden" name="status" value="dikirim">
-                                        <button type="submit" class="text-blue-600 hover:text-blue-800 text-xs font-medium transition">Tandai Dikirim</button>
-                                    </form>
-                                @else
-                                    <span class="text-xs text-gray-400">—</span>
-                                @endif
+                                <button onclick="openDetailModal({{ json_encode([
+                                    'id' => $k->id,
+                                    'nama_pelanggan' => $k->pengguna->name ?? '-',
+                                    'hadiah_nama' => $k->hadiah->nama ?? '-',
+                                    'poin_digunakan' => $k->poin_digunakan,
+                                    'waktu_klaim' => $k->created_at->format('d/m/Y H:i'),
+                                    'status' => $k->status,
+                                    'catatan' => $k->catatan ?? '',
+                                    'url_proses' => route('admin.hadiah.klaim.proses', $k)
+                                ]) }})" class="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 dark:border-gray-800 bg-white dark:bg-transparent px-3 py-1.5 text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/[0.05] transition">
+                                    Detail
+                                </button>
                             </td>
                         </tr>
                     @empty
@@ -720,6 +709,137 @@
 
         </div>{{-- /panel --}}
     </div>{{-- /wrap --}}
+
+    <!-- ═══ DETAIL KLAIM MODAL ═══ -->
+    <div id="detailKlaimModal" style="display:none; position:fixed; inset:0; z-index:999999; align-items:center; justify-content:center; padding:1rem;">
+        <div onclick="closeDetailModal()"
+            style="position:absolute; inset:0; background:rgba(16,24,40,0.55); backdrop-filter:blur(3px); -webkit-backdrop-filter:blur(3px);"></div>
+        <div class="relative flex w-full flex-col rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900"
+            style="z-index:1; max-width:480px; max-height:90vh; box-shadow:0 20px 24px -4px rgba(16,24,40,.10),0 8px 8px -4px rgba(16,24,40,.04);">
+            
+            {{-- Header --}}
+            <div class="flex shrink-0 items-center justify-between border-b border-gray-200 dark:border-gray-800 px-5 py-4">
+                <div class="flex items-center gap-3">
+                    <span class="flex items-center justify-center rounded-xl bg-green-50 dark:bg-green-500/10" style="width:36px;height:36px">
+                        <svg style="width:20px;height:20px" class="text-green-600 dark:text-green-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
+                        </svg>
+                    </span>
+                    <div>
+                        <h3 class="text-base font-semibold text-gray-800 dark:text-white/90">Detail Klaim Hadiah</h3>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Konfirmasi penukaran reward pelanggan</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeDetailModal()"
+                    class="flex items-center justify-center rounded-lg text-gray-400 transition hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-white/5"
+                    style="width:32px;height:32px">
+                    <svg style="width:20px;height:20px" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+
+            {{-- Body --}}
+            <div class="flex-1 overflow-y-auto px-5 py-5" style="scrollbar-width:thin">
+                <div class="space-y-4">
+                    {{-- Detail Info Card --}}
+                    <div class="rounded-xl border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/40 p-4 space-y-3">
+                        <div class="flex justify-between">
+                            <span class="text-xs font-medium text-gray-500 dark:text-gray-400">Nama Pelanggan</span>
+                            <span id="dt-pelanggan" class="text-xs font-semibold text-gray-800 dark:text-white/95">—</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-xs font-medium text-gray-500 dark:text-gray-400">Hadiah Diklaim</span>
+                            <span id="dt-hadiah" class="text-xs font-semibold text-gray-800 dark:text-white/95">—</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-xs font-medium text-gray-500 dark:text-gray-400">Waktu Klaim</span>
+                            <span id="dt-waktu" class="text-xs font-semibold text-gray-800 dark:text-white/95">—</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-xs font-medium text-gray-500 dark:text-gray-400">Poin Digunakan</span>
+                            <span id="dt-poin" class="text-xs font-bold text-red-600 dark:text-red-400">—</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs font-medium text-gray-500 dark:text-gray-400">Status</span>
+                            <span id="dt-status-badge" class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300">Menunggu</span>
+                        </div>
+                        <div id="dt-catatan-container" class="border-t border-gray-200 dark:border-gray-700 pt-2" style="display: none;">
+                            <span class="text-xs font-medium text-gray-500 dark:text-gray-400 block mb-1">Catatan / Alasan:</span>
+                            <p id="dt-catatan" class="text-xs text-gray-700 dark:text-gray-300 font-medium"></p>
+                        </div>
+                    </div>
+
+                    {{-- Actions Forms --}}
+                    <div id="dt-actions" class="space-y-3 pt-2" style="display: none;">
+                        {{-- Approve Form --}}
+                        <form id="approveForm" method="POST" action="">
+                            @csrf
+                            <input type="hidden" name="status" value="disetujui">
+                            <button type="submit" class="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-green-500 px-4 py-2.5 text-sm font-semibold text-white hover:bg-green-600 active:scale-95 transition">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                                </svg>
+                                Setujui Klaim Hadiah
+                            </button>
+                        </form>
+
+                        {{-- Reject Form toggler & block --}}
+                        <div id="rejectBlock" style="display: none;" class="p-3 border border-red-200 dark:border-red-800 bg-red-50/50 dark:bg-red-950/10 rounded-xl space-y-3">
+                            <form id="rejectForm" method="POST" action="">
+                                @csrf
+                                <input type="hidden" name="status" value="ditolak">
+                                <label class="block text-xs font-bold text-red-700 dark:text-red-400 mb-1.5 uppercase">Pilih Alasan Penolakan</label>
+                                <div class="relative mb-3">
+                                    <select name="catatan" required class="w-full rounded-lg border border-red-300 dark:border-red-800 bg-white dark:bg-gray-800 dark:text-gray-300 px-3 py-2.5 text-xs focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-400 transition appearance-none">
+                                        <option value="">-- Pilih Alasan Penolakan --</option>
+                                        <option value="Stok hadiah fisik habis / tidak tersedia">Stok hadiah fisik habis / tidak tersedia</option>
+                                        <option value="Indikasi transaksi mencurigakan / kecurangan poin">Indikasi transaksi mencurigakan / kecurangan poin</option>
+                                        <option value="Kesalahan sistem / data poin tidak sinkron">Kesalahan sistem / data poin tidak sinkron</option>
+                                        <option value="Penukaran kategori reward ini sedang ditangguhkan">Penukaran kategori reward ini sedang ditangguhkan</option>
+                                        <option value="Voucher digital tidak dapat diterbitkan saat ini">Voucher digital tidak dapat diterbitkan saat ini</option>
+                                    </select>
+                                    <span class="pointer-events-none absolute top-1/2 -translate-y-1/2 right-3 text-xs text-gray-500 select-none">▾</span>
+                                </div>
+                                <button type="submit" class="w-full rounded-lg bg-red-600 px-4 py-2.5 text-xs font-semibold text-white hover:bg-red-700 active:scale-95 transition">
+                                    Konfirmasi Penolakan
+                                </button>
+                            </form>
+                        </div>
+
+                        <button type="button" id="rejectBtnToggle" onclick="toggleRejectSection()" class="w-full inline-flex items-center justify-center gap-2 rounded-lg border border-red-300 bg-white dark:bg-transparent dark:border-red-700 px-4 py-2.5 text-sm font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/15 transition">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                            Tolak Klaim Hadiah
+                        </button>
+                    </div>
+
+                    {{-- Deliver Form for disetujui state --}}
+                    <div id="dt-deliver" class="pt-2" style="display: none;">
+                        <form id="deliverForm" method="POST" action="">
+                            @csrf
+                            <input type="hidden" name="status" value="dikirim">
+                            <button type="submit" class="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-blue-500 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-600 active:scale-95 transition">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1"/>
+                                </svg>
+                                Tandai Dikirim / Diproses
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            {{-- Footer --}}
+            <div class="flex shrink-0 items-center justify-end border-t border-gray-200 dark:border-gray-800 px-5 py-4">
+                <button type="button" onclick="closeDetailModal()"
+                    class="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition">
+                    Tutup
+                </button>
+            </div>
+        </div>
+    </div>
 @endsection
 
 
@@ -831,6 +951,83 @@
                     return;
                 }
                 form.submit();
+            };
+
+            window.openDetailModal = function(payload) {
+                document.getElementById('dt-pelanggan').textContent = payload.nama_pelanggan;
+                document.getElementById('dt-hadiah').textContent = payload.hadiah_nama;
+                document.getElementById('dt-waktu').textContent = payload.waktu_klaim;
+                document.getElementById('dt-poin').textContent = `-${parseInt(payload.poin_digunakan).toLocaleString('id-ID')} poin`;
+                
+                const badge = document.getElementById('dt-status-badge');
+                badge.textContent = payload.status.charAt(0).toUpperCase() + payload.status.slice(1);
+                
+                // Reset classes
+                badge.className = 'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ';
+                if (payload.status === 'menunggu') {
+                    badge.className += 'bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400';
+                } else if (payload.status === 'disetujui') {
+                    badge.className += 'bg-green-50 text-green-700 dark:bg-green-500/10 dark:text-green-400';
+                } else if (payload.status === 'dikirim') {
+                    badge.className += 'bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400';
+                } else if (payload.status === 'ditolak') {
+                    badge.className += 'bg-red-50 text-red-700 dark:bg-red-500/10 dark:text-red-400';
+                }
+
+                // Catatan / alasan penolakan
+                const noteContainer = document.getElementById('dt-catatan-container');
+                if (payload.catatan) {
+                    document.getElementById('dt-catatan').textContent = payload.catatan;
+                    noteContainer.style.display = 'block';
+                } else {
+                    noteContainer.style.display = 'none';
+                }
+
+                // Show forms depending on status
+                const actions = document.getElementById('dt-actions');
+                const deliver = document.getElementById('dt-deliver');
+                
+                if (payload.status === 'menunggu') {
+                    actions.style.display = 'block';
+                    deliver.style.display = 'none';
+                    document.getElementById('approveForm').action = payload.url_proses;
+                    document.getElementById('rejectForm').action = payload.url_proses;
+                    // Reset rejection sections
+                    document.getElementById('rejectBlock').style.display = 'none';
+                    document.getElementById('rejectBtnToggle').style.display = 'inline-flex';
+                } else if (payload.status === 'disetujui') {
+                    actions.style.display = 'none';
+                    if (payload.hadiah_nama.toLowerCase().includes('donasi')) {
+                        deliver.style.display = 'none';
+                    } else {
+                        deliver.style.display = 'block';
+                        document.getElementById('deliverForm').action = payload.url_proses;
+                    }
+                } else {
+                    actions.style.display = 'none';
+                    deliver.style.display = 'none';
+                }
+
+                document.getElementById('detailKlaimModal').style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+            };
+
+            window.closeDetailModal = function() {
+                document.getElementById('detailKlaimModal').style.display = 'none';
+                document.body.style.overflow = '';
+            };
+
+            window.toggleRejectSection = function() {
+                const rejectBlock = document.getElementById('rejectBlock');
+                const rejectToggle = document.getElementById('rejectBtnToggle');
+                
+                if (rejectBlock.style.display === 'none') {
+                    rejectBlock.style.display = 'block';
+                    rejectToggle.style.display = 'none';
+                } else {
+                    rejectBlock.style.display = 'none';
+                    rejectToggle.style.display = 'inline-flex';
+                }
             };
 
         })();

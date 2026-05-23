@@ -73,6 +73,13 @@ class RiwayatController extends Controller
             }
             $detail['Status'] = ucfirst($p->status);
 
+            if($p->status === 'dibatalkan' && $p->alasan_pembatalan) {
+                $detail['Alasan Pembatalan'] = $p->alasan_pembatalan;
+            }
+            if($p->metode_pembayaran_pelanggan) {
+                $detail['Pembayaran ke Pelanggan'] = ucfirst($p->metode_pembayaran_pelanggan);
+            }
+
             $riwayat_data[] = [
                 'id' => $p->id,
                 'filter' => $filter,
@@ -87,7 +94,8 @@ class RiwayatController extends Controller
                 'iconColor' => $iconColor,
                 'iconType' => $iconType,
                 'detail' => $detail,
-                'telepon_juru_angkut' => $p->pengangkut ? ($p->pengangkut->telepon ?? '') : ''
+                'telepon_juru_angkut' => $p->pengangkut ? ($p->pengangkut->telepon ?? '') : '',
+                'alasan_pembatalan' => $p->alasan_pembatalan,
             ];
         }
 

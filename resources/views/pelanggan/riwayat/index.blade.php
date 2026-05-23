@@ -481,11 +481,20 @@
             document.getElementById('mdlTitle').textContent = r.title;
             document.getElementById('mdlBadge').innerHTML = badgeHTML(r.status);
 
-            const rows = Object.entries(r.detail).map(([k, v]) => `
+            const rows = Object.entries(r.detail).map(([k, v]) => {
+                if (k === 'Alasan Pembatalan') {
+                    return `
+      <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:12px;padding:12px 14px;margin:8px 0;">
+        <p style="font-size:11px;font-weight:600;color:#dc2626;margin-bottom:4px;">⚠️ Alasan Pembatalan</p>
+        <p style="font-size:13px;font-weight:500;color:#991b1b;line-height:1.5;">${v}</p>
+      </div>`;
+                }
+                return `
       <div class="modal-row">
         <span style="font-size:12.5px;font-weight:400;color:#6b7280;">${k}</span>
         <span style="font-size:13px;font-weight:600;color:#111827;text-align:right;max-width:55%;">${v}</span>
-      </div>`).join('');
+      </div>`;
+            }).join('');
             document.getElementById('mdlRows').innerHTML = rows;
 
             let footerBtns = `<div style="display:flex;gap:10px;margin-top:20px;">`;

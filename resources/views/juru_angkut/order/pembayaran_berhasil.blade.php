@@ -73,6 +73,17 @@
         .info-row:last-child {
             border-bottom: none;
         }
+
+        .receipt-line {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+        }
+
+        .receipt-line:not(:last-child) {
+            border-bottom: 1px dashed #e5e7eb;
+        }
     </style>
 </head>
 
@@ -82,13 +93,13 @@
         <!-- HEADER -->
         <div class="page-header">
             <div style="display:flex;align-items:center;gap:14px;">
-                <a href="#"
+                <a href="{{ route('juru-angkut.order.selesai', $pesanan->id) }}"
                     style="width:36px;height:36px;background:rgba(255,255,255,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
                     <svg width="20" height="20" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
                     </svg>
                 </a>
-                <h1 style="font-size:18px;font-weight:800;color:#fff;">Pembayaran</h1>
+                <h1 style="font-size:18px;font-weight:800;color:#fff;">Receipt Pelanggan</h1>
             </div>
             <p style="font-size:12px;color:rgba(255,255,255,0.75);font-weight:500;padding-left:50px;margin-top:2px;">
                 Order #{{ $pesanan->nomor_pesanan }}</p>
@@ -108,33 +119,106 @@
                         </svg>
                     </div>
                     <p style="font-size:20px;font-weight:800;color:#111827;margin-bottom:6px;">Pembayaran Berhasil!</p>
-                    <p style="font-size:13px;color:#6b7280;line-height:1.6;">Pembayaran dari pelanggan
-                        telah<br />diterima</p>
+                    <p style="font-size:13px;color:#6b7280;line-height:1.6;">Transaksi dengan pelanggan<br />telah
+                        berhasil dicatat</p>
                 </div>
 
-                <!-- Detail card -->
+                <!-- Receipt Card -->
                 <div
                     style="background:#fff;border-radius:20px;padding:20px;box-shadow:0 2px 16px rgba(0,0,0,0.07);margin-bottom:16px;">
 
                     <!-- Pelanggan -->
                     <div class="info-row">
-                        <p style="font-size:11px;color:#9ca3af;font-weight:500;margin-bottom:4px;">Pelanggan</p>
-                        <p style="font-size:15px;font-weight:700;color:#111827;">{{ $pesanan->pengguna->name ?? 'Pelanggan' }}</p>
+                        <p style="font-size:11px;color:#9ca3af;font-weight:500;margin-bottom:4px;">Nama Pelanggan</p>
+                        <p style="font-size:16px;font-weight:700;color:#111827;">{{ $pesanan->pengguna->name ?? 'Pelanggan' }}</p>
+                        @if($pesanan->pengguna && $pesanan->pengguna->telepon)
+                            <p style="font-size:12px;color:#6b7280;margin-top:2px;">{{ $pesanan->pengguna->telepon }}</p>
+                        @endif
+                    </div>
+
+                    <!-- Detail Sampah Anorganik Terjual -->
+                    <div class="info-row">
+                        <p style="font-size:11px;color:#9ca3af;font-weight:500;margin-bottom:8px;">Detail Sampah Terjual</p>
+                        @php
+                            $anorganikDetails = $pesanan->detailPesanan->filter(function($d) {
+                                return $d->kategoriSampah && strtolower($d->kategoriSampah->nama) === 'anorganik';
+                            });
+                            $totalAnorganikKg = $anorganikDetails->sum('berat');
+                        @endphp
+
+                        @if($anorganikDetails->count() > 0)
+                            @foreach($anorganikDetails as $detail)
+                                <div class="receipt-line">
+                                    <div style="display:flex;align-items:center;gap:8px;">
+                                        <span style="font-size:16px;">♻️</span>
+                                        <div>
+                                            <p style="font-size:13px;font-weight:600;color:#374151;">{{ $detail->kategoriSampah->nama ?? 'Anorganik' }}</p>
+                                            <p style="font-size:11px;color:#9ca3af;">{{ number_format($detail->berat, 1) }} kg</p>
+                                        </div>
+                                    </div>
+                                    <p style="font-size:14px;font-weight:700;color:#16a34a;">Rp {{ number_format($detail->subtotal, 0, ',', '.') }}</p>
+                                </div>
+                            @endforeach
+                        @else
+                            {{-- Show all detail if no specific anorganik found --}}
+                            @foreach($pesanan->detailPesanan as $detail)
+                                @if($detail->subtotal > 0)
+                                    <div class="receipt-line">
+                                        <div style="display:flex;align-items:center;gap:8px;">
+                                            <span style="font-size:16px;">{{ $detail->kategoriSampah->ikon ?? '🗑️' }}</span>
+                                            <div>
+                                                <p style="font-size:13px;font-weight:600;color:#374151;">{{ $detail->kategoriSampah->nama ?? 'Sampah' }}</p>
+                                                <p style="font-size:11px;color:#9ca3af;">{{ number_format($detail->berat, 1) }} kg</p>
+                                            </div>
+                                        </div>
+                                        <p style="font-size:14px;font-weight:700;color:#16a34a;">Rp {{ number_format($detail->subtotal, 0, ',', '.') }}</p>
+                                    </div>
+                                @endif
+                            @endforeach
+                        @endif
                     </div>
 
                     <!-- Metode Pembayaran -->
                     <div class="info-row">
-                        <p style="font-size:11px;color:#9ca3af;font-weight:500;margin-bottom:8px;">Metode Pembayaran</p>
+                        <p style="font-size:11px;color:#9ca3af;font-weight:500;margin-bottom:8px;">Metode Pembayaran ke Pelanggan</p>
                         <div style="display:flex;align-items:center;gap:10px;">
-                            <div
-                                style="width:38px;height:38px;background:#f0fdf4;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                                <svg width="18" height="18" fill="none" stroke="#16a34a" stroke-width="2"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                                </svg>
-                            </div>
-                            <p style="font-size:15px;font-weight:700;color:#111827;">Saldo</p>
+                            @if($pesanan->metode_pembayaran_pelanggan === 'tunai')
+                                <div
+                                    style="width:38px;height:38px;background:#fef3c7;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                    <svg width="18" height="18" fill="none" stroke="#d97706" stroke-width="2"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p style="font-size:15px;font-weight:700;color:#111827;">Tunai</p>
+                                    <p style="font-size:11px;color:#d97706;">Diberikan langsung ke pelanggan</p>
+                                </div>
+                            @elseif($pesanan->metode_pembayaran_pelanggan === 'saldo')
+                                <div
+                                    style="width:38px;height:38px;background:#dbeafe;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                    <svg width="18" height="18" fill="none" stroke="#2563eb" stroke-width="2"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p style="font-size:15px;font-weight:700;color:#111827;">Saldo</p>
+                                    <p style="font-size:11px;color:#2563eb;">Otomatis masuk ke saldo pelanggan</p>
+                                </div>
+                            @else
+                                <div
+                                    style="width:38px;height:38px;background:#f0fdf4;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                    <svg width="18" height="18" fill="none" stroke="#16a34a" stroke-width="2"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                                    </svg>
+                                </div>
+                                <p style="font-size:15px;font-weight:700;color:#111827;">Saldo</p>
+                            @endif
                         </div>
                     </div>
 
@@ -150,10 +234,33 @@
 
                 <!-- Total pendapatan card -->
                 <div
-                    style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:18px;padding:18px 20px;margin-bottom:28px;">
-                    <p style="font-size:11.5px;color:#6b7280;font-weight:500;margin-bottom:6px;">Total Pendapatan</p>
+                    style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:18px;padding:18px 20px;margin-bottom:14px;">
+                    <p style="font-size:11.5px;color:#6b7280;font-weight:500;margin-bottom:6px;">Total Pendapatan Pelanggan</p>
                     <p style="font-size:26px;font-weight:800;color:#16a34a;">Rp {{ number_format($pesanan->total_pendapatan ?? 0, 0, ',', '.') }}</p>
                 </div>
+
+                <!-- Info note -->
+                @if($pesanan->metode_pembayaran_pelanggan === 'saldo')
+                    <div style="background:#eff6ff;border:1.5px solid #93c5fd;border-radius:14px;padding:14px 16px;margin-bottom:28px;">
+                        <div style="display:flex;align-items:flex-start;gap:8px;">
+                            <span style="font-size:14px;flex-shrink:0;">💳</span>
+                            <p style="font-size:12px;color:#1e40af;line-height:1.6;">
+                                Pendapatan <strong>Rp {{ number_format($pesanan->total_pendapatan ?? 0, 0, ',', '.') }}</strong> telah otomatis ditambahkan ke saldo akun pelanggan <strong>{{ $pesanan->pengguna->name ?? '' }}</strong>.
+                            </p>
+                        </div>
+                    </div>
+                @elseif($pesanan->metode_pembayaran_pelanggan === 'tunai')
+                    <div style="background:#fffbeb;border:1.5px solid #fcd34d;border-radius:14px;padding:14px 16px;margin-bottom:28px;">
+                        <div style="display:flex;align-items:flex-start;gap:8px;">
+                            <span style="font-size:14px;flex-shrink:0;">💵</span>
+                            <p style="font-size:12px;color:#92400e;line-height:1.6;">
+                                Pastikan Anda telah memberikan uang tunai sebesar <strong>Rp {{ number_format($pesanan->total_pendapatan ?? 0, 0, ',', '.') }}</strong> kepada pelanggan <strong>{{ $pesanan->pengguna->name ?? '' }}</strong>.
+                            </p>
+                        </div>
+                    </div>
+                @else
+                    <div style="margin-bottom:28px;"></div>
+                @endif
 
                 <!-- Button -->
                 <button onclick="window.location.href='{{ route('juru-angkut.order.selesai', $pesanan->id) }}'"

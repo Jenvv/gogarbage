@@ -33,6 +33,8 @@ class Pesanan extends Model
         'komisi_pengangkut',
         'bagian_perusahaan',
         'catatan',
+        'alasan_pembatalan',
+        'metode_pembayaran_pelanggan',
         'diklaim_pada',
         'diselesaikan_pada',
     ];

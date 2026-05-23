@@ -116,7 +116,26 @@ class TransaksiPengepulController extends Controller
                     $stok = StokGudang::where('kategori_sampah_id', $detail->kategori_sampah_id)->first();
 
                     if ($stok) {
-                        $stok->decrement('stok_kg', $detail->berat);
+                        $stokSebelum = (float) $stok->stok_kg;
+                        $stokSesudah = $stokSebelum - $detail->berat;
+
+                        $stok->update([
+                            'stok_kg' => $stokSesudah,
+                            'total_keluar' => ($stok->total_keluar ?? 0) + $detail->berat,
+                        ]);
+
+                        \App\Models\LogStokGudang::create([
+                            'stok_gudang_id' => $stok->id,
+                            'kategori_sampah_id' => $detail->kategori_sampah_id,
+                            'tipe' => 'keluar',
+                            'jumlah_kg' => $detail->berat,
+                            'stok_sebelum' => $stokSebelum,
+                            'stok_sesudah' => $stokSesudah,
+                            'sumber_type' => PenjualanPengepul::class,
+                            'sumber_id' => $penjualan->id,
+                            'deskripsi' => 'Pengurangan stok otomatis dari transaksi pengepul (Invoice: #' . $penjualan->nomor_invoice . ')',
+                            'dibuat_oleh' => Auth::id(),
+                        ]);
                     }
                 }
 
@@ -135,7 +154,7 @@ class TransaksiPengepulController extends Controller
         }
 
         return redirect()->route('admin.transaksi-pengepul', ['tab' => 'riwayat'])
-            ->with('success', "Transaksi {$penjualan->nomor_invoice} selesai. Stok gudang telah dipotong.");
+            ->with('success', "Transaksi {$penjualan->nomor_invoice} selesai. Stok gudang dan log mutasi telah diperbarui.");
     }
 
     /**
@@ -199,7 +218,26 @@ class TransaksiPengepulController extends Controller
                 foreach ($details as $d) {
                     $stok = StokGudang::where('kategori_sampah_id', $d['kategori_sampah_id'])->first();
                     if ($stok) {
-                        $stok->decrement('stok_kg', $d['berat']);
+                        $stokSebelum = (float) $stok->stok_kg;
+                        $stokSesudah = $stokSebelum - $d['berat'];
+
+                        $stok->update([
+                            'stok_kg' => $stokSesudah,
+                            'total_keluar' => ($stok->total_keluar ?? 0) + $d['berat'],
+                        ]);
+
+                        \App\Models\LogStokGudang::create([
+                            'stok_gudang_id' => $stok->id,
+                            'kategori_sampah_id' => $d['kategori_sampah_id'],
+                            'tipe' => 'keluar',
+                            'jumlah_kg' => $d['berat'],
+                            'stok_sebelum' => $stokSebelum,
+                            'stok_sesudah' => $stokSesudah,
+                            'sumber_type' => PenjualanPengepul::class,
+                            'sumber_id' => $penjualan->id,
+                            'deskripsi' => 'Pengurangan stok manual dari penjualan admin langsung (Invoice: #' . $penjualan->nomor_invoice . ')',
+                            'dibuat_oleh' => Auth::id(),
+                        ]);
                     }
                 }
             });
@@ -211,6 +249,6 @@ class TransaksiPengepulController extends Controller
         }
 
         return redirect()->route('admin.transaksi-pengepul', ['tab' => 'riwayat'])
-            ->with('success', 'Penjualan berhasil disimpan. Stok gudang telah dipotong.');
+            ->with('success', 'Penjualan berhasil disimpan. Stok gudang dan log mutasi telah diperbarui.');
     }
 }

@@ -677,7 +677,49 @@
                     </p>
                 </div>
 
-                
+                <!-- ── METODE PEMBAYARAN PELANGGAN ── -->
+                <div id="metodePembayaranSection" style="display:none;margin:16px 16px 14px;">
+                    <div style="background:#fff;border-radius:18px;padding:20px;box-shadow:0 2px 14px rgba(0,0,0,0.07);">
+                        <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+                            <div style="width:30px;height:30px;background:#6366f1;border-radius:8px;display:flex;align-items:center;justify-content:center;">
+                                <svg width="16" height="16" fill="none" stroke="#fff" stroke-width="2.2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <p style="font-size:13px;font-weight:700;color:#312e81;">Metode Pembayaran ke Pelanggan</p>
+                                <p style="font-size:11px;color:#6b7280;font-weight:500;">Pilih cara pembayaran pendapatan</p>
+                            </div>
+                        </div>
+
+                        <div style="display:flex;gap:10px;">
+                            <!-- Tunai -->
+                            <label id="labelTunai" onclick="selectMetode('tunai')" style="flex:1;cursor:pointer;border:2px solid #e5e7eb;border-radius:14px;padding:14px 12px;text-align:center;transition:all 0.2s;background:#f9fafb;">
+                                <div style="width:36px;height:36px;background:#fef3c7;border-radius:10px;display:flex;align-items:center;justify-content:center;margin:0 auto 8px;">
+                                    <svg width="18" height="18" fill="none" stroke="#d97706" stroke-width="2" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
+                                    </svg>
+                                </div>
+                                <p style="font-size:13px;font-weight:700;color:#374151;">Tunai</p>
+                                <p style="font-size:10px;color:#9ca3af;margin-top:2px;">Bayar langsung</p>
+                            </label>
+
+                            <!-- Saldo -->
+                            <label id="labelSaldo" onclick="selectMetode('saldo')" style="flex:1;cursor:pointer;border:2px solid #e5e7eb;border-radius:14px;padding:14px 12px;text-align:center;transition:all 0.2s;background:#f9fafb;">
+                                <div style="width:36px;height:36px;background:#dbeafe;border-radius:10px;display:flex;align-items:center;justify-content:center;margin:0 auto 8px;">
+                                    <svg width="18" height="18" fill="none" stroke="#2563eb" stroke-width="2" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+                                    </svg>
+                                </div>
+                                <p style="font-size:13px;font-weight:700;color:#374151;">Saldo</p>
+                                <p style="font-size:10px;color:#9ca3af;margin-top:2px;">Masuk ke saldo</p>
+                            </label>
+                        </div>
+
+                        <p id="metodeHint" style="font-size:11px;color:#6366f1;margin-top:10px;padding-left:2px;display:none;"></p>
+                    </div>
+                </div>
+
 
             </div>
         </div><!-- end scroll-area -->
@@ -748,6 +790,7 @@
         const statusOrder = '{{ $pesanan->status }}';
         let state = 0;   // 0=menuju, 1=sampai, 2=mengambil, 3=done
         let trashItems = [];   // { kg, jenis }
+        let selectedMetode = ''; // tunai or saldo
 
         if (statusOrder === 'dalam_perjalanan') {
             state = 1;
@@ -915,6 +958,7 @@
                 document.getElementById('itemCount').textContent = `0 item ditambahkan`;
                 document.getElementById('anorganikPriceSection').style.display = 'none';
                 document.getElementById('totalSection').style.display = 'none';
+                document.getElementById('metodePembayaranSection').style.display = 'none';
                 document.getElementById('inputHargaAnorganik').value = '';
             }
         }
@@ -976,6 +1020,7 @@
             const showAnorganik = anorganikKg > 0;
             document.getElementById('anorganikPriceSection').style.display = showAnorganik ? 'block' : 'none';
             document.getElementById('totalSection').style.display = showAnorganik ? 'block' : 'none';
+            document.getElementById('metodePembayaranSection').style.display = showAnorganik ? 'block' : 'none';
 
             renderTotal();
             scrollBottom();
@@ -1002,17 +1047,54 @@
             }, 120);
         }
 
+        function selectMetode(metode) {
+            selectedMetode = metode;
+            const labelTunai = document.getElementById('labelTunai');
+            const labelSaldo = document.getElementById('labelSaldo');
+            const hint = document.getElementById('metodeHint');
+
+            // Reset both
+            labelTunai.style.border = '2px solid #e5e7eb';
+            labelTunai.style.background = '#f9fafb';
+            labelSaldo.style.border = '2px solid #e5e7eb';
+            labelSaldo.style.background = '#f9fafb';
+
+            if (metode === 'tunai') {
+                labelTunai.style.border = '2px solid #d97706';
+                labelTunai.style.background = '#fffbeb';
+                hint.textContent = '💵 Pendapatan akan diberikan langsung secara tunai ke pelanggan';
+                hint.style.color = '#d97706';
+            } else {
+                labelSaldo.style.border = '2px solid #2563eb';
+                labelSaldo.style.background = '#eff6ff';
+                hint.textContent = '💳 Pendapatan akan otomatis masuk ke saldo akun pelanggan';
+                hint.style.color = '#2563eb';
+            }
+            hint.style.display = 'block';
+        }
+
         function selesaikanOrder() {
             if (trashItems.length === 0) {
                 showToast('⚠️ Tambahkan minimal 1 data sampah dulu!');
                 return;
             }
+
+            // Check if anorganik has price => need payment method
+            const hasAnorganik = trashItems.some(i => i.jenis.toLowerCase() === 'anorganik');
+            const hargaAnorganik = document.getElementById('inputHargaAnorganik') ? parseInt(document.getElementById('inputHargaAnorganik').value) || 0 : 0;
+
+            if (hasAnorganik && hargaAnorganik > 0 && !selectedMetode) {
+                showToast('⚠️ Pilih metode pembayaran ke pelanggan!');
+                document.getElementById('metodePembayaranSection').scrollIntoView({ behavior: 'smooth' });
+                return;
+            }
             
-            // Set the hidden input value
+            // Set the hidden input values
             document.getElementById('trashItemsInput').value = JSON.stringify(trashItems);
             
             const rawHarga = document.getElementById('inputHargaAnorganik') ? document.getElementById('inputHargaAnorganik').value : '';
             document.getElementById('hargaManualInput').value = rawHarga;
+            document.getElementById('metodePembayaranInput').value = selectedMetode || '';
 
             const form = document.getElementById('selesaikanForm');
             if (!form.checkValidity()) {
@@ -1047,6 +1129,7 @@
         @csrf
         <input type="hidden" name="trash_items" id="trashItemsInput">
         <input type="hidden" name="harga_manual" id="hargaManualInput">
+        <input type="hidden" name="metode_pembayaran_pelanggan" id="metodePembayaranInput">
     </form>
 </body>
 

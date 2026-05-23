@@ -5,6 +5,7 @@ namespace App\Http\Controllers\JuruAngkut;
 use App\Http\Controllers\Controller;
 use App\Models\DetailPesanan;
 use App\Models\KategoriSampah;
+use App\Models\Konfigurasi;
 use App\Models\Pesanan;
 use App\Models\Transaksi;
 use App\Models\User;
@@ -126,6 +127,7 @@ class OrderController extends Controller
         $request->validate([
             'trash_items' => 'required|string',
             'harga_manual' => 'nullable|numeric|min:0',
+            'metode_pembayaran_pelanggan' => 'nullable|in:tunai,saldo',
         ]);
 
         $pesanan = DB::transaction(function () use ($pesanan, $request) {
@@ -199,14 +201,19 @@ class OrderController extends Controller
                 $totalPendapatan += $subtotal;
             }
 
-            // Hitung poin (1kg = 10 poin, 1x order = 5 poin)
-            $poinBerat = (int) ($totalBerat * 10);
-            $poinOrder = 5;
-            $totalPoin = $poinBerat + $poinOrder;
+            // Hitung poin dari konfigurasi (dynamic)
+            $poinPerKg = (int) Konfigurasi::getValue('poin_per_kg', 10);
+            $poinPerOrder = (int) Konfigurasi::getValue('poin_per_order', 5);
+            $poinBerat = (int) ($totalBerat * $poinPerKg);
+            $totalPoin = $poinBerat + $poinPerOrder;
 
-            // Hitung bagi hasil (70% pengangkut, 30% perusahaan dari biaya_jemput)
-            $komisi = $pesanan->biaya_jemput * 0.70;
-            $perusahaan = $pesanan->biaya_jemput * 0.30;
+            // Hitung bagi hasil dari konfigurasi (dynamic)
+            $komisiPersen = (float) Konfigurasi::getValue('komisi_pengangkut_persen', 70);
+            $komisi = $pesanan->biaya_jemput * ($komisiPersen / 100);
+            $perusahaan = $pesanan->biaya_jemput * ((100 - $komisiPersen) / 100);
+
+            // Metode pembayaran ke pelanggan
+            $metodePembayaranPelanggan = $request->input('metode_pembayaran_pelanggan');
 
             // Update pesanan
             $pesanan->update([
@@ -216,22 +223,29 @@ class OrderController extends Controller
                 'poin_didapat'       => $totalPoin,
                 'komisi_pengangkut'  => $komisi,
                 'bagian_perusahaan'  => $perusahaan,
+                'metode_pembayaran_pelanggan' => $metodePembayaranPelanggan,
                 'diselesaikan_pada'  => now(),
             ]);
 
-            // Update saldo & poin pengguna
+            // Update poin pengguna (selalu, terlepas metode pembayaran)
             if ($pesanan->pengguna) {
                 $userPelanggan = $pesanan->pengguna;
-                $saldoSebelum = $userPelanggan->saldo;
-                $saldoSesudah = $saldoSebelum + $totalPendapatan;
 
+                // Poin selalu ditambahkan
                 $userPelanggan->update([
-                    'saldo' => $saldoSesudah,
-                    'poin'  => $userPelanggan->poin + $totalPoin,
+                    'poin' => $userPelanggan->poin + $totalPoin,
                 ]);
 
-                // Transaksi saldo masuk untuk pelanggan
-                if ($totalPendapatan > 0) {
+                // Saldo hanya ditambahkan jika metode = saldo
+                if ($totalPendapatan > 0 && $metodePembayaranPelanggan === 'saldo') {
+                    $saldoSebelum = $userPelanggan->saldo;
+                    $saldoSesudah = $saldoSebelum + $totalPendapatan;
+
+                    $userPelanggan->update([
+                        'saldo' => $saldoSesudah,
+                    ]);
+
+                    // Transaksi saldo masuk untuk pelanggan
                     Transaksi::create([
                         'nomor_transaksi' => 'TRX-' . now()->format('Ymd') . '-' . str_pad(
                             Transaksi::whereDate('created_at', today())->count() + 1,
@@ -247,9 +261,10 @@ class OrderController extends Controller
                         'status'         => 'selesai',
                         'referensi_type' => Pesanan::class,
                         'referensi_id'   => $pesanan->id,
-                        'deskripsi'      => 'Pendapatan dari penjualan sampah pesanan ' . $pesanan->nomor_pesanan,
+                        'deskripsi'      => 'Pendapatan dari penjualan sampah pesanan ' . $pesanan->nomor_pesanan . ' (via Saldo)',
                     ]);
                 }
+                // Jika tunai: tidak ada perubahan saldo, tidak buat transaksi
             }
 
             return $pesanan;

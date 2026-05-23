@@ -15,30 +15,12 @@ class PesananController extends Controller
     {
         $status = $request->query('status');
 
-        $query = Pesanan::with(['pengguna', 'pengangkut', 'detailPesanan']);
+        $query = Pesanan::with(['pengguna', 'pengangkut', 'detailPesanan.kategoriSampah']);
         if ($status) {
             $query->where('status', $status);
         }
 
-        $pesanan = $query->orderByDesc('created_at')->limit(50)->get();
-
-        if ($request->ajax() || $request->wantsJson()) {
-            $data = $pesanan->map(function ($p) {
-                return [
-                    'id' => $p->id,
-                    'nomor_pesanan' => $p->nomor_pesanan,
-                    'pengguna' => $p->pengguna->name ?? '-',
-                    'pengangkut' => $p->pengangkut->name ?? '-',
-                    'tanggal_jemput' => $p->tanggal_jemput ? $p->tanggal_jemput->format('d M Y') : $p->created_at->format('d M Y'),
-                    'tipe_pesanan' => ucfirst($p->tipe_pesanan),
-                    'total_berat' => number_format($p->total_berat ?? ($p->detailPesanan->sum('berat') ?? 0), 2),
-                    'status' => ucfirst(str_replace('_', ' ', $p->status)),
-                    'batalkan_url' => route('admin.pesanan.batalkan', $p),
-                ];
-            });
-
-            return response()->json(['data' => $data]);
-        }
+        $pesanan = $query->orderByDesc('created_at')->get();
 
         return view('admin.pesanan.index', compact('pesanan'));
     }
@@ -48,10 +30,23 @@ class PesananController extends Controller
      */
     public function batalkan(Request $request, Pesanan $pesanan)
     {
-        $pesanan->status = 'dibatalkan';
-        $pesanan->save();
+        // Guard: hanya pesanan yang belum selesai/dibatalkan yang bisa dibatalkan
+        if (in_array($pesanan->status, ['selesai', 'dibatalkan'])) {
+            return redirect()->back()->with('error', 'Pesanan yang sudah selesai atau dibatalkan tidak bisa dibatalkan lagi.');
+        }
 
-        return redirect()->back()->with('success', 'Pesanan berhasil dibatalkan.');
+        $request->validate([
+            'alasan_pembatalan' => 'required|string|max:500',
+        ], [
+            'alasan_pembatalan.required' => 'Alasan pembatalan wajib diisi.',
+        ]);
+
+        $pesanan->update([
+            'status' => 'dibatalkan',
+            'alasan_pembatalan' => $request->alasan_pembatalan,
+        ]);
+
+        return redirect()->back()->with('success', 'Pesanan ' . $pesanan->nomor_pesanan . ' berhasil dibatalkan.');
     }
 
     /**

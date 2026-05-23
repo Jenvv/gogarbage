@@ -10,6 +10,7 @@ use App\Models\Transaksi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use App\Models\Konfigurasi;
 
 class JemputSampahController extends Controller
 {
@@ -22,8 +23,8 @@ class JemputSampahController extends Controller
         $langgananAktif = $user ? $user->langgananAktif() : null;
         $isBerlangganan = $langgananAktif !== null;
 
-        // Biaya jemput default (Rp 5.000), gratis jika berlangganan
-        $biayaJemput = $isBerlangganan ? 0 : 5000;
+        // Biaya jemput dari konfigurasi, gratis jika berlangganan
+        $biayaJemput = $isBerlangganan ? 0 : (int) Konfigurasi::getValue('biaya_jemput', 5000);
 
         return view('pelanggan.jemput_sampah.index', compact(
             'kategoriSampah',
@@ -82,7 +83,7 @@ class JemputSampahController extends Controller
             'tanggal_jemput'  => $request->tanggal_jemput,
             'jam_jemput'      => $request->jam_jemput,
             'catatan'         => $request->catatan,
-            'biaya_jemput'    => $isBerlangganan ? 0 : 5000,
+            'biaya_jemput'    => $isBerlangganan ? 0 : (int) Konfigurasi::getValue('biaya_jemput', 5000),
             'tipe_pesanan'    => $isBerlangganan ? 'langganan' : 'reguler',
             'langganan_id'    => $isBerlangganan ? $langgananAktif->id : null,
         ]);

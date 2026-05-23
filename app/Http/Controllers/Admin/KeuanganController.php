@@ -74,8 +74,15 @@ class KeuanganController extends Controller
                 ->with('error', 'Penarikan ini sudah diproses sebelumnya.');
         }
 
-        DB::transaction(function () use ($penarikan, $request) {
-            $user = $penarikan->pengguna;
+        $user = $penarikan->pengguna;
+
+        // Validasi kecukupan saldo (Double-Spend Protection)
+        if ($user->saldo < $penarikan->jumlah) {
+            return redirect()->route('admin.keuangan')
+                ->with('error', 'Persetujuan gagal! Saldo ' . $user->name . ' saat ini tidak mencukupi (Saldo: Rp ' . number_format($user->saldo, 0, ',', '.') . ').');
+        }
+
+        DB::transaction(function () use ($penarikan, $request, $user) {
             $saldoSebelum = $user->saldo;
 
             $user->saldo -= $penarikan->jumlah;

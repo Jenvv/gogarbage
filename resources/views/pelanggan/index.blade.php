@@ -275,9 +275,9 @@
                                 Paket<br />Langganan</p>
                         </div>
 
-                        {{-- ── Poin & Reward → route: poin.index ── --}}
+                        {{-- ── Poin & Reward → route: pelanggan.klaim.index ── --}}
                         <div style="display:flex;flex-direction:column;align-items:center;gap:9px;">
-                            <a href="" class="svc-box" style="background:#fef9c3;">
+                            <a href="{{ route('pelanggan.klaim.index') }}" class="svc-box" style="background:#fef9c3;">
                                 <svg width="28" height="28" fill="none" stroke="#ca8a04" stroke-width="2"
                                     viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round"

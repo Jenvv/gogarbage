@@ -257,7 +257,7 @@
                 <!-- HEADER -->
                 <div class="header-green">
                     <div style="display:flex;align-items:center;gap:14px;margin-bottom:4px;">
-                        <a href="#"
+                        <a href="{{ route('pelanggan.index') }}"
                             style="width:36px;height:36px;background:rgba(255,255,255,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;">
                             <svg width="20" height="20" fill="none" stroke="#fff" stroke-width="2.5"
                                 viewBox="0 0 24 24">
@@ -278,7 +278,7 @@
                             <span style="font-size:13px;color:rgba(255,255,255,0.88);font-weight:600;">Total Poin
                                 Anda</span>
                         </div>
-                        <p style="font-size:40px;font-weight:800;color:#fff;line-height:1.1;margin-bottom:8px;">2.500
+                        <p style="font-size:40px;font-weight:800;color:#fff;line-height:1.1;margin-bottom:8px;">{{ number_format($poin, 0, ',', '.') }}
                         </p>
                         <p style="font-size:12.5px;color:rgba(255,255,255,0.8);line-height:1.5;">Kumpulkan lebih banyak
                             poin untuk<br />hadiah menarik!</p>
@@ -311,136 +311,68 @@
                 <div style="margin: 20px 16px 0;">
                     <p style="font-size:16px;font-weight:800;color:#111827;margin-bottom:14px;">Tukar Poin</p>
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                        @forelse($hadiah as $h)
+                            @php
+                                $lowerNama = strtolower($h->nama);
+                                if (str_contains($lowerNama, 'pulsa')) {
+                                    $bg = '#e0f2fe';
+                                    $stroke = '#0284c7';
+                                    $emoji = '📱';
+                                    $icon = '<svg width="24" height="24" fill="none" stroke="'.$stroke.'" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>';
+                                } elseif (str_contains($lowerNama, 'diskon') || str_contains($lowerNama, 'voucher') || $h->tipe === 'voucher') {
+                                    $bg = '#f5f3ff';
+                                    $stroke = '#7c3aed';
+                                    $emoji = '🏷️';
+                                    $icon = '<svg width="24" height="24" fill="none" stroke="'.$stroke.'" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A2 2 0 013 12V7a4 4 0 014-4z" /></svg>';
+                                } elseif (str_contains($lowerNama, 'saldo') || str_contains($lowerNama, 'cash') || str_contains($lowerNama, 'uang')) {
+                                    $bg = '#dcfce7';
+                                    $stroke = '#16a34a';
+                                    $emoji = '💳';
+                                    $icon = '<svg width="24" height="24" fill="none" stroke="'.$stroke.'" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>';
+                                } else {
+                                    $bg = '#fef9c3';
+                                    $stroke = '#ca8a04';
+                                    $emoji = '🎁';
+                                    $icon = '<svg width="24" height="24" fill="none" stroke="'.$stroke.'" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" /></svg>';
+                                }
 
-                        <!-- Pulsa 10k -->
-                        <div class="reward-card">
-                            <div class="reward-icon-wrap" style="background:#e0f2fe;">
-                                <svg width="24" height="24" fill="none" stroke="#0284c7" stroke-width="2"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                                </svg>
+                                $poinKurang = $poin < $h->biaya_poin;
+                                $stokHabis = $h->tipe !== 'voucher' && $h->stok <= 0;
+                                $cannotClaim = $poinKurang || $stokHabis;
+                            @endphp
+                            <div class="reward-card">
+                                <div class="reward-icon-wrap" style="background:{{ $bg }};">
+                                    {!! $icon !!}
+                                </div>
+                                <p style="font-size:13px;font-weight:700;color:#111827;">{{ $h->nama }}</p>
+                                <div style="display:flex;align-items:center;gap:5px;">
+                                    <svg width="13" height="13" fill="none" stroke="#22c55e" stroke-width="2" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                                    </svg>
+                                    <span style="font-size:13px;font-weight:700;color:#16a34a;">{{ number_format($h->biaya_poin, 0, ',', '.') }}</span>
+                                    @if($h->tipe !== 'voucher')
+                                        <span style="font-size:11px;color:#6b7280;margin-left:auto;">Stok: {{ $h->stok }}</span>
+                                    @endif
+                                </div>
+                                <button class="tukar-btn" 
+                                    @if($cannotClaim) 
+                                        disabled style="background: #9ca3af; cursor: not-allowed; opacity: 0.7;" 
+                                    @endif
+                                    onclick="openModal('{{ $h->id }}', '{{ addslashes($h->nama) }}', '{{ $h->biaya_poin }}', '{{ $emoji }}')">
+                                    @if($stokHabis)
+                                        Stok Habis
+                                    @elseif($poinKurang)
+                                        Poin Kurang
+                                    @else
+                                        Tukar
+                                    @endif
+                                </button>
                             </div>
-                            <p style="font-size:13px;font-weight:700;color:#111827;">Pulsa Rp 10.000</p>
-                            <div style="display:flex;align-items:center;gap:5px;">
-                                <svg width="13" height="13" fill="none" stroke="#22c55e" stroke-width="2"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
-                                </svg>
-                                <span style="font-size:13px;font-weight:700;color:#16a34a;">500</span>
+                        @empty
+                            <div style="grid-column: span 2; padding: 30px 0; text-align: center;">
+                                <p style="font-size: 13px; color: #9ca3af; font-weight: 500;">Belum ada reward tersedia</p>
                             </div>
-                            <button class="tukar-btn" onclick="openModal('Pulsa Rp 10.000','500','📱')">Tukar</button>
-                        </div>
-
-                        <!-- Pulsa 25k -->
-                        <div class="reward-card">
-                            <div class="reward-icon-wrap" style="background:#dbeafe;">
-                                <svg width="24" height="24" fill="none" stroke="#3b82f6" stroke-width="2"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                                </svg>
-                            </div>
-                            <p style="font-size:13px;font-weight:700;color:#111827;">Pulsa Rp 25.000</p>
-                            <div style="display:flex;align-items:center;gap:5px;">
-                                <svg width="13" height="13" fill="none" stroke="#22c55e" stroke-width="2"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
-                                </svg>
-                                <span style="font-size:13px;font-weight:700;color:#16a34a;">1200</span>
-                            </div>
-                            <button class="tukar-btn" onclick="openModal('Pulsa Rp 25.000','1200','📱')">Tukar</button>
-                        </div>
-
-                        <!-- Diskon 50% -->
-                        <div class="reward-card">
-                            <div class="reward-icon-wrap" style="background:#f5f3ff;">
-                                <svg width="24" height="24" fill="none" stroke="#7c3aed" stroke-width="2"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A2 2 0 013 12V7a4 4 0 014-4z" />
-                                </svg>
-                            </div>
-                            <p style="font-size:13px;font-weight:700;color:#111827;">Diskon 50%<br />Jemput...</p>
-                            <div style="display:flex;align-items:center;gap:5px;">
-                                <svg width="13" height="13" fill="none" stroke="#22c55e" stroke-width="2"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
-                                </svg>
-                                <span style="font-size:13px;font-weight:700;color:#16a34a;">800</span>
-                            </div>
-                            <button class="tukar-btn"
-                                onclick="openModal('Diskon 50% Jemput Sampah','800','🏷️')">Tukar</button>
-                        </div>
-
-                        <!-- Saldo 20k -->
-                        <div class="reward-card">
-                            <div class="reward-icon-wrap" style="background:#dcfce7;">
-                                <svg width="24" height="24" fill="none" stroke="#16a34a" stroke-width="2"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                                </svg>
-                            </div>
-                            <p style="font-size:13px;font-weight:700;color:#111827;">Saldo Rp 20.000</p>
-                            <div style="display:flex;align-items:center;gap:5px;">
-                                <svg width="13" height="13" fill="none" stroke="#22c55e" stroke-width="2"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
-                                </svg>
-                                <span style="font-size:13px;font-weight:700;color:#16a34a;">1000</span>
-                            </div>
-                            <button class="tukar-btn"
-                                onclick="openModal('Saldo Rp 20.000','1000','💳')">Tukar</button>
-                        </div>
-
-                        <!-- Saldo 50k -->
-                        <div class="reward-card">
-                            <div class="reward-icon-wrap" style="background:#dcfce7;">
-                                <svg width="24" height="24" fill="none" stroke="#16a34a" stroke-width="2"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                                </svg>
-                            </div>
-                            <p style="font-size:13px;font-weight:700;color:#111827;">Saldo Rp 50.000</p>
-                            <div style="display:flex;align-items:center;gap:5px;">
-                                <svg width="13" height="13" fill="none" stroke="#22c55e" stroke-width="2"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
-                                </svg>
-                                <span style="font-size:13px;font-weight:700;color:#16a34a;">2500</span>
-                            </div>
-                            <button class="tukar-btn"
-                                onclick="openModal('Saldo Rp 50.000','2500','💳')">Tukar</button>
-                        </div>
-
-                        <!-- Bonus Poin -->
-                        <div class="reward-card">
-                            <div class="reward-icon-wrap" style="background:#fef9c3;">
-                                <svg width="24" height="24" fill="none" stroke="#ca8a04" stroke-width="2"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
-                                </svg>
-                            </div>
-                            <p style="font-size:13px;font-weight:700;color:#111827;">Bonus Poin 500</p>
-                            <div style="display:flex;align-items:center;gap:5px;">
-                                <svg width="13" height="13" fill="none" stroke="#22c55e" stroke-width="2"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
-                                </svg>
-                                <span style="font-size:13px;font-weight:700;color:#16a34a;">2000</span>
-                            </div>
-                            <button class="tukar-btn" onclick="openModal('Bonus Poin 500','2000','🎁')">Tukar</button>
-                        </div>
-
+                        @endforelse
                     </div>
                 </div>
 
@@ -448,22 +380,43 @@
                 <div style="margin: 24px 16px 0;">
                     <p style="font-size:16px;font-weight:800;color:#111827;margin-bottom:14px;">Riwayat Penukaran</p>
 
-                    <div class="riwayat-card">
-                        <div>
-                            <p style="font-size:13px;font-weight:700;color:#111827;">Pulsa Rp 10.000</p>
-                            <p style="font-size:11.5px;color:#9ca3af;margin-top:3px;">10 April 2026</p>
+                    @forelse($riwayat as $item)
+                        @php
+                            $statusBadge = '';
+                            if ($item->status === 'menunggu') {
+                                $statusBadge = '<span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;background:#fef3c7;color:#d97706;margin-left:8px;vertical-align:middle;">Menunggu</span>';
+                            } elseif ($item->status === 'disetujui') {
+                                $statusBadge = '<span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;background:#d1fae5;color:#059669;margin-left:8px;vertical-align:middle;">Disetujui</span>';
+                            } elseif ($item->status === 'dikirim') {
+                                $statusBadge = '<span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;background:#dbeafe;color:#2563eb;margin-left:8px;vertical-align:middle;">Dikirim</span>';
+                            } elseif ($item->status === 'ditolak') {
+                                $statusBadge = '<span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;background:#fee2e2;color:#dc2626;margin-left:8px;vertical-align:middle;">Ditolak</span>';
+                            }
+                        @endphp
+                        <div class="riwayat-card" style="flex-direction: column; align-items: stretch; gap: 8px;">
+                            <div style="display: flex; align-items: center; justify-content: space-between;">
+                                <div>
+                                    <p style="font-size:13px;font-weight:700;color:#111827;">
+                                        {{ $item->hadiah->nama ?? 'Reward' }}
+                                        {!! $statusBadge !!}
+                                    </p>
+                                    <p style="font-size:11.5px;color:#9ca3af;margin-top:3px;">
+                                        {{ $item->created_at ? $item->created_at->format('d M Y, H:i') : '-' }}
+                                    </p>
+                                </div>
+                                <span style="font-size:13px;font-weight:800;color:#ef4444;">-{{ number_format($item->poin_digunakan, 0, ',', '.') }} poin</span>
+                            </div>
+                            @if($item->status === 'ditolak' && $item->catatan)
+                                <div style="padding:8px 12px;background:#fff5f5;border-left:3px solid #f87171;border-radius:4px;font-size:11px;color:#b91c1c;line-height:1.4;">
+                                    <strong>Alasan Penolakan:</strong> {{ $item->catatan }}
+                                </div>
+                            @endif
                         </div>
-                        <span style="font-size:13px;font-weight:800;color:#ef4444;">-500 poin</span>
-                    </div>
-
-                    <div class="riwayat-card">
-                        <div>
-                            <p style="font-size:13px;font-weight:700;color:#111827;">Diskon 20%</p>
-                            <p style="font-size:11.5px;color:#9ca3af;margin-top:3px;">5 April 2026</p>
+                    @empty
+                        <div style="padding: 24px 0; text-align: center; background: #fff; border-radius: 14px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);">
+                            <p style="font-size: 13px; color: #9ca3af; font-weight: 500;">Belum ada riwayat penukaran</p>
                         </div>
-                        <span style="font-size:13px;font-weight:800;color:#ef4444;">-300 poin</span>
-                    </div>
-
+                    @endforelse
                 </div>
 
             </div>
@@ -548,16 +501,27 @@
 
     </div>
 
-    <script>
-        let currentPoin = 2500;
+    <form id="tukarForm" action="{{ route('pelanggan.klaim.store') }}" method="POST" style="display: none;">
+        @csrf
+        <input type="hidden" name="hadiah_id" id="formHadiahId" value="">
+    </form>
 
-        function openModal(name, poin, emoji) {
+    <script>
+        let currentPoin = {{ $poin }};
+
+        @if(session('success_claim'))
+            window.addEventListener('DOMContentLoaded', () => {
+                showSuccessModal("{{ session('success_claim') }}");
+            });
+        @endif
+
+        function openModal(id, name, poin, emoji) {
             const sisa = currentPoin - parseInt(poin);
             document.getElementById('modalEmoji').textContent = emoji;
             document.getElementById('modalTitle').textContent = name;
             document.getElementById('modalReward').textContent = name;
-            document.getElementById('modalPoin').textContent = poin + ' poin';
-            document.getElementById('modalSisa').textContent = (sisa >= 0 ? sisa : 0) + ' poin';
+            document.getElementById('modalPoin').textContent = parseInt(poin).toLocaleString('id-ID') + ' poin';
+            document.getElementById('modalSisa').textContent = (sisa >= 0 ? sisa : 0).toLocaleString('id-ID') + ' poin';
 
             document.getElementById('confirmState').style.display = 'block';
             document.getElementById('successState').style.display = 'none';
@@ -568,6 +532,7 @@
             modal.querySelector('.modal-sheet').style.transform = 'translateY(0)';
 
             // store for confirm
+            modal.dataset.hadiahId = id;
             modal.dataset.poin = poin;
             modal.dataset.name = name;
             modal.dataset.emoji = emoji;
@@ -584,15 +549,22 @@
 
         function confirmTukar() {
             const modal = document.getElementById('confirmModal');
-            const poin = parseInt(modal.dataset.poin);
-            const name = modal.dataset.name;
+            const id = modal.dataset.hadiahId;
 
-            currentPoin = Math.max(0, currentPoin - poin);
+            // Submit form to backend
+            document.getElementById('formHadiahId').value = id;
+            document.getElementById('tukarForm').submit();
+        }
 
+        function showSuccessModal(message) {
             document.getElementById('confirmState').style.display = 'none';
             document.getElementById('successState').style.display = 'block';
-            document.getElementById('successDesc').textContent =
-                name + ' berhasil ditukarkan!\nSisa poin kamu: ' + currentPoin + ' poin';
+            document.getElementById('successDesc').textContent = message;
+
+            const modal = document.getElementById('confirmModal');
+            modal.style.opacity = '1';
+            modal.style.pointerEvents = 'all';
+            modal.querySelector('.modal-sheet').style.transform = 'translateY(0)';
         }
 
         function handleOverlayClick(e) {

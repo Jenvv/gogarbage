@@ -110,7 +110,18 @@ class HadiahController extends Controller
     {
         $request->validate([
             'status'  => 'required|in:disetujui,dikirim,ditolak',
-            'catatan' => 'required_if:status,ditolak|nullable|string|max:1000',
+            'catatan' => [
+                'required_if:status,ditolak',
+                'nullable',
+                'string',
+                \Illuminate\Validation\Rule::in([
+                    'Stok hadiah fisik habis / tidak tersedia',
+                    'Indikasi transaksi mencurigakan / kecurangan poin',
+                    'Kesalahan sistem / data poin tidak sinkron',
+                    'Penukaran kategori reward ini sedang ditangguhkan',
+                    'Voucher digital tidak dapat diterbitkan saat ini'
+                ])
+            ],
         ]);
 
         $newStatus = $request->status;

@@ -10,6 +10,7 @@ use App\Http\Controllers\Pelanggan\LanggananController;
 use App\Http\Controllers\Pelanggan\RiwayatController;
 use App\Http\Controllers\Pelanggan\ProfilController as PelangganProfilController;
 use App\Http\Controllers\Pelanggan\DompetController;
+use App\Http\Controllers\Pelanggan\KlaimController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\KeuanganController;
@@ -20,6 +21,7 @@ use App\Http\Controllers\Admin\PenggunaController;
 use App\Http\Controllers\Admin\HadiahController;
 use App\Http\Controllers\Admin\KategoriSampahController;
 use App\Http\Controllers\Admin\TransaksiPengepulController;
+use App\Http\Controllers\Admin\KonfigurasiController;
 use App\Http\Controllers\Pengepul\DashboardController as PengepulDashboardController;
 use App\Http\Controllers\Pengepul\StokController as PengepulStokController;
 use App\Http\Controllers\Pengepul\RequestController as PengepulRequestController;
@@ -57,6 +59,10 @@ Route::middleware(['auth', 'role:pengguna'])->group(function () {
     Route::post('/pelanggan/dompet/topup', [DompetController::class, 'topUp'])->name('pelanggan.dompet.topup');
     Route::post('/pelanggan/dompet/tarik', [DompetController::class, 'tarikSaldo'])->name('pelanggan.dompet.tarik');
     Route::post('/pelanggan/dompet/rekening', [DompetController::class, 'simpanRekening'])->name('pelanggan.dompet.rekening');
+
+    // Klaim Hadiah Pelanggan
+    Route::get('/pelanggan/klaim', [KlaimController::class, 'index'])->name('pelanggan.klaim.index');
+    Route::post('/pelanggan/klaim', [KlaimController::class, 'store'])->name('pelanggan.klaim.store');
 });
 
 // juru Angkut
@@ -126,6 +132,8 @@ Route::middleware(['auth', 'role:admin_gudang'])->prefix('admin')->group(functio
     Route::post('/master-data/paket', [AdminLanggananController::class, 'storePaket'])->name('admin.master-data.paket.store');
     Route::put('/master-data/paket/{paket}', [AdminLanggananController::class, 'updatePaket'])->name('admin.master-data.paket.update');
     Route::delete('/master-data/paket/{paket}', [AdminLanggananController::class, 'destroyPaket'])->name('admin.master-data.paket.destroy');
+    Route::get('/konfigurasi', [KonfigurasiController::class, 'index'])->name('admin.konfigurasi');
+    Route::post('/konfigurasi', [KonfigurasiController::class, 'update'])->name('admin.konfigurasi.update');
 });
 
 // ══════════════════════════════════════════
@@ -141,10 +149,23 @@ Route::middleware(['auth', 'role:pengepul'])->prefix('pengepul')->group(function
 });
 
 
-// API Endpoint for Polling Status
-Route::get('/api/pesanan/{id}/status', function ($id) {
+// API Endpoint for Polling Status (Secured with Ownership Validation)
+Route::middleware('auth')->get('/api/pesanan/{id}/status', function ($id) {
     $pesanan = \App\Models\Pesanan::find($id);
-    if (!$pesanan) return response()->json(['status' => 'error'], 404);
+    if (!$pesanan) {
+        return response()->json(['status' => 'error', 'message' => 'Pesanan tidak ditemukan'], 404);
+    }
+    
+    $user = auth()->user();
+    
+    // Otorisasi: Hanya pembuat pesanan, juru angkut yang ditugaskan, atau admin yang berhak
+    if ($user->role === 'pengguna' && $pesanan->user_id !== $user->id) {
+        return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 403);
+    }
+    if ($user->role === 'juru_angkut' && $pesanan->pengangkut_id !== $user->id) {
+        return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 403);
+    }
+    
     return response()->json(['status' => $pesanan->status]);
 });
 
