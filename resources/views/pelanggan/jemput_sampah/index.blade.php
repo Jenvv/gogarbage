@@ -84,25 +84,7 @@
             display: block;
         }
 
-        /* Jenis chip */
-        .jenis-chip {
-            padding: 10px 12px;
-            border-radius: 50px;
-            border: 1.5px solid #d1d5db;
-            font-size: 13px;
-            font-weight: 600;
-            color: #6b7280;
-            background: #fff;
-            cursor: pointer;
-            transition: all 0.18s;
-            white-space: nowrap;
-        }
 
-        .jenis-chip.active {
-            border-color: #22c55e;
-            color: #16a34a;
-            background: #f0fdf4;
-        }
 
         /* Input field */
         .input-wrap {
@@ -323,23 +305,7 @@
 
                     <div class="form-card">
 
-                        <!-- Jenis Sampah (dari database) -->
-                        <label class="field-label">Jenis Sampah</label>
-                        <div style="display:flex;flex-wrap:wrap;gap:6px;padding-bottom:4px;" id="jenisRow">
-                            @forelse ($kategoriSampah as $kategori)
-                                <label class="jenis-chip" id="chip-{{ $kategori->id }}">
-                                    <input type="checkbox" name="kategori_sampah[]" value="{{ $kategori->id }}"
-                                        style="display:none;"
-                                        {{ in_array($kategori->id, old('kategori_sampah', [])) ? 'checked' : '' }}
-                                        onchange="toggleChip(this)">
-                                    {{ $kategori->ikon ?? '♻️' }} {{ $kategori->nama }}
-                                </label>
-                            @empty
-                                <p style="font-size:12px;color:#9ca3af;">Belum ada kategori sampah tersedia.</p>
-                            @endforelse
-                        </div>
 
-                        <div style="height:20px;"></div>
 
                         <!-- Lokasi Penjemputan -->
                         <label class="field-label">Lokasi Penjemputan</label>
@@ -518,24 +484,7 @@
     </div><!-- end phone-wrapper -->
 
     <script>
-        // ── Jenis Sampah (checkbox-based multi-select) ──
-        function toggleChip(checkbox) {
-            const chip = checkbox.closest('.jenis-chip');
-            if (checkbox.checked) {
-                chip.classList.add('active');
-            } else {
-                chip.classList.remove('active');
-            }
-        }
 
-        // Initialize active state on page load (for old() values)
-        document.addEventListener('DOMContentLoaded', function() {
-            document.querySelectorAll('.jenis-chip input[type="checkbox"]').forEach(cb => {
-                if (cb.checked) {
-                    cb.closest('.jenis-chip').classList.add('active');
-                }
-            });
-        });
 
         // ── Date & Select color ──
         function updateDateColor(el) {
@@ -592,13 +541,11 @@
 
         // ── Form Submit ──
         document.getElementById('formJemputSampah').addEventListener('submit', function(e) {
-            const checked = document.querySelectorAll('input[name="kategori_sampah[]"]:checked');
             const lokasi = document.getElementById('lokasiInput').value.trim();
             const tanggal = document.getElementById('tanggalInput').value;
             const jam = document.getElementById('jamSelect').value;
 
             let errors = [];
-            if (checked.length === 0) errors.push('Pilih minimal 1 jenis sampah');
             if (!lokasi) errors.push('Isi alamat penjemputan');
             if (!tanggal) errors.push('Pilih tanggal');
             if (!jam) errors.push('Pilih jam');

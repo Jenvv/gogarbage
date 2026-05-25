@@ -54,8 +54,6 @@ class JemputSampahController extends Controller
         }
 
         $request->validate([
-            'kategori_sampah'   => 'required|array|min:1',
-            'kategori_sampah.*' => 'exists:kategori_sampah,id',
             'alamat_jemput'     => 'required|string|max:500',
             'latitude'          => 'nullable|numeric',
             'longitude'         => 'nullable|numeric',
@@ -63,8 +61,6 @@ class JemputSampahController extends Controller
             'jam_jemput'        => 'required|string',
             'catatan'           => 'nullable|string|max:500',
         ], [
-            'kategori_sampah.required'      => 'Pilih minimal 1 jenis sampah.',
-            'kategori_sampah.min'           => 'Pilih minimal 1 jenis sampah.',
             'alamat_jemput.required'        => 'Alamat penjemputan wajib diisi.',
             'tanggal_jemput.required'       => 'Tanggal penjemputan wajib diisi.',
             'tanggal_jemput.after_or_equal' => 'Tanggal tidak boleh di masa lalu.',
@@ -76,7 +72,6 @@ class JemputSampahController extends Controller
         $isBerlangganan = $langgananAktif !== null;
 
         session()->put('pesanan_draft', [
-            'kategori_sampah' => $request->kategori_sampah,
             'alamat_jemput'   => $request->alamat_jemput,
             'latitude'        => $request->latitude,
             'longitude'       => $request->longitude,
@@ -104,13 +99,10 @@ class JemputSampahController extends Controller
                 ->withErrors(['pesanan' => 'Silakan isi form jemput sampah terlebih dahulu.']);
         }
 
-        // Ambil data kategori sampah untuk ditampilkan
-        $kategoriList = KategoriSampah::whereIn('id', $draft['kategori_sampah'])->get();
         $isBerlangganan = $draft['tipe_pesanan'] === 'langganan';
 
         return view('pelanggan.jemput_sampah.konfirmasi_pesanan', compact(
             'draft',
-            'kategoriList',
             'isBerlangganan'
         ));
     }
@@ -187,18 +179,7 @@ class JemputSampahController extends Controller
                 'catatan'         => $draft['catatan'],
             ]);
 
-            // 2. Insert ke tabel detail_pesanan (per kategori sampah)
-            $kategoriList = KategoriSampah::whereIn('id', $draft['kategori_sampah'])->get();
 
-            foreach ($kategoriList as $kategori) {
-                DetailPesanan::create([
-                    'pesanan_id'        => $pesanan->id,
-                    'kategori_sampah_id' => $kategori->id,
-                    'berat'              => 0,
-                    'harga_per_kg'       => $kategori->harga_per_kg,
-                    'subtotal'           => 0,
-                ]);
-            }
 
             // 3. Insert ke tabel transaksi (record pembayaran biaya jemput)
             Transaksi::create([

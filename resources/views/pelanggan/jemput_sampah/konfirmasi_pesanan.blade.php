@@ -246,22 +246,7 @@
                 <div class="detail-card">
                     <p style="font-size:15px;font-weight:800;color:#111827;margin-bottom:4px;">Detail Pesanan</p>
 
-                    <!-- Jenis Sampah -->
-                    <div class="detail-row">
-                        <div class="detail-icon">
-                            <svg width="18" height="18" fill="none" stroke="#16a34a" stroke-width="2"
-                                viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
-                        </div>
-                        <div>
-                            <p style="font-size:11.5px;color:#9ca3af;font-weight:500;margin-bottom:3px;">Jenis Sampah
-                            </p>
-                            <p style="font-size:14px;font-weight:700;color:#111827;">
-                                {{ $kategoriList->pluck('nama')->join(', ') }}</p>
-                        </div>
-                    </div>
+
 
                     <!-- Alamat -->
                     <div class="detail-row">
