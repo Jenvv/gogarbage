@@ -316,6 +316,7 @@
                 </div>
 
                 <!-- ── METODE PEMBAYARAN ── -->
+                @if (!$isBerlangganan)
                 <div
                     style="background:#fff;border-radius:20px;margin:14px 16px 0;box-shadow:0 2px 16px rgba(0,0,0,0.07);overflow:hidden;">
                     <div style="padding:14px 18px 6px;">
@@ -343,25 +344,39 @@
                         </svg>
                     </div>
                 </div>
+                @endif
 
                 <!-- ── RINGKASAN PEMBAYARAN ── -->
                 <div class="ringkasan-card" id="ringkasanCard">
                     <p style="font-size:14px;font-weight:800;color:#111827;margin-bottom:14px;">Ringkasan Pembayaran</p>
 
+                    <!-- Jarak -->
                     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-                        <span style="font-size:13px;color:#374151;font-weight:500;">Biaya Jemput Sampah</span>
-                        <span style="font-size:13px;font-weight:700;color:#111827;">{{ $isBerlangganan ? 'GRATIS' : 'Rp ' . number_format($draft['biaya_jemput'], 0, ',', '.') }}</span>
+                        <span style="font-size:13px;color:#374151;font-weight:500;">Jarak Penjemputan</span>
+                        <span style="font-size:13px;font-weight:700;color:#111827;">{{ $draft['jarak_km'] }} KM</span>
                     </div>
+
+                    <!-- Ongkir Juru Angkut -->
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+                        <span style="font-size:13px;color:#374151;font-weight:500;">Ongkir Jemput</span>
+                        <span style="font-size:13px;font-weight:700;color:#111827;">
+                            {{ $isBerlangganan ? 'GRATIS' : 'Rp ' . number_format($draft['ongkir_juru_angkut'], 0, ',', '.') }}
+                        </span>
+                    </div>
+
+                    @if (!$isBerlangganan)
+                    <!-- Biaya Admin -->
                     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
                         <span style="font-size:13px;color:#374151;font-weight:500;">Biaya Layanan</span>
-                        <span style="font-size:13px;font-weight:700;color:#111827;">Rp 1.000</span>
+                        <span style="font-size:13px;font-weight:700;color:#111827;">Rp {{ number_format($draft['biaya_admin'], 0, ',', '.') }}</span>
                     </div>
+                    @endif
 
                     @if ($isBerlangganan)
                         <div style="margin-bottom:14px;">
                             <div style="background:#dcfce7;border:1px solid #86efac;border-radius:10px;padding:10px 12px;display:flex;gap:8px;align-items:center;">
                                 <span style="font-size:14px;flex-shrink:0;">🎉</span>
-                                <p style="font-size:11px;font-weight:600;color:#15803d;line-height:1.5;">Biaya jemput gratis karena kamu berlangganan!</p>
+                                <p style="font-size:11px;font-weight:600;color:#15803d;line-height:1.5;">Biaya jemput dan layanan gratis karena kamu berlangganan!</p>
                             </div>
                         </div>
                     @endif
@@ -369,7 +384,7 @@
                     <div style="border-top:1.5px solid #86efac;margin-bottom:14px;"></div>
                     <div style="display:flex;justify-content:space-between;align-items:center;">
                         <span style="font-size:15px;font-weight:800;color:#111827;">Total</span>
-                        <span style="font-size:20px;font-weight:800;color:#16a34a;">Rp {{ number_format($draft['biaya_jemput'] + 1000, 0, ',', '.') }}</span>
+                        <span style="font-size:20px;font-weight:800;color:#16a34a;">{{ $isBerlangganan ? 'Rp 0 (GRATIS)' : 'Rp ' . number_format($draft['biaya_jemput'], 0, ',', '.') }}</span>
                     </div>
                 </div>
 
@@ -377,7 +392,7 @@
                 <div style="padding: 0 16px;">
                     <form id="formKonfirmasi" action="{{ route('pelanggan.confirm-pesanan') }}" method="POST" enctype="multipart/form-data">
                         @csrf
-                        <input type="hidden" name="metode_pembayaran" id="inputMetodeBayar" value="tunai">
+                        <input type="hidden" name="metode_pembayaran" id="inputMetodeBayar" value="{{ $isBerlangganan ? 'saldo' : 'tunai' }}">
                         <input type="file" name="bukti_pembayaran" id="inputBuktiPesanan" accept="image/*" style="display:none;">
                         <button type="button" class="lanjut-btn" id="btnPesan" onclick="pesanSekarang()">Pesan Sekarang</button>
                     </form>
@@ -513,12 +528,14 @@
     </style>
 
     <script>
-        const totalBiaya = {{ $draft['biaya_jemput'] + 1000 }};
+        const isBerlangganan = {{ $isBerlangganan ? 'true' : 'false' }};
+        const totalBiaya = {{ $isBerlangganan ? 0 : $draft['biaya_jemput'] + 1000 }};
         const saldoUser = {{ Auth::user()->saldo ?? 0 }};
-        let selectedMetode = 'tunai';
+        let selectedMetode = isBerlangganan ? 'saldo' : 'tunai';
 
         // ── Payment Modal ──
         function openPaymentModal() {
+            if (isBerlangganan) return; // No modal needed for subscribers
             const modal = document.getElementById('paymentModal');
             const sheet = document.getElementById('payModalSheet');
             modal.style.opacity = '1';

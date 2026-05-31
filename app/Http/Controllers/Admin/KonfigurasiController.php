@@ -17,16 +17,22 @@ class KonfigurasiController extends Controller
     public function update(Request $request)
     {
         $request->validate([
-            'biaya_jemput'             => 'required|numeric|min:0',
-            'poin_per_kg'              => 'required|numeric|min:0',
-            'poin_per_order'           => 'required|numeric|min:0',
-            'komisi_pengangkut_persen' => 'required|numeric|min:0|max:100',
+            'ongkir_base_fee'      => 'required|numeric|min:0',
+            'ongkir_per_km'        => 'required|numeric|min:0',
+            'biaya_admin_reguler'  => 'required|numeric|min:0',
+            'poin_per_kg'          => 'required|numeric|min:0',
+            'poin_per_order'       => 'required|numeric|min:0',
+            'lat_bank_sampah'      => 'required|numeric',
+            'lon_bank_sampah'      => 'required|numeric',
         ]);
 
-        Konfigurasi::setValue('biaya_jemput', $request->biaya_jemput);
+        Konfigurasi::setValue('ongkir_base_fee', $request->ongkir_base_fee);
+        Konfigurasi::setValue('ongkir_per_km', $request->ongkir_per_km);
+        Konfigurasi::setValue('biaya_admin_reguler', $request->biaya_admin_reguler);
         Konfigurasi::setValue('poin_per_kg', $request->poin_per_kg);
         Konfigurasi::setValue('poin_per_order', $request->poin_per_order);
-        Konfigurasi::setValue('komisi_pengangkut_persen', $request->komisi_pengangkut_persen);
+        Konfigurasi::setValue('lat_bank_sampah', $request->lat_bank_sampah);
+        Konfigurasi::setValue('lon_bank_sampah', $request->lon_bank_sampah);
 
         return redirect()->back()->with('success', 'Pengaturan berhasil disimpan.');
     }

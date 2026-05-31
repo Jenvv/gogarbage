@@ -33,8 +33,9 @@
             <h4 class="mt-2 text-2xl font-bold text-green-700 dark:text-green-300">Rp {{ number_format($totalPendapatan, 0, ',', '.') }}</h4>
         </div>
         <div class="rounded-2xl border border-blue-200 bg-blue-50 p-5 dark:border-blue-800 dark:bg-blue-500/10">
-            <p class="text-sm text-blue-600 dark:text-blue-400 font-medium">Komisi JA (Total)</p>
-            <h4 class="mt-2 text-2xl font-bold text-blue-700 dark:text-blue-300">Rp {{ number_format($totalKomisiJA, 0, ',', '.') }}</h4>
+            <p class="text-sm text-blue-600 dark:text-blue-400 font-medium">Ongkir JA (Total)</p>
+            <h4 class="mt-2 text-2xl font-bold text-blue-700 dark:text-blue-300">Rp {{ number_format($totalOngkirJA, 0, ',', '.') }}</h4>
+            <p class="mt-1 text-xs text-blue-500 dark:text-blue-400">Subsidi: Rp {{ number_format($totalSubsidiOngkir, 0, ',', '.') }}</p>
         </div>
         <div class="rounded-2xl border border-amber-200 bg-amber-50 p-5 dark:border-amber-800 dark:bg-amber-500/10">
             <p class="text-sm text-amber-600 dark:text-amber-400 font-medium">Penarikan Menunggu</p>
@@ -47,8 +48,8 @@
             <p class="mt-1 text-xs text-cyan-500 dark:text-cyan-400">{{ $jumlahTopUpMenunggu }} permintaan</p>
         </div>
         <div class="rounded-2xl border border-purple-200 bg-purple-50 p-5 dark:border-purple-800 dark:bg-purple-500/10">
-            <p class="text-sm text-purple-600 dark:text-purple-400 font-medium">Bagian Perusahaan</p>
-            <h4 class="mt-2 text-2xl font-bold text-purple-700 dark:text-purple-300">Rp {{ number_format($totalBagianPerusahaan, 0, ',', '.') }}</h4>
+            <p class="text-sm text-purple-600 dark:text-purple-400 font-medium">Biaya Admin (Total)</p>
+            <h4 class="mt-2 text-2xl font-bold text-purple-700 dark:text-purple-300">Rp {{ number_format($totalBiayaAdmin, 0, ',', '.') }}</h4>
         </div>
     </div>
 

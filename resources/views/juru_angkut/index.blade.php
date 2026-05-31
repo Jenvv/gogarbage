@@ -242,7 +242,8 @@
                             </p>
                         </a>
 
-                        <div style="display:flex;flex-direction:column;align-items:center;gap:9px;">
+                        <a href="{{ route('juru-angkut.jadwal') }}"
+                            style="display:flex;flex-direction:column;align-items:center;gap:9px;text-decoration:none;">
                             <div class="svc-box" style="background:#dbeafe;">
                                 <svg width="28" height="28" fill="none" stroke="#2563eb" stroke-width="2"
                                     viewBox="0 0 24 24">
@@ -251,9 +252,12 @@
                                     <line x1="8" y1="2" x2="8" y2="6" />
                                     <line x1="3" y1="10" x2="21" y2="10" />
                                 </svg>
+                                @if (isset($jadwalHariIniCount) && $jadwalHariIniCount > 0)
+                                    <span class="badge">{{ $jadwalHariIniCount }}</span>
+                                @endif
                             </div>
                             <p style="font-size:11.5px;font-weight:600;color:#374151;">Jadwal</p>
-                        </div>
+                        </a>
 
                         <div style="display:flex;flex-direction:column;align-items:center;gap:9px;">
                             <div class="svc-box" style="background:#fef3c7;">
@@ -289,23 +293,27 @@
                             <p style="font-size:11.5px;font-weight:600;color:#374151;">Profil</p>
                         </div>
 
-                        <a href="{{ route('juru-angkut.langganan-tunai') }}" style="display:flex;flex-direction:column;align-items:center;gap:9px;text-decoration:none;">
-                            <div class="svc-box" style="background:#fef3c7;">
-                                <svg width="28" height="28" fill="none" stroke="#d97706" stroke-width="2"
-                                    viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
-                                </svg>
-                                @if($langgananTunaiCount > 0)
-                                    <span class="badge">{{ $langgananTunaiCount }}</span>
-                                @endif
-                            </div>
-                            <p style="font-size:11.5px;font-weight:600;color:#374151;line-height:1.35;">
-                                Tunai<br />Langganan</p>
-                        </a>
 
                     </div>
                 </div>
+
+                <!-- JADWAL BANNER -->
+                @if(isset($jadwalHariIniCount) && $jadwalHariIniCount > 0)
+                <a href="{{ route('juru-angkut.jadwal') }}" style="display:block;text-decoration:none;margin:14px 16px 0;">
+                    <div style="background:linear-gradient(135deg,#2563eb 0%,#1e40af 100%);border-radius:16px;padding:16px 18px;display:flex;align-items:center;gap:14px;box-shadow:0 4px 16px rgba(37,99,235,0.25);">
+                        <div style="width:44px;height:44px;background:rgba(255,255,255,0.2);border-radius:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                            <span style="font-size:20px;">📋</span>
+                        </div>
+                        <div style="flex:1;">
+                            <p style="font-size:14px;font-weight:700;color:#fff;">{{ $jadwalHariIniCount }} Jadwal Hari Ini</p>
+                            <p style="font-size:11px;color:rgba(255,255,255,0.8);font-weight:500;margin-top:2px;">Penjemputan langganan menunggu</p>
+                        </div>
+                        <svg width="20" height="20" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="2.5" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </div>
+                </a>
+                @endif
 
                 <!-- ORDER MENUNGGU -->
                 <div style="margin: 18px 16px 0;">
@@ -461,6 +469,17 @@
                     d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 11H4L5 9z" />
             </svg>
             <span style="font-size:10px;font-weight:500;color:#9ca3af;">Order</span>
+        </a>
+        <a href="{{ route('juru-angkut.jadwal') }}" class="nav-btn" style="position:relative;">
+            <svg width="22" height="22" fill="none" stroke="#9ca3af" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zM5 8V6h14v2H5z"/>
+            </svg>
+            <span style="font-size:10px;font-weight:500;color:#9ca3af;">Jadwal</span>
+            @if(isset($jadwalHariIniCount) && $jadwalHariIniCount > 0)
+                <span style="position:absolute;top:-2px;right:2px;min-width:16px;height:16px;background:#ef4444;border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid #fff;">
+                    <span style="font-size:8px;font-weight:800;color:#fff;">{{ $jadwalHariIniCount }}</span>
+                </span>
+            @endif
         </a>
         <a href="{{ route('juru-angkut.riwayat') }}" class="nav-btn">
             <svg width="22" height="22" fill="none" stroke="#9ca3af" stroke-width="2"

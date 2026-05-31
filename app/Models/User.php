@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use App\Models\JadwalLangganan;
 
 class User extends Authenticatable
 {
@@ -91,6 +92,16 @@ class User extends Authenticatable
     public function langgananDisetujui(): HasMany
     {
         return $this->hasMany(Langganan::class, 'disetujui_oleh');
+    }
+
+    public function jadwalLangganan(): HasMany
+    {
+        return $this->hasMany(JadwalLangganan::class, 'user_id');
+    }
+
+    public function jadwalSebagaiPengangkut(): HasMany
+    {
+        return $this->hasMany(JadwalLangganan::class, 'pengangkut_id');
     }
 
     /**

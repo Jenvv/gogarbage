@@ -509,7 +509,7 @@
                     <label
                         style="display:flex;align-items:center;gap:10px;border:1.5px solid #e5e7eb;border-radius:12px;padding:12px 14px;cursor:pointer;background:#fff;transition:all 0.18s;"
                         id="labelSaldo" onclick="setTimeout(handleMetodeChange, 50)">
-                        <input type="radio" name="metode_pembayaran" value="saldo" id="radioSaldo"
+                        <input type="radio" name="metode_pembayaran" value="saldo" id="radioSaldo" checked
                             style="accent-color:#16a34a;width:16px;height:16px;flex-shrink:0;">
                         <div style="flex:1;">
                             <p style="font-size:13px;font-weight:600;color:#111827;">Saldo GoGarbage</p>
@@ -526,17 +526,6 @@
                         <div style="flex:1;">
                             <p style="font-size:13px;font-weight:600;color:#111827;">Transfer Bank</p>
                             <p style="font-size:11px;color:#6b7280;">BCA, Mandiri, BRI</p>
-                        </div>
-                    </label>
-                    <!-- Tunai -->
-                    <label
-                        style="display:flex;align-items:center;gap:10px;border:1.5px solid #e5e7eb;border-radius:12px;padding:12px 14px;cursor:pointer;background:#fff;transition:all 0.18s;"
-                        onclick="setTimeout(handleMetodeChange, 50)">
-                        <input type="radio" name="metode_pembayaran" value="tunai" checked id="radioTunai"
-                            style="accent-color:#16a34a;width:16px;height:16px;flex-shrink:0;">
-                        <div style="flex:1;">
-                            <p style="font-size:13px;font-weight:600;color:#111827;">Tunai / Cash</p>
-                            <p style="font-size:11px;color:#6b7280;">Bayar langsung saat penjemputan</p>
                         </div>
                     </label>
                 </div>
@@ -675,7 +664,7 @@
             icon.innerHTML = '<span style="font-size:24px;">' + (theme === 'purple' ? '⭐' : '🌿') + '</span>';
             document.getElementById('modalBtn').style.background = gradients[theme];
             // Reset form state
-            document.getElementById('radioTunai').checked = true;
+            document.getElementById('radioSaldo').checked = true;
             document.getElementById('transferInfo').style.display = 'none';
             document.getElementById('inputBukti').value = '';
             document.getElementById('uploadText').textContent = 'Ketuk untuk upload bukti transfer';

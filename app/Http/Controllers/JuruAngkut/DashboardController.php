@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\JuruAngkut;
 
 use App\Http\Controllers\Controller;
+use App\Models\JadwalLangganan;
 use App\Models\Pesanan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -48,9 +49,9 @@ class DashboardController extends Controller
             ->whereDate('diselesaikan_pada', today())
             ->count();
 
-        // Jumlah langganan menunggu konfirmasi tunai
-        $langgananTunaiCount = \App\Models\Langganan::where('status', 'menunggu_tunai')
-            ->where('metode_pembayaran', 'tunai')
+        // Jadwal langganan hari ini (terjadwal)
+        $jadwalHariIniCount = JadwalLangganan::whereDate('tanggal_jemput', today())
+            ->where('status', 'terjadwal')
             ->count();
 
         return view('juru_angkut.index', compact(
@@ -59,7 +60,7 @@ class DashboardController extends Controller
             'pendapatanHariIni',
             'orderHariIni',
             'user',
-            'langgananTunaiCount'
+            'jadwalHariIniCount'
         ));
     }
 }

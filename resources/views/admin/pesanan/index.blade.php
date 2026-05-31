@@ -200,42 +200,36 @@
                     </div>
 
                     {{-- Keuangan --}}
-                    <div class="grid grid-cols-2 gap-3">
+                    <div class="grid grid-cols-3 gap-3">
+                        <div class="rounded-xl bg-indigo-50 dark:bg-indigo-500/10 p-3">
+                            <p class="text-xs text-indigo-600 dark:text-indigo-400 mb-1">Jarak</p>
+                            <p class="text-sm font-bold text-indigo-700 dark:text-indigo-300">{{ $p->jarak_km ? $p->jarak_km . ' KM' : '-' }}</p>
+                        </div>
                         <div class="rounded-xl bg-blue-50 dark:bg-blue-500/10 p-3">
-                            <p class="text-xs text-blue-600 dark:text-blue-400 mb-1">Biaya Jemput</p>
-                            <p class="text-sm font-bold text-blue-700 dark:text-blue-300">Rp {{ number_format($p->biaya_jemput, 0, ',', '.') }}</p>
+                            <p class="text-xs text-blue-600 dark:text-blue-400 mb-1">Ongkir JA</p>
+                            <p class="text-sm font-bold text-blue-700 dark:text-blue-300">Rp {{ number_format($p->ongkir_juru_angkut, 0, ',', '.') }}</p>
+                        </div>
+                        <div class="rounded-xl bg-purple-50 dark:bg-purple-500/10 p-3">
+                            <p class="text-xs text-purple-600 dark:text-purple-400 mb-1">Biaya Admin</p>
+                            <p class="text-sm font-bold text-purple-700 dark:text-purple-300">Rp {{ number_format($p->biaya_admin, 0, ',', '.') }}</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="rounded-xl bg-green-50 dark:bg-green-500/10 p-3">
+                            <p class="text-xs text-green-600 dark:text-green-400 mb-1">Total Bayar Pelanggan</p>
+                            <p class="text-sm font-bold text-green-700 dark:text-green-300">Rp {{ number_format($p->biaya_jemput, 0, ',', '.') }}</p>
                         </div>
                         <div class="rounded-xl bg-green-50 dark:bg-green-500/10 p-3">
-                            <p class="text-xs text-green-600 dark:text-green-400 mb-1">Pendapatan Pelanggan</p>
+                            <p class="text-xs text-green-600 dark:text-green-400 mb-1">Pendapatan Sampah</p>
                             <p class="text-sm font-bold text-green-700 dark:text-green-300">Rp {{ number_format($p->total_pendapatan, 0, ',', '.') }}</p>
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-3 gap-3">
-                        <div class="rounded-xl bg-gray-50 dark:bg-gray-800 p-3">
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Metode Bayar</p>
-                            <p class="text-sm font-semibold text-gray-800 dark:text-white">{{ ucfirst($p->metode_pembayaran ?? '-') }}</p>
-                        </div>
-                        <div class="rounded-xl bg-gray-50 dark:bg-gray-800 p-3">
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Total Berat</p>
-                            <p class="text-sm font-semibold text-gray-800 dark:text-white">{{ number_format($totalBeratModal, 1) }} kg</p>
-                        </div>
-                        <div class="rounded-xl bg-gray-50 dark:bg-gray-800 p-3">
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Poin</p>
-                            <p class="text-sm font-semibold text-gray-800 dark:text-white">{{ $p->poin_didapat }} poin</p>
-                        </div>
-                    </div>
-
-                    @if($p->komisi_pengangkut > 0 || $p->bagian_perusahaan > 0)
-                        <div class="grid grid-cols-2 gap-3">
-                            <div class="rounded-xl bg-gray-50 dark:bg-gray-800 p-3">
-                                <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Komisi JA</p>
-                                <p class="text-sm font-semibold text-gray-800 dark:text-white">Rp {{ number_format($p->komisi_pengangkut, 0, ',', '.') }}</p>
-                            </div>
-                            <div class="rounded-xl bg-gray-50 dark:bg-gray-800 p-3">
-                                <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Bagian Perusahaan</p>
-                                <p class="text-sm font-semibold text-gray-800 dark:text-white">Rp {{ number_format($p->bagian_perusahaan, 0, ',', '.') }}</p>
-                            </div>
+                    @if($p->tipe_pesanan === 'langganan')
+                        <div class="rounded-xl bg-amber-50 dark:bg-amber-500/10 p-3 border border-amber-200 dark:border-amber-800">
+                            <p class="text-xs text-amber-600 dark:text-amber-400 mb-1 font-semibold">📢 Subsidi Ongkir</p>
+                            <p class="text-sm text-amber-700 dark:text-amber-300">Ongkir JA Rp {{ number_format($p->ongkir_juru_angkut, 0, ',', '.') }} disubsidi dari dana langganan</p>
                         </div>
                     @endif
 

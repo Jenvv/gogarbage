@@ -8,6 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap"
         rel="stylesheet" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         * {
             font-family: 'Poppins', sans-serif;
@@ -309,26 +310,31 @@
 
                         <!-- Lokasi Penjemputan -->
                         <label class="field-label">Lokasi Penjemputan</label>
-                        <div class="input-wrap">
-                            <svg width="18" height="18" fill="none" stroke="#9ca3af" stroke-width="2"
-                                viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                            </svg>
-                            <input type="text" name="alamat_jemput" placeholder="Jl. Gajah Mada No. 123, Pontianak"
-                                id="lokasiInput" value="{{ old('alamat_jemput') }}" />
+                        <div style="background:#f9fafb;border-radius:16px;padding:16px;display:flex;align-items:flex-start;gap:12px;box-shadow:0 2px 8px rgba(0,0,0,0.02);border:1px solid #e5e7eb;cursor:pointer;"
+                             onclick="pilihPeta()">
+                            <div style="width:36px;height:36px;background:#dcfce7;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                <span style="font-size:16px;">📍</span>
+                            </div>
+                            <div style="flex:1;min-width:0;">
+                                <p style="font-size:11px;font-weight:600;color:#6b7280;margin-bottom:2px;text-transform:uppercase;letter-spacing:0.5px;" id="lokasiLabel">Lokasi Penjemputan</p>
+                                <input type="hidden" name="alamat_jemput" id="lokasiInput" value="{{ old('alamat_jemput') }}">
+                                <p style="font-size:13px;color:#111827;font-weight:600;line-height:1.4;margin:0;" id="alamatText">
+                                    {{ old('alamat_jemput') ?: 'Ketuk untuk pilih lokasi dari peta' }}
+                                </p>
+                                <p style="font-size:11px;color:#9ca3af;margin-top:2px;display:none;" id="koordinatText"></p>
+                            </div>
+                            <div style="color:#6366f1;padding-top:8px;">
+                                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                </svg>
+                            </div>
                         </div>
+                        
+                        <p style="font-size:11px;color:#6b7280;margin-top:6px;text-align:center;">Ketuk untuk memilih lokasi dari peta</p>
+
                         <!-- Hidden fields for coordinates -->
                         <input type="hidden" name="latitude" id="latitudeInput" value="{{ old('latitude') }}">
                         <input type="hidden" name="longitude" id="longitudeInput" value="{{ old('longitude') }}">
-
-                        <div style="margin-top:10px;display:flex;align-items:center;gap:6px;cursor:pointer;"
-                            onclick="pilihPeta()">
-                            <span style="font-size:14px;">📍</span>
-                            <span style="font-size:12px;font-weight:600;color:#16a34a;">Pilih dari Peta</span>
-                        </div>
 
                         <div style="height:20px;"></div>
 
@@ -395,21 +401,17 @@
                                     @if ($isBerlangganan)
                                         Gratis karena kamu berlangganan 🎉
                                     @else
-                                        Sudah termasuk biaya layanan
+                                        Dihitung otomatis berdasarkan jarak lokasi
                                     @endif
                                 </p>
                             </div>
                             <div id="biayaValue">
                                 @if ($isBerlangganan)
                                     <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;">
-                                        <span
-                                            style="font-size:11px;color:#9ca3af;font-weight:500;text-decoration:line-through;">Rp
-                                            5.000</span>
                                         <div class="gratis-badge">GRATIS</div>
                                     </div>
                                 @else
-                                    <span style="font-size:20px;font-weight:800;color:#16a34a;">Rp
-                                        {{ number_format($biayaJemput, 0, ',', '.') }}</span>
+                                    <span style="font-size:14px;font-weight:700;color:#16a34a;">📍 Pilih lokasi dulu</span>
                                 @endif
                             </div>
                         </div>
@@ -454,37 +456,59 @@
         <!-- ── MAP MODAL ── -->
         <div id="mapModal"
             style="position:absolute;inset:0;background:rgba(0,0,0,0.5);z-index:200;display:none;align-items:flex-end;">
-            <div style="width:100%;background:#fff;border-radius:24px 24px 0 0;padding:20px;max-height:85%;">
-                <div style="display:flex;justify-content:center;margin-bottom:16px;">
+            <div style="width:100%;background:#fff;border-radius:24px 24px 0 0;padding:20px;max-height:90%;display:flex;flex-direction:column;">
+                <div style="display:flex;justify-content:center;margin-bottom:12px;">
                     <div style="width:40px;height:4px;background:#d1d5db;border-radius:4px;"></div>
                 </div>
-                <p style="font-size:15px;font-weight:700;color:#111827;margin-bottom:14px;">Pilih Lokasi dari Peta</p>
-                <!-- Placeholder map image -->
-                <div
-                    style="width:100%;height:220px;background:#e8f5e9;border-radius:16px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;position:relative;overflow:hidden;">
-                    <div id="mapPlaceholder" style="display:flex;flex-direction:column;align-items:center;gap:8px;">
-                        <span style="font-size:40px;">🗺️</span>
-                        <p style="font-size:13px;color:#6b7280;font-weight:600;">Ketuk untuk memilih lokasi</p>
-                    </div>
+                <p style="font-size:15px;font-weight:700;color:#111827;margin-bottom:12px;">📍 Pilih Lokasi dari Peta</p>
+
+                <!-- Interactive Leaflet Map -->
+                <div style="width:100%;height:280px;border-radius:16px;overflow:hidden;margin-bottom:12px;position:relative;border:1.5px solid #e5e7eb;">
+                    <div id="modalMap" style="width:100%;height:100%;z-index:1;"></div>
                 </div>
-                <div
-                    style="background:#f9fafb;border:1.5px solid #e5e7eb;border-radius:12px;padding:12px 14px;margin-bottom:16px;">
-                    <p style="font-size:11px;color:#9ca3af;margin-bottom:2px;">Lokasi dipilih:</p>
-                    <p style="font-size:13px;font-weight:600;color:#374151;" id="mapSelectedLoc">Jl. Gajah Mada No.
-                        123,
-                        Pontianak Kota</p>
+
+                <!-- GPS Button -->
+                <button type="button" id="btnGPSModal" onclick="deteksiLokasiGPS()"
+                    style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px;background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:12px;padding:12px;font-size:13px;font-weight:600;color:#16a34a;cursor:pointer;margin-bottom:12px;transition:all 0.2s;">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                    <span id="labelGPSModal">Gunakan Lokasi Saat Ini</span>
+                </button>
+
+                <!-- Location Info -->
+                <div style="background:#f9fafb;border:1.5px solid #e5e7eb;border-radius:12px;padding:12px 14px;margin-bottom:16px;">
+                    <p style="font-size:11px;color:#9ca3af;margin-bottom:4px;">Lokasi dipilih:</p>
+                    <p style="font-size:13px;font-weight:600;color:#374151;line-height:1.4;" id="mapSelectedLoc">Geser marker atau klik peta untuk memilih</p>
+                    <p style="font-size:11px;color:#9ca3af;margin-top:4px;display:none;" id="mapKoordinat"></p>
                 </div>
-                <button onclick="confirmMap()"
+
+                <button type="button" onclick="confirmMap()"
                     style="width:100%;background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;font-size:14px;font-weight:700;padding:14px;border-radius:12px;border:none;cursor:pointer;">
-                    Gunakan Lokasi Ini
+                    ✅ Gunakan Lokasi Ini
                 </button>
             </div>
         </div>
 
     </div><!-- end phone-wrapper -->
 
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
+        // ── Config Variables for frontend calculation ──
+        const latBase = {{ $latBase ?? -0.026330 }};
+        const lonBase = {{ $lonBase ?? 109.342504 }};
+        const baseFee = {{ $baseFee ?? 10000 }};
+        const perKm = {{ $perKm ?? 2500 }};
+        const isBerlangganan = {{ $isBerlangganan ? 'true' : 'false' }};
 
+        // Map state
+        let modalMap = null;
+        let modalMarker = null;
+        let mapInitialized = false;
+        // Temp coordinates while user is picking on the modal
+        let tempLat = null;
+        let tempLon = null;
 
         // ── Date & Select color ──
         function updateDateColor(el) {
@@ -496,45 +520,260 @@
             el.classList.toggle('selected', !!el.value);
         }
 
-        // ── Map modal & Geolocation ──
-        function pilihPeta() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    function(position) {
-                        const lat = position.coords.latitude;
-                        const lng = position.coords.longitude;
-                        
-                        document.getElementById('latitudeInput').value = lat;
-                        document.getElementById('longitudeInput').value = lng;
-                        
-                        document.getElementById('mapSelectedLoc').textContent = `Terdeteksi (Lat: ${lat.toFixed(5)}, Lng: ${lng.toFixed(5)})`;
-                        
-                        if (!document.getElementById('lokasiInput').value) {
-                            document.getElementById('lokasiInput').value = `Titik GPS: ${lat.toFixed(5)}, ${lng.toFixed(5)}`;
-                        }
+        // ── Haversine Formula for JS fallback ──
+        function hitungJarakHaversine(lat1, lon1, lat2, lon2) {
+            const earthRadius = 6371;
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            return earthRadius * c;
+        }
 
-                        const modal = document.getElementById('mapModal');
-                        modal.style.display = 'flex';
-                    },
-                    function(error) {
-                        let msg = 'Gagal mengambil lokasi.';
-                        if (error.code === 1) msg = 'Izin lokasi ditolak. Silakan izinkan akses lokasi di browser Anda.';
-                        else if (error.code === 2) msg = 'Sinyal GPS tidak tersedia.';
-                        else if (error.code === 3) msg = 'Waktu pengambilan lokasi habis.';
-                        alert(msg);
-                    },
-                    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-                );
+        // ── Dynamic Distance & Cost calculation ──
+        function hitungJarakDanBiaya(latUser, lonUser) {
+            const subtextEl = document.getElementById('biayaSubtext');
+            const valueEl = document.getElementById('biayaValue');
+
+            if (!isBerlangganan && valueEl) {
+                valueEl.innerHTML = '<span style="font-size:12px;color:#9ca3af;">⏳ Menghitung ongkir...</span>';
+            }
+
+            const bLat = parseFloat(latBase);
+            const bLon = parseFloat(lonBase);
+            const uLat = parseFloat(latUser);
+            const uLon = parseFloat(lonUser);
+
+            fetch(`https://router.project-osrm.org/route/v1/driving/${uLon},${uLat};${bLon},${bLat}?overview=false`)
+            .then(r => r.json())
+            .then(data => {
+                let jarak = 1.0;
+                if (data.routes && data.routes[0] && data.routes[0].distance) {
+                    jarak = data.routes[0].distance / 1000;
+                } else {
+                    jarak = hitungJarakHaversine(bLat, bLon, uLat, uLon);
+                }
+                updateBiayaUI(jarak);
+            })
+            .catch(() => {
+                const jarak = hitungJarakHaversine(bLat, bLon, uLat, uLon);
+                updateBiayaUI(jarak);
+            });
+        }
+
+        function updateBiayaUI(jarak) {
+            const subtextEl = document.getElementById('biayaSubtext');
+            const valueEl = document.getElementById('biayaValue');
+            const jarakKm = parseFloat(jarak.toFixed(2)) || 0;
+
+            let ongkir = baseFee;
+            if (jarakKm > 1) {
+                const sisaKm = Math.ceil(jarakKm - 1);
+                ongkir = baseFee + (sisaKm * perKm);
+            }
+
+            if (isBerlangganan) {
+                if (subtextEl) subtextEl.innerHTML = `Jarak: <strong>${jarakKm} KM</strong> (Gratis karena berlangganan 🎉)`;
             } else {
-                alert('Geolocation tidak didukung oleh browser Anda.');
+                if (subtextEl) subtextEl.innerHTML = `Jarak: <strong>${jarakKm} KM</strong> dari Bank Sampah`;
+                if (valueEl) {
+                    valueEl.innerHTML = `<span style="font-size:16px;font-weight:800;color:#16a34a;">Rp ${ongkir.toLocaleString('id-ID')}</span>`;
+                }
             }
         }
 
+        // ── Reverse Geocode ──
+        function reverseGeocode(lat, lon) {
+            const lokasiInput = document.getElementById('lokasiInput');
+            const alamatText = document.getElementById('alamatText');
+            const koordinatText = document.getElementById('koordinatText');
+            const lokasiLabel = document.getElementById('lokasiLabel');
+            const mapSelectedLoc = document.getElementById('mapSelectedLoc');
+            const mapKoordinat = document.getElementById('mapKoordinat');
+
+            if (alamatText) alamatText.textContent = '⏳ Mendapatkan nama tempat...';
+            if (mapSelectedLoc) mapSelectedLoc.textContent = '⏳ Mendapatkan nama tempat...';
+
+            hitungJarakDanBiaya(lat, lon);
+
+            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1`, {
+                headers: { 'Accept-Language': 'id' }
+            })
+            .then(r => r.json())
+            .then(data => {
+                const address = data.display_name || `Titik GPS: ${lat.toFixed(7)}, ${lon.toFixed(7)}`;
+                if (lokasiInput) lokasiInput.value = address;
+                if (alamatText) alamatText.textContent = address;
+                if (lokasiLabel) lokasiLabel.textContent = 'LOKASI DIPILIH ✓';
+                if (mapSelectedLoc) mapSelectedLoc.textContent = address;
+                if (koordinatText) {
+                    koordinatText.textContent = `${lat.toFixed(7)}, ${lon.toFixed(7)}`;
+                    koordinatText.style.display = 'block';
+                }
+                if (mapKoordinat) {
+                    mapKoordinat.textContent = `${lat.toFixed(7)}, ${lon.toFixed(7)}`;
+                    mapKoordinat.style.display = 'block';
+                }
+                // Update marker popup
+                if (modalMarker) {
+                    modalMarker.setPopupContent(`<b>📍 Lokasi Jemput</b><br><span style="font-size:11px">${address}</span>`).openPopup();
+                }
+            })
+            .catch(() => {
+                const fallback = `Titik GPS: ${lat.toFixed(7)}, ${lon.toFixed(7)}`;
+                if (lokasiInput) lokasiInput.value = fallback;
+                if (alamatText) alamatText.textContent = fallback;
+                if (lokasiLabel) lokasiLabel.textContent = 'LOKASI DIPILIH ✓';
+                if (mapSelectedLoc) mapSelectedLoc.textContent = fallback;
+                if (koordinatText) {
+                    koordinatText.textContent = `${lat.toFixed(7)}, ${lon.toFixed(7)}`;
+                    koordinatText.style.display = 'block';
+                }
+                if (mapKoordinat) {
+                    mapKoordinat.textContent = `${lat.toFixed(7)}, ${lon.toFixed(7)}`;
+                    mapKoordinat.style.display = 'block';
+                }
+            });
+        }
+
+        // ── Modal map: called when marker position changes ──
+        function onMapLocationSelected(lat, lon) {
+            tempLat = lat;
+            tempLon = lon;
+
+            // Update hidden inputs immediately
+            document.getElementById('latitudeInput').value = lat;
+            document.getElementById('longitudeInput').value = lon;
+
+            // Update modal info & main page
+            reverseGeocode(lat, lon);
+        }
+
+        // ── Initialize or re-center Leaflet map inside modal ──
+        function initModalMap(lat, lon) {
+            if (!mapInitialized) {
+                modalMap = L.map('modalMap', {
+                    zoomControl: false
+                }).setView([lat, lon], 16);
+
+                L.control.zoom({ position: 'topright' }).addTo(modalMap);
+
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap',
+                    maxZoom: 19
+                }).addTo(modalMap);
+
+                modalMarker = L.marker([lat, lon], { draggable: true }).addTo(modalMap);
+                modalMarker.bindPopup('<b>📍 Lokasi Jemput</b><br>Geser atau klik peta').openPopup();
+
+                // Drag marker
+                modalMarker.on('dragend', function(e) {
+                    const pos = e.target.getLatLng();
+                    onMapLocationSelected(pos.lat, pos.lng);
+                });
+
+                // Click map
+                modalMap.on('click', function(e) {
+                    modalMarker.setLatLng(e.latlng);
+                    onMapLocationSelected(e.latlng.lat, e.latlng.lng);
+                });
+
+                mapInitialized = true;
+            } else {
+                modalMap.setView([lat, lon], 16);
+                modalMarker.setLatLng([lat, lon]);
+            }
+
+            // Fix Leaflet tile rendering in hidden container
+            setTimeout(() => { modalMap.invalidateSize(); }, 200);
+        }
+
+        // ── Open map modal ──
+        function pilihPeta() {
+            const modal = document.getElementById('mapModal');
+            modal.style.display = 'flex';
+
+            // Determine initial center: saved coordinates or default Pontianak
+            let initLat = parseFloat(document.getElementById('latitudeInput').value);
+            let initLon = parseFloat(document.getElementById('longitudeInput').value);
+
+            if (isNaN(initLat) || isNaN(initLon)) {
+                // No saved location — try GPS first
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                        function(pos) {
+                            initLat = pos.coords.latitude;
+                            initLon = pos.coords.longitude;
+                            initModalMap(initLat, initLon);
+                            onMapLocationSelected(initLat, initLon);
+                        },
+                        function() {
+                            // GPS failed, use default
+                            initModalMap(-0.026330, 109.342504);
+                        },
+                        { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
+                    );
+                } else {
+                    initModalMap(-0.026330, 109.342504);
+                }
+            } else {
+                initModalMap(initLat, initLon);
+            }
+        }
+
+        // ── GPS button inside modal ──
+        function deteksiLokasiGPS() {
+            const btn = document.getElementById('btnGPSModal');
+            const label = document.getElementById('labelGPSModal');
+
+            if (!navigator.geolocation) {
+                alert('Browser tidak mendukung Geolocation.');
+                return;
+            }
+
+            btn.style.opacity = '0.6';
+            btn.style.pointerEvents = 'none';
+            label.textContent = '⏳ Mendeteksi lokasi...';
+
+            navigator.geolocation.getCurrentPosition(
+                function(pos) {
+                    const lat = pos.coords.latitude;
+                    const lon = pos.coords.longitude;
+
+                    if (modalMap && modalMarker) {
+                        modalMarker.setLatLng([lat, lon]);
+                        modalMap.setView([lat, lon], 17, { animate: true });
+                    }
+                    onMapLocationSelected(lat, lon);
+
+                    btn.style.opacity = '1';
+                    btn.style.pointerEvents = 'auto';
+                    label.textContent = '📍 Lokasi Terdeteksi!';
+                    setTimeout(() => { label.textContent = 'Gunakan Lokasi Saat Ini'; }, 2000);
+                },
+                function(error) {
+                    let msg = 'Gagal mengambil lokasi.';
+                    if (error.code === 1) msg = 'Izin lokasi ditolak.';
+                    else if (error.code === 2) msg = 'Sinyal GPS tidak tersedia.';
+                    else if (error.code === 3) msg = 'Waktu habis. Coba lagi.';
+                    alert(msg);
+
+                    btn.style.opacity = '1';
+                    btn.style.pointerEvents = 'auto';
+                    label.textContent = 'Gunakan Lokasi Saat Ini';
+                },
+                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+            );
+        }
+
+        // ── Confirm selected location ──
         function confirmMap() {
             document.getElementById('mapModal').style.display = 'none';
         }
 
-        // Close on backdrop
+        // Close on backdrop click
         document.getElementById('mapModal').addEventListener('click', function(e) {
             if (e.target === this) this.style.display = 'none';
         });
@@ -546,7 +785,7 @@
             const jam = document.getElementById('jamSelect').value;
 
             let errors = [];
-            if (!lokasi) errors.push('Isi alamat penjemputan');
+            if (!lokasi) errors.push('Pilih lokasi penjemputan dari peta');
             if (!tanggal) errors.push('Pilih tanggal');
             if (!jam) errors.push('Pilih jam');
 
@@ -556,9 +795,21 @@
                 return;
             }
 
-            // Disable button to prevent double submit
             document.getElementById('pesanBtn').disabled = true;
             document.getElementById('pesanBtn').textContent = 'Memproses...';
+        });
+
+        // ── Auto-load on page load (e.g. after validation error) ──
+        document.addEventListener('DOMContentLoaded', function() {
+            const lat = document.getElementById('latitudeInput').value;
+            const lon = document.getElementById('longitudeInput').value;
+            if (lat && lon) {
+                const parsedLat = parseFloat(lat);
+                const parsedLon = parseFloat(lon);
+                if (!isNaN(parsedLat) && !isNaN(parsedLon)) {
+                    reverseGeocode(parsedLat, parsedLon);
+                }
+            }
         });
     </script>
 </body>

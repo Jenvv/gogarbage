@@ -130,6 +130,29 @@ class OrderController extends Controller
             'metode_pembayaran_pelanggan' => 'nullable|in:tunai,saldo',
         ]);
 
+        // Server-side: cek apakah ada anorganik, jika ya maka harga_manual & metode wajib diisi
+        $trashItemsRaw = json_decode($request->input('trash_items'), true);
+        $hasAnorganik = false;
+        if (is_array($trashItemsRaw)) {
+            foreach ($trashItemsRaw as $item) {
+                if (strcasecmp($item['jenis'] ?? '', 'Anorganik') === 0) {
+                    $hasAnorganik = true;
+                    break;
+                }
+            }
+        }
+
+        if ($hasAnorganik) {
+            $request->validate([
+                'harga_manual' => 'required|numeric|min:1',
+                'metode_pembayaran_pelanggan' => 'required|in:tunai,saldo',
+            ], [
+                'harga_manual.required' => 'Harga pembelian anorganik wajib diisi.',
+                'harga_manual.min' => 'Harga pembelian anorganik harus lebih dari 0.',
+                'metode_pembayaran_pelanggan.required' => 'Metode pembayaran ke pelanggan wajib dipilih.',
+            ]);
+        }
+
         $pesanan = DB::transaction(function () use ($pesanan, $request) {
             $totalBerat = 0;
             $totalPendapatan = 0;
@@ -151,20 +174,22 @@ class OrderController extends Controller
                 $jenis = $item['jenis'] ?? ''; // Nama kategori (Organik, Anorganik, dll)
 
                 $kategori = \App\Models\KategoriSampah::where('nama', $jenis)->first();
-                $harga_per_kg = $kategori ? $kategori->harga_per_kg : 0;
                 $kategori_id = $kategori ? $kategori->id : null;
 
-                // Gunakan harga manual jika ada dan jenisnya anorganik
-                if ($hargaManual !== null && strcasecmp($jenis, 'Anorganik') === 0) {
-                    $subtotal = $hargaManual;
+                // Untuk anorganik: JANGAN gunakan harga_per_kg dari database (itu khusus pengepul)
+                // Gunakan harga manual yang diinput oleh juru angkut
+                if (strcasecmp($jenis, 'Anorganik') === 0) {
+                    $subtotal = $hargaManual !== null ? floatval($hargaManual) : 0;
+                    $harga_per_kg_simpan = 0; // harga_per_kg di DB khusus pengepul, jadi simpan 0
                 } else {
-                    $subtotal = $berat * $harga_per_kg;
+                    $harga_per_kg_simpan = $kategori ? $kategori->harga_per_kg : 0;
+                    $subtotal = $berat * $harga_per_kg_simpan;
                 }
 
                 $pesanan->detailPesanan()->create([
                     'kategori_sampah_id' => $kategori_id,
                     'berat'    => $berat,
-                    'harga_per_kg' => $harga_per_kg,
+                    'harga_per_kg' => $harga_per_kg_simpan,
                     'subtotal' => $subtotal,
                 ]);
 
@@ -207,10 +232,9 @@ class OrderController extends Controller
             $poinBerat = (int) ($totalBerat * $poinPerKg);
             $totalPoin = $poinBerat + $poinPerOrder;
 
-            // Hitung bagi hasil dari konfigurasi (dynamic)
-            $komisiPersen = (float) Konfigurasi::getValue('komisi_pengangkut_persen', 70);
-            $komisi = $pesanan->biaya_jemput * ($komisiPersen / 100);
-            $perusahaan = $pesanan->biaya_jemput * ((100 - $komisiPersen) / 100);
+            // Bagi hasil langsung dari kolom ongkir (bukan persentase lagi)
+            $komisi = $pesanan->ongkir_juru_angkut; // hak juru angkut = ongkir berdasarkan jarak
+            $perusahaan = $pesanan->biaya_admin;     // hak admin = platform fee
 
             // Metode pembayaran ke pelanggan
             $metodePembayaranPelanggan = $request->input('metode_pembayaran_pelanggan');
@@ -267,6 +291,33 @@ class OrderController extends Controller
                 // Jika tunai: tidak ada perubahan saldo, tidak buat transaksi
             }
 
+            // Subsidi ongkir untuk pesanan langganan → tambah saldo juru angkut
+            if ($pesanan->tipe_pesanan === 'langganan' && $komisi > 0) {
+                $juruAngkut = Auth::user();
+                $saldoSebelumJA = $juruAngkut->saldo;
+                $saldoSesudahJA = $saldoSebelumJA + $komisi;
+
+                $juruAngkut->update(['saldo' => $saldoSesudahJA]);
+
+                Transaksi::create([
+                    'nomor_transaksi' => 'SUB-' . now()->format('Ymd') . '-' . str_pad(
+                        Transaksi::whereDate('created_at', today())->count() + 1,
+                        4,
+                        '0',
+                        STR_PAD_LEFT
+                    ),
+                    'user_id'        => $juruAngkut->id,
+                    'tipe'           => 'masuk',
+                    'jumlah'         => $komisi,
+                    'saldo_sebelum'  => $saldoSebelumJA,
+                    'saldo_sesudah'  => $saldoSesudahJA,
+                    'status'         => 'selesai',
+                    'referensi_type' => Pesanan::class,
+                    'referensi_id'   => $pesanan->id,
+                    'deskripsi'      => 'Subsidi ongkir dari langganan pesanan ' . $pesanan->nomor_pesanan . ' (jarak: ' . $pesanan->jarak_km . ' KM)',
+                ]);
+            }
+
             return $pesanan;
         });
 
@@ -301,36 +352,4 @@ class OrderController extends Controller
         return view('juru_angkut.order.pembayaran_berhasil', compact('pesanan'));
     }
 
-    /**
-     * List langganan yang menunggu pembayaran tunai.
-     */
-    public function langgananTunai()
-    {
-        $langgananTunai = \App\Models\Langganan::where('status', 'menunggu_tunai')
-            ->where('metode_pembayaran', 'tunai')
-            ->with(['pengguna', 'paket'])
-            ->orderBy('created_at', 'desc')
-            ->get();
-
-        return view('juru_angkut.order.langganan_tunai', compact('langgananTunai'));
-    }
-
-    /**
-     * Konfirmasi bahwa tunai sudah diterima dari pelanggan.
-     * Status berubah dari menunggu_tunai → menunggu (menunggu approval admin).
-     */
-    public function konfirmasiTunai($id)
-    {
-        $langganan = \App\Models\Langganan::where('status', 'menunggu_tunai')
-            ->findOrFail($id);
-
-        $langganan->update([
-            'status' => 'menunggu',
-            'catatan' => 'Tunai telah diterima oleh juru angkut (' . Auth::user()->name . '), menunggu persetujuan admin.',
-        ]);
-
-        return redirect()
-            ->route('juru-angkut.langganan-tunai')
-            ->with('success', 'Pembayaran tunai untuk ' . ($langganan->pengguna->name ?? 'Pelanggan') . ' berhasil dikonfirmasi.');
-    }
 }

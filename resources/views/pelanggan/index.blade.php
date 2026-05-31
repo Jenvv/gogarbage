@@ -331,6 +331,59 @@
                 </div>
                 <!-- ── END PROMO ── -->
 
+                <!-- ── JADWAL HARI INI (untuk pelanggan berlangganan) ── -->
+                @if(isset($jadwalHariIni) && $jadwalHariIni)
+                    @php
+                        $jadwalStatus = $jadwalHariIni->status;
+                        $paketNama = $jadwalHariIni->langganan->paket->nama ?? 'Langganan';
+                    @endphp
+
+                    @if($jadwalStatus === 'terjadwal')
+                        <div style="background:linear-gradient(135deg,#2563eb 0%,#1e40af 100%);border-radius:20px;margin:14px 16px 0;padding:18px 20px;box-shadow:0 4px 16px rgba(37,99,235,0.2);">
+                            <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+                                <div style="width:40px;height:40px;background:rgba(255,255,255,0.2);border-radius:12px;display:flex;align-items:center;justify-content:center;">
+                                    <span style="font-size:18px;">🗓️</span>
+                                </div>
+                                <div>
+                                    <p style="font-size:14px;font-weight:700;color:#fff;">Jadwal Jemput Hari Ini</p>
+                                    <p style="font-size:11px;color:rgba(255,255,255,0.8);font-weight:500;">{{ $paketNama }}</p>
+                                </div>
+                            </div>
+                            <div style="display:flex;gap:16px;margin-top:6px;">
+                                <div style="display:flex;align-items:center;gap:6px;">
+                                    <span style="font-size:12px;">⏰</span>
+                                    <span style="font-size:12px;color:rgba(255,255,255,0.9);font-weight:600;">{{ $jadwalHariIni->jam_jemput }}</span>
+                                </div>
+                                <div style="display:flex;align-items:center;gap:6px;">
+                                    <span style="font-size:12px;">📍</span>
+                                    <span style="font-size:12px;color:rgba(255,255,255,0.9);font-weight:600;">Menunggu juru angkut</span>
+                                </div>
+                            </div>
+                        </div>
+                    @elseif($jadwalStatus === 'selesai')
+                        <div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:20px;margin:14px 16px 0;padding:16px 20px;">
+                            <div style="display:flex;align-items:center;gap:12px;">
+                                <span style="font-size:24px;">✅</span>
+                                <div>
+                                    <p style="font-size:13px;font-weight:700;color:#15803d;">Sampah hari ini sudah dijemput!</p>
+                                    <p style="font-size:11px;color:#6b7280;font-weight:500;">{{ $paketNama }} · {{ $jadwalHariIni->jam_jemput }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    @elseif($jadwalStatus === 'dilewati')
+                        <div style="background:#fefce8;border:1.5px solid #fde047;border-radius:20px;margin:14px 16px 0;padding:16px 20px;">
+                            <div style="display:flex;align-items:center;gap:12px;">
+                                <span style="font-size:24px;">⏭️</span>
+                                <div>
+                                    <p style="font-size:13px;font-weight:700;color:#a16207;">Jadwal hari ini dilewati</p>
+                                    <p style="font-size:11px;color:#6b7280;font-weight:500;">Dijadwalkan ulang ke minggu depan</p>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+                @endif
+                <!-- ── END JADWAL ── -->
+
                 <!-- ── AKTIVITAS TERAKHIR ── -->
                 <div class="aktiv-card">
                     <div style="display:flex;align-items:center;justify-content:space-between;padding-bottom:4px;">

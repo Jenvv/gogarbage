@@ -36,7 +36,7 @@ class LanggananController extends Controller
                     'metode' => $l->metode_pembayaran,
                     'jumlah' => number_format($l->jumlah_bayar, 0, ',', '.'),
                     'status' => $l->status,
-                    'bukti_url' => $l->bukti_pembayaran ? asset($l->bukti_pembayaran) : null,
+                    'bukti_url' => $l->bukti_pembayaran ? asset('storage/' . $l->bukti_pembayaran) : null,
                     'setujui_url' => route('admin.langganan.setujui', $l),
                     'tolak_url' => route('admin.langganan.tolak', $l),
                 ];
@@ -66,7 +66,10 @@ class LanggananController extends Controller
         $langganan->disetujui_oleh = Auth::id();
         $langganan->save();
 
-        return redirect()->back()->with('success', 'Langganan disetujui.');
+        // Generate jadwal penjemputan otomatis berdasarkan frekuensi paket
+        $langganan->generateJadwal();
+
+        return redirect()->back()->with('success', 'Langganan disetujui dan jadwal penjemputan berhasil digenerate.');
     }
 
     public function tolak(Request $request, Langganan $langganan)

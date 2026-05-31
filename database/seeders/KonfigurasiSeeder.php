@@ -11,11 +11,6 @@ class KonfigurasiSeeder extends Seeder
     {
         $configs = [
             [
-                'kunci'     => 'biaya_jemput',
-                'nilai'     => '5000',
-                'deskripsi' => 'Biaya jemput sampah reguler (Rp). Gratis jika pelanggan berlangganan.',
-            ],
-            [
                 'kunci'     => 'poin_per_kg',
                 'nilai'     => '10',
                 'deskripsi' => 'Jumlah poin yang didapat pelanggan per 1 kg sampah.',
@@ -26,9 +21,29 @@ class KonfigurasiSeeder extends Seeder
                 'deskripsi' => 'Bonus poin yang didapat pelanggan per 1 kali order.',
             ],
             [
-                'kunci'     => 'komisi_pengangkut_persen',
-                'nilai'     => '70',
-                'deskripsi' => 'Persentase komisi juru angkut dari biaya jemput (%).',
+                'kunci'     => 'lat_bank_sampah',
+                'nilai'     => '-0.026330',
+                'deskripsi' => 'Latitude lokasi Bank Sampah (titik awal perhitungan jarak).',
+            ],
+            [
+                'kunci'     => 'lon_bank_sampah',
+                'nilai'     => '109.342504',
+                'deskripsi' => 'Longitude lokasi Bank Sampah (titik awal perhitungan jarak).',
+            ],
+            [
+                'kunci'     => 'ongkir_base_fee',
+                'nilai'     => '10000',
+                'deskripsi' => 'Base ongkir juru angkut jika jarak ≤ 1 KM (Rp). Ini adalah tarif dasar ongkir.',
+            ],
+            [
+                'kunci'     => 'ongkir_per_km',
+                'nilai'     => '2500',
+                'deskripsi' => 'Tarif tambahan ongkir per KM setelah 1 KM pertama (Rp).',
+            ],
+            [
+                'kunci'     => 'biaya_admin_reguler',
+                'nilai'     => '2000',
+                'deskripsi' => 'Biaya admin/platform fee untuk pelanggan reguler (Rp). Gratis untuk pelanggan berlangganan.',
             ],
         ];
 
@@ -38,5 +53,9 @@ class KonfigurasiSeeder extends Seeder
                 $config
             );
         }
+
+        // Hapus konfigurasi lama yang tidak dipakai lagi
+        Konfigurasi::where('kunci', 'biaya_jemput')->delete();
+        Konfigurasi::where('kunci', 'komisi_pengangkut_persen')->delete();
     }
 }

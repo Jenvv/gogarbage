@@ -1079,11 +1079,23 @@
                 return;
             }
 
-            // Check if anorganik has price => need payment method
+            // Check if anorganik exists => require harga & metode pembayaran
             const hasAnorganik = trashItems.some(i => i.jenis.toLowerCase() === 'anorganik');
             const hargaAnorganik = document.getElementById('inputHargaAnorganik') ? parseInt(document.getElementById('inputHargaAnorganik').value) || 0 : 0;
 
-            if (hasAnorganik && hargaAnorganik > 0 && !selectedMetode) {
+            if (hasAnorganik && hargaAnorganik <= 0) {
+                showToast('⚠️ Masukkan harga pembelian anorganik!');
+                const priceWrap = document.getElementById('priceInputWrap');
+                if (priceWrap) {
+                    priceWrap.style.borderColor = '#ef4444';
+                    priceWrap.style.background = '#fef2f2';
+                    setTimeout(() => { priceWrap.style.borderColor = '#e5e7eb'; priceWrap.style.background = '#fafafa'; }, 2500);
+                }
+                document.getElementById('anorganikPriceSection').scrollIntoView({ behavior: 'smooth' });
+                return;
+            }
+
+            if (hasAnorganik && !selectedMetode) {
                 showToast('⚠️ Pilih metode pembayaran ke pelanggan!');
                 document.getElementById('metodePembayaranSection').scrollIntoView({ behavior: 'smooth' });
                 return;

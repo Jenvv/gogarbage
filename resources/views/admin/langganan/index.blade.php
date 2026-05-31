@@ -33,9 +33,6 @@
             class="langganan-filter-tab inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium {{ $s ? 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400' : 'bg-green-500 text-white' }}">Semua</a>
         <a href="{{ route('admin.langganan', ['status' => 'menunggu']) }}" data-status="menunggu"
             class="langganan-filter-tab inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium {{ $s === 'menunggu' ? 'bg-green-500 text-white' : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 cursor-pointer hover:bg-gray-200' }}">Menunggu</a>
-        <a href="{{ route('admin.langganan', ['status' => 'menunggu_tunai']) }}" data-status="menunggu_tunai"
-            class="langganan-filter-tab inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium {{ $s === 'menunggu_tunai' ? 'bg-green-500 text-white' : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 cursor-pointer hover:bg-gray-200' }}">Menunggu
-            Tunai</a>
         <a href="{{ route('admin.langganan', ['status' => 'aktif']) }}" data-status="aktif"
             class="langganan-filter-tab inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium {{ $s === 'aktif' ? 'bg-green-500 text-white' : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 cursor-pointer hover:bg-gray-200' }}">Aktif</a>
     </div>
@@ -67,7 +64,7 @@
                                 {{ ucfirst(str_replace('_', ' ', $l->status)) }}</td>
                             <td class="py-3 text-sm text-gray-700 dark:text-white/80">
                                 @if ($l->bukti_pembayaran)
-                                    <a href="{{ asset($l->bukti_pembayaran) }}" target="_blank"
+                                    <a href="{{ asset('storage/' . $l->bukti_pembayaran) }}" target="_blank"
                                         class="text-sm text-blue-600 dark:text-blue-400">Lihat</a>
                                 @else
                                     <span class="text-sm text-gray-500 dark:text-gray-400">-</span>

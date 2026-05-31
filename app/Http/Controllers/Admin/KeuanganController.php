@@ -21,7 +21,13 @@ class KeuanganController extends Controller
         $totalPendapatanPengepul = PenjualanPengepul::where('status_pembayaran', 'lunas')->sum('total_harga');
         $totalPendapatan = $totalPendapatanPesanan + $totalPendapatanPengepul;
 
-        $totalKomisiJA = Pesanan::where('status', 'selesai')->sum('komisi_pengangkut');
+        // Total ongkir yang diterima juru angkut (dari semua pesanan selesai)
+        $totalOngkirJA = Pesanan::where('status', 'selesai')->sum('ongkir_juru_angkut');
+
+        // Total subsidi ongkir admin (ongkir JA dari pesanan langganan — disubsidi dari uang langganan)
+        $totalSubsidiOngkir = Pesanan::where('status', 'selesai')
+            ->where('tipe_pesanan', 'langganan')
+            ->sum('ongkir_juru_angkut');
 
         $totalPenarikanMenunggu = Penarikan::where('status', 'menunggu')->sum('jumlah');
         $jumlahPenarikanMenunggu = Penarikan::where('status', 'menunggu')->count();
@@ -29,7 +35,7 @@ class KeuanganController extends Controller
         $totalTopUpMenunggu = TopUp::where('status', 'menunggu')->sum('jumlah');
         $jumlahTopUpMenunggu = TopUp::where('status', 'menunggu')->count();
 
-        $totalBagianPerusahaan = Pesanan::where('status', 'selesai')->sum('bagian_perusahaan');
+        $totalBiayaAdmin = Pesanan::where('status', 'selesai')->sum('biaya_admin');
 
         // ── Tabel Data ──
         $penarikan = Penarikan::with('pengguna', 'penyetuju')
@@ -51,12 +57,13 @@ class KeuanganController extends Controller
 
         return view('admin.keuangan.index', compact(
             'totalPendapatan',
-            'totalKomisiJA',
+            'totalOngkirJA',
+            'totalSubsidiOngkir',
             'totalPenarikanMenunggu',
             'jumlahPenarikanMenunggu',
             'totalTopUpMenunggu',
             'jumlahTopUpMenunggu',
-            'totalBagianPerusahaan',
+            'totalBiayaAdmin',
             'penarikan',
             'topUps',
             'transaksi',

@@ -44,7 +44,7 @@ class LanggananController extends Controller
     {
         $request->validate([
             'paket_id' => 'required|exists:paket,id',
-            'metode_pembayaran' => 'required|in:tunai,saldo,transfer',
+            'metode_pembayaran' => 'required|in:saldo,transfer',
             'bukti_pembayaran' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 

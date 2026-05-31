@@ -1,3 +1,7 @@
+@php
+    $pendingPesananCount = \App\Models\Pesanan::where('status', 'menunggu')->count();
+    $pendingLanggananCount = \App\Models\Langganan::whereIn('status', ['menunggu', 'menunggu_tunai'])->count();
+@endphp
 <aside id="sidebar"
     class="fixed flex flex-col mt-0 top-0 px-5 left-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-900 h-screen transition-all duration-300 ease-in-out z-99999 border-r border-gray-200"
     x-data="{
@@ -85,23 +89,31 @@
 
                         {{-- Pesanan --}}
                         <li>
-                            <a href="/admin/pesanan" class="menu-item group"
+                            <a href="/admin/pesanan" class="menu-item group relative"
                                 :class="isActive('/admin/pesanan') ? 'menu-item-active' : 'menu-item-inactive'">
                                 <span :class="isActive('/admin/pesanan') ? 'menu-item-icon-active' : 'menu-item-icon-inactive'">
                                     <svg class="fill-current" width="24" height="24" viewBox="0 0 24 24"><path fill-rule="evenodd" clip-rule="evenodd" d="M5.75 3A2.75 2.75 0 003 5.75v12.5A2.75 2.75 0 005.75 21h12.5A2.75 2.75 0 0021 18.25V5.75A2.75 2.75 0 0018.25 3H5.75zM4.5 5.75c0-.69.56-1.25 1.25-1.25h12.5c.69 0 1.25.56 1.25 1.25v12.5c0 .69-.56 1.25-1.25 1.25H5.75c-.69 0-1.25-.56-1.25-1.25V5.75zM8 8.25a.75.75 0 01.75-.75h6.5a.75.75 0 010 1.5h-6.5A.75.75 0 018 8.25zm0 3.75a.75.75 0 01.75-.75h6.5a.75.75 0 010 1.5h-6.5A.75.75 0 018 12zm0 3.75a.75.75 0 01.75-.75h4a.75.75 0 010 1.5h-4a.75.75 0 01-.75-.75z"/></svg>
                                 </span>
                                 <span x-show="$store.sidebar.isExpanded || $store.sidebar.isHovered || $store.sidebar.isMobileOpen" class="menu-item-text">Pesanan</span>
+                                @if($pendingPesananCount > 0)
+                                <span x-show="!isActive('/admin/pesanan') && ($store.sidebar.isExpanded || $store.sidebar.isHovered || $store.sidebar.isMobileOpen)" class="ml-auto inline-flex items-center justify-center w-5 h-5 text-[10px] font-bold text-white bg-red-500 rounded-full flex-shrink-0">{{ $pendingPesananCount }}</span>
+                                <span x-show="!isActive('/admin/pesanan') && !($store.sidebar.isExpanded || $store.sidebar.isHovered || $store.sidebar.isMobileOpen)" class="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border border-white"></span>
+                                @endif
                             </a>
                         </li>
 
                         {{-- Langganan --}}
                         <li>
-                            <a href="/admin/langganan" class="menu-item group"
+                            <a href="/admin/langganan" class="menu-item group relative"
                                 :class="isActive('/admin/langganan') ? 'menu-item-active' : 'menu-item-inactive'">
                                 <span :class="isActive('/admin/langganan') ? 'menu-item-icon-active' : 'menu-item-icon-inactive'">
                                     <svg class="fill-current" width="24" height="24" viewBox="0 0 24 24"><path fill-rule="evenodd" clip-rule="evenodd" d="M4.5 3.75a.75.75 0 00-.75.75v15c0 .414.336.75.75.75h15a.75.75 0 00.75-.75v-15a.75.75 0 00-.75-.75h-15zm-2.25.75A2.25 2.25 0 014.5 2.25h15a2.25 2.25 0 012.25 2.25v15a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25v-15zm4.5 3a.75.75 0 01.75-.75h9a.75.75 0 010 1.5h-9a.75.75 0 01-.75-.75zm.75 3a.75.75 0 000 1.5h6a.75.75 0 000-1.5h-6zM16.28 9.22a.75.75 0 010 1.06l-3 3a.75.75 0 01-1.06 0l-1.5-1.5a.75.75 0 011.06-1.06l.97.97 2.47-2.47a.75.75 0 011.06 0z"/></svg>
                                 </span>
                                 <span x-show="$store.sidebar.isExpanded || $store.sidebar.isHovered || $store.sidebar.isMobileOpen" class="menu-item-text">Langganan</span>
+                                @if($pendingLanggananCount > 0)
+                                <span x-show="!isActive('/admin/langganan') && ($store.sidebar.isExpanded || $store.sidebar.isHovered || $store.sidebar.isMobileOpen)" class="ml-auto inline-flex items-center justify-center w-5 h-5 text-[10px] font-bold text-white bg-red-500 rounded-full flex-shrink-0">{{ $pendingLanggananCount }}</span>
+                                <span x-show="!isActive('/admin/langganan') && !($store.sidebar.isExpanded || $store.sidebar.isHovered || $store.sidebar.isMobileOpen)" class="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border border-white"></span>
+                                @endif
                             </a>
                         </li>
                     </ul>

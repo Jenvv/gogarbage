@@ -4,6 +4,7 @@ use App\Http\Controllers\JuruAngkut\DashboardController as JuruAngkutDashboardCo
 use App\Http\Controllers\JuruAngkut\OrderController as JuruAngkutOrderController;
 use App\Http\Controllers\JuruAngkut\RiwayatController as JuruAngkutRiwayatController;
 use App\Http\Controllers\JuruAngkut\ProfilController as JuruAngkutProfilController;
+use App\Http\Controllers\JuruAngkut\JadwalController as JuruAngkutJadwalController;
 use App\Http\Controllers\Pelanggan\BerandaController;
 use App\Http\Controllers\Pelanggan\JemputSampahController;
 use App\Http\Controllers\Pelanggan\LanggananController;
@@ -78,8 +79,15 @@ Route::middleware(['auth', 'role:juru_angkut'])->group(function () {
     Route::get('/juru-angkut/order/{id}/selesai', [JuruAngkutOrderController::class, 'orderSelesai'])->name('juru-angkut.order.selesai');
     Route::get('/juru-angkut/order/{id}/pembayaran-berhasil', [JuruAngkutOrderController::class, 'pembayaranBerhasil'])->name('juru-angkut.order.pembayaran-berhasil');
     Route::get('/juru-angkut/riwayat', [JuruAngkutRiwayatController::class, 'index'])->name('juru-angkut.riwayat');
-    Route::get('/juru-angkut/langganan-tunai', [JuruAngkutOrderController::class, 'langgananTunai'])->name('juru-angkut.langganan-tunai');
-    Route::post('/juru-angkut/langganan-tunai/{id}/konfirmasi', [JuruAngkutOrderController::class, 'konfirmasiTunai'])->name('juru-angkut.langganan-tunai.konfirmasi');
+
+    // Jadwal Langganan - Juru Angkut
+    Route::get('/juru-angkut/jadwal', [JuruAngkutJadwalController::class, 'index'])->name('juru-angkut.jadwal');
+    Route::post('/juru-angkut/jadwal/{id}/mulai', [JuruAngkutJadwalController::class, 'mulaiJemput'])->name('juru-angkut.jadwal.mulai');
+    Route::post('/juru-angkut/jadwal/{id}/skip', [JuruAngkutJadwalController::class, 'skip'])->name('juru-angkut.jadwal.skip');
+
+    // Langganan tunai removed - langganan hanya antara pelanggan dan admin
+    // Route::get('/juru-angkut/langganan-tunai', [JuruAngkutOrderController::class, 'langgananTunai'])->name('juru-angkut.langganan-tunai');
+    // Route::post('/juru-angkut/langganan-tunai/{id}/konfirmasi', [JuruAngkutOrderController::class, 'konfirmasiTunai'])->name('juru-angkut.langganan-tunai.konfirmasi');
 
     // Profil Juru Angkut
     Route::get('/juru-angkut/profil', [JuruAngkutProfilController::class, 'index'])->name('juru-angkut.profil');
