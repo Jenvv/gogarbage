@@ -272,15 +272,15 @@
                             <td class="py-3 text-sm font-semibold text-gray-700 dark:text-gray-300">Rp {{ number_format($ks->harga_per_kg, 0, ',', '.') }}</td>
                             <td class="py-3 text-sm text-gray-700 dark:text-gray-300">{{ $ks->satuan }}</td>
                             <td class="py-3 text-sm">
-                                @if($ks->aktif)
-                                    <form method="POST" action="{{ route('admin.master-data.kategori-sampah.destroy', $ks) }}" onsubmit="return confirm('Yakin ingin menonaktifkan kategori ini?')" style="display:inline">
+                                <div class="flex items-center gap-2">
+                                    <button type="button" onclick='modalKategori.edit(@json($ks))'
+                                        class="text-blue-500 hover:text-blue-700 text-xs font-medium transition">Edit</button>
+                                    <form method="POST" action="{{ route('admin.master-data.kategori-sampah.destroy', $ks) }}" onsubmit="return confirm('Yakin ingin menghapus kategori ini?')" style="display:inline">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="text-red-500 hover:text-red-700 text-xs font-medium transition">Nonaktifkan</button>
+                                        <button type="submit" class="text-red-500 hover:text-red-700 text-xs font-medium transition">Hapus</button>
                                     </form>
-                                @else
-                                    <span class="text-xs text-gray-400">&mdash;</span>
-                                @endif
+                                </div>
                             </td>
                         </tr>
                     @empty
@@ -352,6 +352,7 @@
                 <form id="formKategoriSampah" action="{{ route('admin.master-data.kategori-sampah.store') }}" method="POST"
                     enctype="multipart/form-data" novalidate>
                     @csrf
+                    <input type="hidden" name="_method" id="ks_method" value="POST">
                     <div style="display:flex;flex-direction:column;gap:1.25rem;">
 
                         {{-- ── Nama Kategori ── --}}
@@ -586,7 +587,7 @@
                         viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
                     </svg>
-                    Simpan Kategori
+                    <span id="ks-submit-label">Simpan Kategori</span>
                 </button>
             </div>
 
@@ -604,9 +605,53 @@
             const backdrop = document.getElementById('modalKategoriBackdrop');
             const panel = document.getElementById('modalKategoriPanel');
 
-            /* 1. OPEN / CLOSE */
+            /* 1. OPEN / CLOSE / EDIT */
             window.modalKategori = {
                 open() {
+                    document.getElementById('modalKategoriTitle').textContent = 'Tambah Kategori Sampah';
+                    document.getElementById('ks-header-sub').textContent = 'Stok gudang dibuat otomatis dengan nilai 0 kg';
+                    document.getElementById('ks-submit-label').textContent = 'Simpan Kategori';
+                    document.getElementById('ks_method').value = 'POST';
+                    document.getElementById('formKategoriSampah').action = '{{ route("admin.master-data.kategori-sampah.store") }}';
+                    document.getElementById('formKategoriSampah').reset();
+                    document.getElementById('ks_aktif').value = '1';
+                    document.getElementById('ksToggleBtn').style.background = '#16a34a';
+                    document.getElementById('ksToggleThumb').style.transform = 'translateX(20px)';
+                    document.getElementById('ksAktifLabel').textContent = '● Aktif';
+                    document.getElementById('ksAktifLabel').className = 'text-xs font-medium text-green-600 mt-1';
+                    document.getElementById('ksIkonPlaceholder').style.display = '';
+                    document.getElementById('ksIkonPreviewBox').style.display = 'none';
+                    ksAktifState = true;
+
+                    wrap.style.display = 'flex';
+                    document.body.style.overflow = 'hidden';
+                    void wrap.offsetWidth;
+                    backdrop.style.opacity = '1';
+                    panel.style.transform = 'scale(1)';
+                    panel.style.opacity = '1';
+                },
+                edit(data) {
+                    document.getElementById('modalKategoriTitle').textContent = 'Edit Kategori Sampah';
+                    document.getElementById('ks-header-sub').textContent = 'Ubah data: ' + data.nama;
+                    document.getElementById('ks-submit-label').textContent = 'Update Kategori';
+                    document.getElementById('ks_method').value = 'PUT';
+                    document.getElementById('formKategoriSampah').action = '/admin/master-data/kategori-sampah/' + data.id;
+                    document.getElementById('formKategoriSampah').reset();
+
+                    document.getElementById('ks_nama').value = data.nama || '';
+                    document.getElementById('ks_slug').value = data.slug || '';
+                    document.getElementById('ks_deskripsi').value = data.deskripsi || '';
+                    document.getElementById('ks_harga_per_kg').value = data.harga_per_kg || 0;
+                    document.getElementById('ks_satuan').value = data.satuan || 'kg';
+
+                    var isAktif = data.aktif ? true : false;
+                    document.getElementById('ks_aktif').value = isAktif ? '1' : '0';
+                    document.getElementById('ksToggleBtn').style.background = isAktif ? '#16a34a' : '#98a2b3';
+                    document.getElementById('ksToggleThumb').style.transform = isAktif ? 'translateX(20px)' : 'translateX(0px)';
+                    document.getElementById('ksAktifLabel').textContent = isAktif ? '● Aktif' : '○ Nonaktif';
+                    document.getElementById('ksAktifLabel').className = isAktif ? 'text-xs font-medium text-green-600 mt-1' : 'text-xs font-medium text-gray-400 mt-1';
+                    ksAktifState = isAktif;
+
                     wrap.style.display = 'flex';
                     document.body.style.overflow = 'hidden';
                     void wrap.offsetWidth;
@@ -676,16 +721,16 @@
             };
 
             /* 4. TOGGLE AKTIF / NONAKTIF */
-            var aktifState = true;
+            var ksAktifState = true;
 
             window.ksToggleAktif = function() {
-                aktifState = !aktifState;
+                ksAktifState = !ksAktifState;
                 var btn = document.getElementById('ksToggleBtn');
                 var thumb = document.getElementById('ksToggleThumb');
                 var inp = document.getElementById('ks_aktif');
                 var lbl = document.getElementById('ksAktifLabel');
 
-                if (aktifState) {
+                if (ksAktifState) {
                     btn.style.background = '#16a34a';
                     thumb.style.transform = 'translateX(20px)';
                     inp.value = '1';
@@ -698,7 +743,7 @@
                     lbl.textContent = '○ Nonaktif';
                     lbl.className = 'text-xs font-medium text-gray-400 mt-1';
                 }
-                btn.setAttribute('aria-checked', String(aktifState));
+                btn.setAttribute('aria-checked', String(ksAktifState));
             };
 
             /* 5. SUBMIT */

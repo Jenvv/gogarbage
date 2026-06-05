@@ -245,15 +245,17 @@
                                 @endif
                             </td>
                             <td class="py-3 text-sm">
-                                @if($p->aktif)
-                                    <form method="POST" action="{{ route('admin.master-data.paket.destroy', $p) }}" onsubmit="return confirm('Yakin ingin menonaktifkan paket ini?')" style="display:inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="text-red-500 hover:text-red-700 text-xs font-medium transition">Nonaktifkan</button>
-                                    </form>
-                                @else
-                                    <span class="text-xs text-gray-400">&mdash;</span>
-                                @endif
+                                <div class="flex items-center gap-2">
+                                    <button type="button" onclick='modalPaket.edit(@json($p))'
+                                        class="text-blue-500 hover:text-blue-700 text-xs font-medium transition">Edit</button>
+                                    @if($p->aktif)
+                                        <form method="POST" action="{{ route('admin.master-data.paket.destroy', $p) }}" onsubmit="return confirm('Yakin ingin menonaktifkan paket ini?')" style="display:inline">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="text-red-500 hover:text-red-700 text-xs font-medium transition">Nonaktifkan</button>
+                                        </form>
+                                    @endif
+                                </div>
                             </td>
                         </tr>
                     @empty
@@ -309,6 +311,7 @@
                         <p id="pp-header-sub" class="text-xs text-gray-500">
                             Isi detail paket layanan jemput sampah pelanggan
                         </p>
+                        <input type="hidden" id="pp_edit_mode" value="0">
                     </div>
                 </div>
                 <button id="pp-close-btn" type="button" onclick="modalPaket.close()"
@@ -326,6 +329,7 @@
             <div class="flex-1 overflow-y-auto px-5 py-5" style="scrollbar-width:thin">
                 <form id="formPaketLangganan" action="{{ route('admin.master-data.paket.store') }}" method="POST" novalidate>
                     @csrf
+                    <input type="hidden" name="_method" id="pp_method" value="POST">
                     <div style="display:flex;flex-direction:column;gap:1.25rem;">
 
                         {{-- ════ INFORMASI DASAR ════ --}}
@@ -643,7 +647,7 @@
                         viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
                     </svg>
-                    Simpan Paket
+                    <span id="pp-submit-label">Simpan Paket</span>
                 </button>
             </div>
 
@@ -661,12 +665,63 @@
             const backdrop = document.getElementById('modalPaketBackdrop');
             const panel = document.getElementById('modalPaketPanel');
 
-            /* ── 1. OPEN / CLOSE ── */
+            /* ── 1. OPEN / CLOSE / EDIT ── */
             window.modalPaket = {
                 open() {
+                    // Reset to create mode
+                    document.getElementById('modalPaketTitle').textContent = 'Tambah Paket Langganan';
+                    document.getElementById('pp-header-sub').textContent = 'Isi detail paket layanan jemput sampah pelanggan';
+                    document.getElementById('pp-submit-label').textContent = 'Simpan Paket';
+                    document.getElementById('pp_edit_mode').value = '0';
+                    document.getElementById('pp_method').value = 'POST';
+                    document.getElementById('formPaketLangganan').action = '{{ route("admin.master-data.paket.store") }}';
+                    document.getElementById('formPaketLangganan').reset();
+                    // Reset toggle
+                    document.getElementById('pp_aktif').value = '1';
+                    document.getElementById('ppToggleBtn').style.background = '#16a34a';
+                    document.getElementById('ppToggleThumb').style.transform = 'translateX(20px)';
+                    document.getElementById('ppAktifLabel').textContent = '● Aktif';
+                    document.getElementById('ppAktifLabel').className = 'text-xs font-medium text-green-600 mt-1';
+
                     wrap.style.display = 'flex';
                     document.body.style.overflow = 'hidden';
-                    void wrap.offsetWidth; // force reflow
+                    void wrap.offsetWidth;
+                    backdrop.style.opacity = '1';
+                    panel.style.transform = 'scale(1)';
+                    panel.style.opacity = '1';
+                },
+                edit(data) {
+                    // Set to edit mode
+                    document.getElementById('modalPaketTitle').textContent = 'Edit Paket Langganan';
+                    document.getElementById('pp-header-sub').textContent = 'Ubah detail paket: ' + data.nama;
+                    document.getElementById('pp-submit-label').textContent = 'Update Paket';
+                    document.getElementById('pp_edit_mode').value = '1';
+                    document.getElementById('pp_method').value = 'PUT';
+                    document.getElementById('formPaketLangganan').action = '/admin/master-data/paket/' + data.id;
+
+                    // Fill fields
+                    document.getElementById('pp_nama').value = data.nama || '';
+                    document.getElementById('pp_deskripsi').value = data.deskripsi || '';
+                    document.getElementById('pp_info_tong').value = data.info_tong || '';
+                    document.getElementById('pp_harga').value = data.harga || 0;
+                    document.getElementById('pp_durasi_hari').value = data.durasi_hari || 30;
+                    document.getElementById('pp_frekuensi_jemput').value = data.frekuensi_jemput || 1;
+                    document.getElementById('pp_satuan_frekuensi').value = data.satuan_frekuensi || 'minggu';
+                    document.getElementById('pp_biaya_jemput').value = data.biaya_jemput || 0;
+                    document.getElementById('pp_persentase_bagi_hasil').value = data.persentase_bagi_hasil || 100;
+
+                    // Toggle status
+                    var isAktif = data.aktif ? true : false;
+                    document.getElementById('pp_aktif').value = isAktif ? '1' : '0';
+                    document.getElementById('ppToggleBtn').style.background = isAktif ? '#16a34a' : '#98a2b3';
+                    document.getElementById('ppToggleThumb').style.transform = isAktif ? 'translateX(20px)' : 'translateX(0px)';
+                    document.getElementById('ppAktifLabel').textContent = isAktif ? '● Aktif' : '○ Nonaktif';
+                    document.getElementById('ppAktifLabel').className = isAktif ? 'text-xs font-medium text-green-600 mt-1' : 'text-xs font-medium text-gray-400 mt-1';
+                    aktifState = isAktif;
+
+                    wrap.style.display = 'flex';
+                    document.body.style.overflow = 'hidden';
+                    void wrap.offsetWidth;
                     backdrop.style.opacity = '1';
                     panel.style.transform = 'scale(1)';
                     panel.style.opacity = '1';
@@ -690,7 +745,7 @@
             });
 
             /* ── 2. TOGGLE AKTIF / NONAKTIF ── */
-            var aktifState = true;
+            window.aktifState = true;
 
             window.ppToggleAktif = function() {
                 aktifState = !aktifState;

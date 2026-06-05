@@ -16,12 +16,14 @@ use Illuminate\Support\Facades\DB;
 class OrderController extends Controller
 {
     /**
-     * List semua order masuk (status = menunggu).
+     * List semua order masuk (status = menunggu, tanggal jemput hari ini).
+     * Order untuk tanggal mendatang akan masuk ke menu Jadwal.
      */
     public function index()
     {
         $orders = Pesanan::with(['pengguna', 'detailPesanan.kategoriSampah'])
             ->where('status', 'menunggu')
+            ->whereDate('tanggal_jemput', '<=', today())
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -51,6 +53,11 @@ class OrderController extends Controller
         // Pastikan status masih menunggu
         if ($pesanan->status !== 'menunggu') {
             return back()->withErrors(['order' => 'Order ini sudah diklaim oleh pengangkut lain.']);
+        }
+
+        // Cegah terima order jika tanggal jemput masih di masa depan
+        if ($pesanan->tanggal_jemput && $pesanan->tanggal_jemput->isFuture()) {
+            return back()->withErrors(['order' => 'Order ini dijadwalkan untuk tanggal ' . $pesanan->tanggal_jemput->format('d M Y') . '. Silakan tunggu hingga hari tersebut untuk menerima order.']);
         }
 
         $pesanan->update([

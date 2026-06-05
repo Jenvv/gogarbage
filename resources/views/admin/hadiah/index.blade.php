@@ -283,11 +283,15 @@
                                 @endif
                             </td>
                             <td class="py-3 text-sm">
-                                <form method="POST" action="{{ route('admin.hadiah.destroy', $h) }}" onsubmit="return confirm('Yakin ingin menghapus hadiah ini?')" style="display:inline">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="text-red-500 hover:text-red-700 text-xs font-medium transition">Hapus</button>
-                                </form>
+                                <div class="flex items-center gap-2">
+                                    <button type="button" onclick='modalHadiah.edit(@json($h))'
+                                        class="text-blue-500 hover:text-blue-700 text-xs font-medium transition">Edit</button>
+                                    <form method="POST" action="{{ route('admin.hadiah.destroy', $h) }}" onsubmit="return confirm('Yakin ingin menghapus hadiah ini?')" style="display:inline">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="text-red-500 hover:text-red-700 text-xs font-medium transition">Hapus</button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                     @empty
@@ -431,6 +435,7 @@
                 <form id="formHadiah" action="{{ route('admin.hadiah.store') }}" method="POST" enctype="multipart/form-data"
                     novalidate>
                     @csrf
+                    <input type="hidden" name="_method" id="hd_method" value="POST">
                     <div style="display:flex;flex-direction:column;gap:1.25rem;">
 
                         {{-- ════ INFORMASI DASAR ════ --}}
@@ -703,7 +708,7 @@
                         viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
                     </svg>
-                    Simpan Hadiah
+                    <span id="hd-submit-label">Simpan Hadiah</span>
                 </button>
             </div>
 
@@ -852,12 +857,56 @@
             const backdrop = document.getElementById('modalHadiahBackdrop');
             const panel = document.getElementById('modalHadiahPanel');
 
-            /* ── 1. OPEN / CLOSE ── */
+            /* ── 1. OPEN / CLOSE / EDIT ── */
             window.modalHadiah = {
                 open() {
+                    document.getElementById('modalHadiahTitle').textContent = 'Tambah Hadiah';
+                    document.getElementById('hd-header-sub').textContent = 'Tambahkan hadiah baru ke katalog penukaran poin';
+                    document.getElementById('hd-submit-label').textContent = 'Simpan Hadiah';
+                    document.getElementById('hd_method').value = 'POST';
+                    document.getElementById('formHadiah').action = '{{ route("admin.hadiah.store") }}';
+                    document.getElementById('formHadiah').reset();
+                    document.getElementById('hd_aktif').value = '1';
+                    document.getElementById('hdToggleBtn').style.background = '#16a34a';
+                    document.getElementById('hdToggleThumb').style.transform = 'translateX(20px)';
+                    document.getElementById('hdAktifLabel').textContent = '● Aktif';
+                    document.getElementById('hdAktifLabel').className = 'text-xs font-medium text-green-600 mt-1';
+                    document.getElementById('hdGambarPlaceholder').style.display = '';
+                    document.getElementById('hdGambarPreviewBox').style.display = 'none';
+                    hdAktifState = true;
+
                     wrap.style.display = 'flex';
                     document.body.style.overflow = 'hidden';
-                    void wrap.offsetWidth; // force reflow
+                    void wrap.offsetWidth;
+                    backdrop.style.opacity = '1';
+                    panel.style.transform = 'scale(1)';
+                    panel.style.opacity = '1';
+                },
+                edit(data) {
+                    document.getElementById('modalHadiahTitle').textContent = 'Edit Hadiah';
+                    document.getElementById('hd-header-sub').textContent = 'Ubah data: ' + data.nama;
+                    document.getElementById('hd-submit-label').textContent = 'Update Hadiah';
+                    document.getElementById('hd_method').value = 'PUT';
+                    document.getElementById('formHadiah').action = '/admin/hadiah/' + data.id;
+                    document.getElementById('formHadiah').reset();
+
+                    document.getElementById('hd_nama').value = data.nama || '';
+                    document.getElementById('hd_deskripsi').value = data.deskripsi || '';
+                    document.getElementById('hd_tipe').value = data.tipe || '';
+                    document.getElementById('hd_biaya_poin').value = data.biaya_poin || 0;
+                    document.getElementById('hd_stok').value = data.stok || 0;
+
+                    var isAktif = data.aktif ? true : false;
+                    document.getElementById('hd_aktif').value = isAktif ? '1' : '0';
+                    document.getElementById('hdToggleBtn').style.background = isAktif ? '#16a34a' : '#98a2b3';
+                    document.getElementById('hdToggleThumb').style.transform = isAktif ? 'translateX(20px)' : 'translateX(0px)';
+                    document.getElementById('hdAktifLabel').textContent = isAktif ? '● Aktif' : '○ Nonaktif';
+                    document.getElementById('hdAktifLabel').className = isAktif ? 'text-xs font-medium text-green-600 mt-1' : 'text-xs font-medium text-gray-400 mt-1';
+                    hdAktifState = isAktif;
+
+                    wrap.style.display = 'flex';
+                    document.body.style.overflow = 'hidden';
+                    void wrap.offsetWidth;
                     backdrop.style.opacity = '1';
                     panel.style.transform = 'scale(1)';
                     panel.style.opacity = '1';
@@ -908,16 +957,16 @@
             };
 
             /* ── 3. TOGGLE AKTIF / NONAKTIF ── */
-            var aktifState = true;
+            var hdAktifState = true;
 
             window.hdToggleAktif = function() {
-                aktifState = !aktifState;
+                hdAktifState = !hdAktifState;
                 var btn = document.getElementById('hdToggleBtn');
                 var thumb = document.getElementById('hdToggleThumb');
                 var inp = document.getElementById('hd_aktif');
                 var lbl = document.getElementById('hdAktifLabel');
 
-                if (aktifState) {
+                if (hdAktifState) {
                     btn.style.background = '#16a34a';
                     thumb.style.transform = 'translateX(20px)';
                     inp.value = '1';
@@ -930,7 +979,7 @@
                     lbl.textContent = '○ Nonaktif';
                     lbl.className = 'text-xs font-medium text-gray-400 mt-1';
                 }
-                btn.setAttribute('aria-checked', String(aktifState));
+                btn.setAttribute('aria-checked', String(hdAktifState));
             };
 
             /* ── 4. SUBMIT ── */

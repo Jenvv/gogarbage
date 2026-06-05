@@ -18,9 +18,10 @@ class DashboardController extends Controller
         // Sementara: ambil user pertama dengan role juru_angkut, atau user yang login
         $user = Auth::user();
 
-        // Order menunggu (belum diklaim oleh siapapun)
+        // Order menunggu (belum diklaim, tanggal jemput hari ini atau sudah lewat)
         $orderMenunggu = Pesanan::with(['pengguna', 'detailPesanan.kategoriSampah'])
             ->where('status', 'menunggu')
+            ->whereDate('tanggal_jemput', '<=', today())
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -49,10 +50,16 @@ class DashboardController extends Controller
             ->whereDate('diselesaikan_pada', today())
             ->count();
 
-        // Jadwal langganan hari ini (terjadwal)
-        $jadwalHariIniCount = JadwalLangganan::whereDate('tanggal_jemput', today())
+        // Jadwal hari ini: jadwal_langganan terjadwal + pesanan reguler menunggu untuk hari ini
+        $jadwalLanggananCount = JadwalLangganan::whereDate('tanggal_jemput', today())
             ->where('status', 'terjadwal')
             ->count();
+
+        $pesananTerjadwalCount = Pesanan::where('status', 'menunggu')
+            ->whereDate('tanggal_jemput', '>', today())
+            ->count();
+
+        $jadwalHariIniCount = $jadwalLanggananCount + $pesananTerjadwalCount;
 
         return view('juru_angkut.index', compact(
             'orderMenunggu',

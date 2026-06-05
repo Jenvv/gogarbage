@@ -178,6 +178,8 @@
                         @endif
                     </div>
                     <div class="flex items-center gap-2">
+                        <button type="button" onclick='modalPengepul.edit(@json($p))'
+                            class="text-blue-500 hover:text-blue-700 text-xs font-medium transition">Edit</button>
                         <form method="POST" action="{{ route('admin.pengguna.pengepul.destroy', $p) }}" onsubmit="return confirm('Yakin ingin menghapus pengepul ini?')">
                             @csrf
                             @method('DELETE')
@@ -259,6 +261,7 @@
             <div class="flex-1 overflow-y-auto px-5 py-5" style="scrollbar-width:thin">
                 <form id="formPengepul" action="{{ route('admin.pengguna.pengepul.store') }}" method="POST" enctype="multipart/form-data" novalidate>
                     @csrf
+                    <input type="hidden" name="_method" id="pgp_method" value="POST">
                     <input type="hidden" name="role" value="pengepul">
 
                     <div style="display:flex;flex-direction:column;gap:1.25rem;">
@@ -511,7 +514,7 @@
                         viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
                     </svg>
-                    Simpan Pengepul
+                    <span id="pgp-submit-label">Simpan Pengepul</span>
                 </button>
             </div>
 
@@ -528,9 +531,44 @@
             const backdrop = document.getElementById('modalPengepulBackdrop');
             const panel = document.getElementById('modalPengepulPanel');
 
-            /* ── Open / Close ── */
+            /* ── Open / Close / Edit ── */
             window.modalPengepul = {
                 open() {
+                    document.getElementById('modalPengepulTitle').textContent = 'Tambah Pengepul';
+                    document.getElementById('pgp-header-sub').innerHTML = 'Akun baru akan mendapat role <code class="font-mono">pengepul</code>';
+                    document.getElementById('pgp-submit-label').textContent = 'Simpan Pengepul';
+                    document.getElementById('pgp_method').value = 'POST';
+                    document.getElementById('formPengepul').action = '{{ route("admin.pengguna.pengepul.store") }}';
+                    document.getElementById('formPengepul').reset();
+                    document.getElementById('pgp_password').required = true;
+                    document.getElementById('pgp_password_confirmation').required = true;
+                    document.getElementById('pgpFotoPlaceholder').style.display = '';
+                    document.getElementById('pgpFotoPreviewBox').style.display = 'none';
+
+                    wrap.style.display = 'flex';
+                    document.body.style.overflow = 'hidden';
+                    void wrap.offsetWidth;
+                    backdrop.style.opacity = '1';
+                    panel.style.transform = 'scale(1)';
+                    panel.style.opacity = '1';
+                },
+                edit(data) {
+                    document.getElementById('modalPengepulTitle').textContent = 'Edit Pengepul';
+                    document.getElementById('pgp-header-sub').textContent = 'Ubah data: ' + data.name;
+                    document.getElementById('pgp-submit-label').textContent = 'Update Pengepul';
+                    document.getElementById('pgp_method').value = 'PUT';
+                    document.getElementById('formPengepul').action = '/admin/pengguna/pengepul/' + data.id;
+                    document.getElementById('formPengepul').reset();
+
+                    document.getElementById('pgp_name').value = data.name || '';
+                    document.getElementById('pgp_email').value = data.email || '';
+                    document.getElementById('pgp_telepon').value = data.telepon || '';
+                    document.getElementById('pgp_alamat').value = data.alamat || '';
+                    document.getElementById('pgp_password').required = false;
+                    document.getElementById('pgp_password_confirmation').required = false;
+                    document.getElementById('pgp_password').placeholder = 'Kosongkan jika tidak diubah';
+                    document.getElementById('pgp_password_confirmation').placeholder = 'Kosongkan jika tidak diubah';
+
                     wrap.style.display = 'flex';
                     document.body.style.overflow = 'hidden';
                     void wrap.offsetWidth;

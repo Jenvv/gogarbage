@@ -192,6 +192,8 @@
                             <td class="py-3 text-sm text-gray-700 dark:text-gray-300">{{ $ja->total_order ?? 0 }}</td>
                             <td class="py-3 text-sm">
                                 <div class="flex items-center gap-2">
+                                    <button type="button" onclick='modalJuruAngkut.edit(@json($ja))'
+                                        class="text-blue-500 hover:text-blue-700 text-xs font-medium transition">Edit</button>
                                     <form method="POST" action="{{ route('admin.pengguna.juru-angkut.destroy', $ja) }}" onsubmit="return confirm('Yakin ingin menghapus juru angkut ini?')">
                                         @csrf
                                         @method('DELETE')
@@ -274,6 +276,7 @@
                 --}}
                 <form id="formJuruAngkut" action="{{ route('admin.pengguna.juru-angkut.store') }}" method="POST" enctype="multipart/form-data" novalidate>
                     @csrf
+                    <input type="hidden" name="_method" id="ja_method" value="POST">
                     <input type="hidden" name="role" value="juru_angkut">
 
                     <div style="display:flex;flex-direction:column;gap:1.25rem;">
@@ -532,7 +535,7 @@
                         viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
                     </svg>
-                    Simpan Juru Angkut
+                    <span id="ja-submit-label">Simpan Juru Angkut</span>
                 </button>
             </div>
 
@@ -550,9 +553,47 @@
             const backdrop = document.getElementById('modalJuruAngkutBackdrop');
             const panel = document.getElementById('modalJuruAngkutPanel');
 
-            /* ── Open / Close ── */
+            /* ── Open / Close / Edit ── */
             window.modalJuruAngkut = {
                 open() {
+                    document.getElementById('modalJuruAngkutTitle').textContent = 'Tambah Juru Angkut';
+                    document.getElementById('ja-header-sub').innerHTML = 'Akun baru akan mendapat role <code class="font-mono">juru_angkut</code>';
+                    document.getElementById('ja-submit-label').textContent = 'Simpan Juru Angkut';
+                    document.getElementById('ja_method').value = 'POST';
+                    document.getElementById('formJuruAngkut').action = '{{ route("admin.pengguna.juru-angkut.store") }}';
+                    document.getElementById('formJuruAngkut').reset();
+                    document.getElementById('ja_password').required = true;
+                    document.getElementById('ja_password_confirmation').required = true;
+                    // Reset foto
+                    document.getElementById('jaFotoPlaceholder').style.display = '';
+                    document.getElementById('jaFotoPreviewBox').style.display = 'none';
+
+                    wrap.style.display = 'flex';
+                    document.body.style.overflow = 'hidden';
+                    void wrap.offsetWidth;
+                    backdrop.style.opacity = '1';
+                    panel.style.transform = 'scale(1)';
+                    panel.style.opacity = '1';
+                },
+                edit(data) {
+                    document.getElementById('modalJuruAngkutTitle').textContent = 'Edit Juru Angkut';
+                    document.getElementById('ja-header-sub').textContent = 'Ubah data: ' + data.name;
+                    document.getElementById('ja-submit-label').textContent = 'Update Juru Angkut';
+                    document.getElementById('ja_method').value = 'PUT';
+                    document.getElementById('formJuruAngkut').action = '/admin/pengguna/juru-angkut/' + data.id;
+                    document.getElementById('formJuruAngkut').reset();
+
+                    // Fill fields
+                    document.getElementById('ja_name').value = data.name || '';
+                    document.getElementById('ja_email').value = data.email || '';
+                    document.getElementById('ja_telepon').value = data.telepon || '';
+                    document.getElementById('ja_alamat').value = data.alamat || '';
+                    // Password optional for edit
+                    document.getElementById('ja_password').required = false;
+                    document.getElementById('ja_password_confirmation').required = false;
+                    document.getElementById('ja_password').placeholder = 'Kosongkan jika tidak diubah';
+                    document.getElementById('ja_password_confirmation').placeholder = 'Kosongkan jika tidak diubah';
+
                     wrap.style.display = 'flex';
                     document.body.style.overflow = 'hidden';
                     void wrap.offsetWidth;

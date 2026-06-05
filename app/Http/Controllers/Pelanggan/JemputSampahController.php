@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Pelanggan;
 use App\Http\Controllers\Controller;
 use App\Models\DetailPesanan;
 use App\Models\KategoriSampah;
+use App\Models\Langganan;
 use App\Models\Pesanan;
 use App\Models\Transaksi;
 use Illuminate\Http\Request;
@@ -12,6 +13,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use App\Models\Konfigurasi;
+use Carbon\CarbonImmutable;
 
 class JemputSampahController extends Controller
 {
@@ -153,6 +155,14 @@ class JemputSampahController extends Controller
         $biayaAdmin = (int) Konfigurasi::getValue('biaya_admin_reguler', 2000);
 
         if ($isBerlangganan) {
+            // Validasi kuota langganan
+            $sisaKuota = $langgananAktif->sisaKuota();
+            if ($sisaKuota <= 0) {
+                return back()->withErrors([
+                    'pesanan' => 'Kuota penjemputan langganan sudah habis. Silakan perpanjang paket.'
+                ])->withInput();
+            }
+
             $biayaAdmin = 0;
             $totalBayar = 0; // Pelanggan tidak bayar apa-apa
         } else {
@@ -303,6 +313,15 @@ class JemputSampahController extends Controller
 
             return $pesanan;
         });
+
+        // Jika berlangganan → trigger reschedule jadwal
+        if ($isBerlangganan && !empty($draft['langganan_id'])) {
+            $langganan = Langganan::find($draft['langganan_id']);
+            if ($langganan) {
+                $titikOrder = CarbonImmutable::parse($draft['tanggal_jemput']);
+                $langganan->rescheduleAfterManualOrder($titikOrder);
+            }
+        }
 
         // Hapus draft dari session setelah berhasil
         session()->forget('pesanan_draft');

@@ -13,41 +13,72 @@ use Illuminate\Support\Facades\DB;
 class JadwalController extends Controller
 {
     /**
-     * Tampilkan semua jadwal langganan hari ini dan mendatang.
+     * Tampilkan jadwal: tab Pesanan Reguler & tab Pelanggan Langganan.
      */
     public function index(Request $request)
     {
-        $tanggal = $request->query('tanggal', today()->toDateString());
-
-        // Jadwal hari yang dipilih (semua jadwal yang belum di-assign atau milik JA ini)
-        $jadwalHariIni = JadwalLangganan::with(['pelanggan', 'langganan.paket'])
-            ->whereDate('tanggal_jemput', $tanggal)
-            ->where('status', 'terjadwal')
-            ->orderBy('jam_jemput')
-            ->get();
-
-        // Jadwal mendatang (7 hari ke depan)
-        $jadwalMendatang = JadwalLangganan::with(['pelanggan', 'langganan.paket'])
-            ->whereDate('tanggal_jemput', '>', $tanggal)
-            ->whereDate('tanggal_jemput', '<=', now()->addDays(7)->toDateString())
-            ->where('status', 'terjadwal')
+        // ── 1. PESANAN REGULER MENDATANG (belum bisa diklaim karena tanggal future) ──
+        $pesananReguler = Pesanan::with(['pengguna', 'detailPesanan.kategoriSampah'])
+            ->where('status', 'menunggu')
+            ->whereDate('tanggal_jemput', '>', today())
             ->orderBy('tanggal_jemput')
-            ->orderBy('jam_jemput')
             ->get();
 
-        // Summary stats
-        $totalHariIni = JadwalLangganan::whereDate('tanggal_jemput', today())->count();
-        $selesaiHariIni = JadwalLangganan::whereDate('tanggal_jemput', today())->where('status', 'selesai')->count();
-        $dilewatiHariIni = JadwalLangganan::whereDate('tanggal_jemput', today())->where('status', 'dilewati')->count();
-        $terjadwalHariIni = JadwalLangganan::whereDate('tanggal_jemput', today())->where('status', 'terjadwal')->count();
+        // ── 2. LANGGANAN AKTIF — grouped by langganan with all jadwal ──
+        $langgananAktif = \App\Models\Langganan::with(['pengguna', 'paket'])
+            ->where('status', 'aktif')
+            ->whereDate('tanggal_selesai', '>=', today())
+            ->get()
+            ->map(function ($l) {
+                // Ambil semua jadwal untuk langganan ini
+                $jadwalSemua = JadwalLangganan::where('langganan_id', $l->id)
+                    ->orderBy('tanggal_jemput')
+                    ->get();
+
+                $totalJadwal = $jadwalSemua->count();
+                $selesai = $jadwalSemua->where('status', 'selesai')->count();
+                $terjadwal = $jadwalSemua->where('status', 'terjadwal')->count();
+                $nextJadwal = $jadwalSemua->where('status', 'terjadwal')
+                    ->where('tanggal_jemput', '>=', today())
+                    ->first();
+
+                return (object) [
+                    'id'              => $l->id,
+                    'nama_pelanggan'  => $l->pengguna->name ?? 'Pelanggan',
+                    'paket_nama'      => $l->paket->nama ?? 'Paket',
+                    'frekuensi'       => $l->paket->frekuensi_jemput ?? 0,
+                    'satuan'          => $l->paket->satuan_frekuensi ?? 'minggu',
+                    'tanggal_mulai'   => $l->tanggal_mulai,
+                    'tanggal_selesai' => $l->tanggal_selesai,
+                    'total_jadwal'    => $totalJadwal,
+                    'selesai'         => $selesai,
+                    'terjadwal'       => $terjadwal,
+                    'next_tanggal'    => $nextJadwal?->tanggal_jemput?->format('d M Y'),
+                    'jadwal_list'     => $jadwalSemua->map(fn($j) => (object) [
+                        'id'      => $j->id,
+                        'tanggal' => $j->tanggal_jemput->format('d M Y'),
+                        'hari'    => $j->tanggal_jemput->translatedFormat('l'),
+                        'jam'     => $j->jam_jemput,
+                        'status'  => $j->status,
+                        'raw_date' => $j->tanggal_jemput->toDateString(),
+                    ]),
+                ];
+            });
+
+        // Summary counts
+        $totalPesananReguler = $pesananReguler->count();
+        $totalLanggananAktif = $langgananAktif->count();
+
+        // Badge count for nav
+        $terjadwalHariIni = JadwalLangganan::whereDate('tanggal_jemput', today())
+            ->where('status', 'terjadwal')->count()
+            + Pesanan::where('status', 'menunggu')->whereDate('tanggal_jemput', '>', today())->count();
 
         return view('juru_angkut.jadwal.index', compact(
-            'jadwalHariIni',
-            'jadwalMendatang',
-            'tanggal',
-            'totalHariIni',
-            'selesaiHariIni',
-            'dilewatiHariIni',
+            'pesananReguler',
+            'langgananAktif',
+            'totalPesananReguler',
+            'totalLanggananAktif',
             'terjadwalHariIni'
         ));
     }
