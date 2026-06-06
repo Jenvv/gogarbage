@@ -177,9 +177,7 @@ Route::middleware('auth')->get('/api/pesanan/{id}/status', function ($id) {
     return response()->json(['status' => $pesanan->status]);
 });
 
-Route::get('/dashboard', function () {
-    return redirect()->route(auth()->user()->getDashboardRoute());
-})->middleware(['auth', 'verified'])->name('dashboard');
+
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
