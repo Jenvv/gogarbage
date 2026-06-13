@@ -362,19 +362,11 @@
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                     d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
-                            <select name="jam_jemput" id="jamSelect" onchange="updateSelectColor(this)"
-                                class="{{ old('jam_jemput') ? 'selected' : '' }}">
-                                <option value="" disabled {{ old('jam_jemput') ? '' : 'selected' }}>Pilih Jam
-                                </option>
-                                <option value="08:00" {{ old('jam_jemput') == '08:00' ? 'selected' : '' }}>08:00 –
-                                    10:00</option>
-                                <option value="10:00" {{ old('jam_jemput') == '10:00' ? 'selected' : '' }}>10:00 –
-                                    12:00</option>
-                                <option value="13:00" {{ old('jam_jemput') == '13:00' ? 'selected' : '' }}>13:00 –
-                                    15:00</option>
-                                <option value="15:00" {{ old('jam_jemput') == '15:00' ? 'selected' : '' }}>15:00 –
-                                    17:00</option>
-                            </select>
+                            <input type="time" name="jam_jemput" id="jamInput"
+                                value="{{ old('jam_jemput') }}"
+                                style="color:{{ old('jam_jemput') ? '#374151' : '#9ca3af' }};"
+                                onchange="this.style.color = this.value ? '#374151' : '#9ca3af';"
+                                placeholder="Pilih Jam" />
                         </div>
 
                         <div style="height:20px;"></div>
@@ -399,7 +391,7 @@
                                 <p style="font-size:13px;font-weight:700;color:#374151;">Biaya Jemput</p>
                                 <p style="font-size:11px;color:#9ca3af;margin-top:2px;" id="biayaSubtext">
                                     @if ($isBerlangganan)
-                                        Gratis karena kamu berlangganan 🎉
+                                        Gratis karena kamu berlangganan
                                     @else
                                         Dihitung otomatis berdasarkan jarak lokasi
                                     @endif
@@ -782,7 +774,7 @@
         document.getElementById('formJemputSampah').addEventListener('submit', function(e) {
             const lokasi = document.getElementById('lokasiInput').value.trim();
             const tanggal = document.getElementById('tanggalInput').value;
-            const jam = document.getElementById('jamSelect').value;
+            const jam = document.getElementById('jamInput').value;
 
             let errors = [];
             if (!lokasi) errors.push('Pilih lokasi penjemputan dari peta');

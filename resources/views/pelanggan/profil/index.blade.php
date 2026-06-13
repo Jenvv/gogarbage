@@ -439,9 +439,20 @@
                                         d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                                 </svg>
                             </div>
-                            <div>
+                            <div style="flex:1;">
                                 <p style="font-size:11.5px;color:#9ca3af;font-weight:500;margin-bottom:3px;">Alamat</p>
                                 <p style="font-size:14px;font-weight:700;color:#111827;line-height:1.45;">{{ $user->alamat ?? '-' }}</p>
+                                @if($user->latitude && $user->longitude)
+                                    <p style="font-size:11px;color:#9ca3af;margin-top:3px;">📍 {{ number_format($user->latitude, 5) }}, {{ number_format($user->longitude, 5) }}</p>
+                                @endif
+                                <a href="{{ route('pelanggan.set-alamat') }}"
+                                    style="display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:600;color:#16a34a;margin-top:6px;text-decoration:none;">
+                                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                    </svg>
+                                    Ubah Lokasi di Peta
+                                </a>
                             </div>
                         </div>
                         <!-- Email -->

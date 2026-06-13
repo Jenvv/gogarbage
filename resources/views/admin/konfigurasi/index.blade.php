@@ -18,6 +18,7 @@
         $ongkirBaseFee = $configs->firstWhere('kunci', 'ongkir_base_fee');
         $ongkirPerKm = $configs->firstWhere('kunci', 'ongkir_per_km');
         $biayaAdminReguler = $configs->firstWhere('kunci', 'biaya_admin_reguler');
+        $komisiAdminPersen = $configs->firstWhere('kunci', 'komisi_admin_persen');
         $poinPerKg = $configs->firstWhere('kunci', 'poin_per_kg');
         $poinPerOrder = $configs->firstWhere('kunci', 'poin_per_order');
         $latBankSampah = $configs->firstWhere('kunci', 'lat_bank_sampah');
@@ -29,7 +30,7 @@
 
         {{-- Section: Ongkir --}}
         <h3 class="text-base font-semibold text-gray-700 dark:text-white/80 mb-3">💰 Pengaturan Ongkir</h3>
-        <div class="grid grid-cols-1 gap-6 lg:grid-cols-3 mb-8">
+        <div class="grid grid-cols-1 gap-6 lg:grid-cols-2 mb-8">
             {{-- Base Ongkir --}}
             <div class="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03] p-6">
                 <div class="flex items-center gap-3 mb-4">
@@ -97,6 +98,30 @@
                         class="w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-sm text-gray-800 dark:text-white pl-10 pr-4 py-3 focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
                 </div>
                 @error('biaya_admin_reguler')
+                    <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
+                @enderror
+            </div>
+
+            {{-- Komisi Admin (Persentase) --}}
+            <div class="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03] p-6">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-10 h-10 bg-red-50 dark:bg-red-500/10 rounded-xl flex items-center justify-center">
+                        <svg class="w-5 h-5 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-semibold text-gray-800 dark:text-white">Komisi Admin</h3>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Persentase dari biaya jemput reguler yang menjadi komisi admin</p>
+                    </div>
+                </div>
+                <div class="relative">
+                    <input type="number" name="komisi_admin_persen" value="{{ old('komisi_admin_persen', $komisiAdminPersen->nilai ?? 10) }}" min="0" max="100" step="0.1"
+                        class="w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-sm text-gray-800 dark:text-white pl-4 pr-10 py-3 focus:ring-2 focus:ring-red-500 focus:border-red-500">
+                    <span class="absolute right-3 top-1/2 -translate-y-1/2 text-sm font-semibold text-gray-500">%</span>
+                </div>
+                <p class="mt-2 text-xs text-gray-400 dark:text-gray-500">Contoh: 10% dari Rp 15.000 = Rp 1.500 untuk admin</p>
+                @error('komisi_admin_persen')
                     <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
                 @enderror
             </div>

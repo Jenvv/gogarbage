@@ -46,7 +46,6 @@ class Pesanan extends Model
     {
         return [
             'tanggal_jemput'      => 'date',
-            'jam_jemput'          => 'datetime',
             'jarak_km'            => 'decimal:2',
             'biaya_jemput'        => 'decimal:2',
             'ongkir_juru_angkut'  => 'decimal:2',

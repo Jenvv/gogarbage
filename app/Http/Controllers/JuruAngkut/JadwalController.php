@@ -98,19 +98,14 @@ class JadwalController extends Controller
         $langganan = $jadwal->langganan;
         $pelanggan = $jadwal->pelanggan;
 
-        // Hitung ongkir berdasarkan jarak (gunakan alamat pelanggan)
+        // Hitung ongkir berdasarkan jarak (gunakan alamat pelanggan yang tersimpan di profil)
         $latBase = (float) Konfigurasi::getValue('lat_bank_sampah', -0.026330);
         $lonBase = (float) Konfigurasi::getValue('lon_bank_sampah', 109.342504);
 
-        // Ambil koordinat pelanggan dari alamat tersimpan (jika ada dari pesanan terakhir)
-        $pesananTerakhir = Pesanan::where('user_id', $pelanggan->id)
-            ->whereNotNull('latitude')
-            ->latest()
-            ->first();
-
-        $latUser = $pesananTerakhir->latitude ?? $latBase;
-        $lonUser = $pesananTerakhir->longitude ?? $lonBase;
-        $alamat = $pesananTerakhir->alamat_jemput ?? $pelanggan->alamat ?? 'Alamat pelanggan';
+        // Gunakan koordinat pelanggan dari profil (wajib diisi via middleware)
+        $latUser = $pelanggan->latitude ?? $latBase;
+        $lonUser = $pelanggan->longitude ?? $lonBase;
+        $alamat = $pelanggan->alamat ?? 'Alamat pelanggan';
 
         // Hitung jarak (Haversine fallback)
         $jarakKm = $this->hitungJarakHaversine($latBase, $lonBase, (float) $latUser, (float) $lonUser);

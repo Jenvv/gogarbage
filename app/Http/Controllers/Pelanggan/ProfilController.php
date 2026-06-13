@@ -23,6 +23,8 @@ class ProfilController extends Controller
             'name' => 'required|string|max:255',
             'telepon' => 'nullable|string|max:20',
             'alamat' => 'nullable|string|max:1000',
+            'latitude' => 'nullable|numeric',
+            'longitude' => 'nullable|numeric',
             'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
@@ -30,8 +32,12 @@ class ProfilController extends Controller
         $user->telepon = $request->telepon;
         $user->alamat = $request->alamat;
 
+        if ($request->filled('latitude') && $request->filled('longitude')) {
+            $user->latitude = $request->latitude;
+            $user->longitude = $request->longitude;
+        }
+
         if ($request->hasFile('foto')) {
-            // Hapus foto lama jika ada
             if ($user->foto && Storage::disk('public')->exists($user->foto)) {
                 Storage::disk('public')->delete($user->foto);
             }
@@ -42,5 +48,38 @@ class ProfilController extends Controller
         $user->save();
 
         return redirect()->route('pelanggan.profil')->with('success', 'Profil berhasil diperbarui');
+    }
+
+    /**
+     * Halaman wajib isi alamat (untuk pelanggan yang belum set lokasi).
+     */
+    public function setAlamat()
+    {
+        $user = Auth::user();
+        return view('pelanggan.profil.set_alamat', compact('user'));
+    }
+
+    /**
+     * Simpan alamat wajib.
+     */
+    public function simpanAlamat(Request $request)
+    {
+        $request->validate([
+            'alamat' => 'required|string|max:1000',
+            'latitude' => 'required|numeric',
+            'longitude' => 'required|numeric',
+        ], [
+            'alamat.required' => 'Alamat wajib diisi.',
+            'latitude.required' => 'Silakan pilih lokasi dari peta.',
+            'longitude.required' => 'Silakan pilih lokasi dari peta.',
+        ]);
+
+        $user = Auth::user();
+        $user->alamat = $request->alamat;
+        $user->latitude = $request->latitude;
+        $user->longitude = $request->longitude;
+        $user->save();
+
+        return redirect()->route('pelanggan.index')->with('success', 'Alamat berhasil disimpan!');
     }
 }

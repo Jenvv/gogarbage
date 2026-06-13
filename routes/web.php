@@ -36,34 +36,41 @@ Route::get('/', function () {
 
 // Pelanggan
 Route::middleware(['auth', 'role:pengguna'])->group(function () {
-    Route::get('/pelanggan', [BerandaController::class, 'index'])->name('pelanggan.index');
+    // Halaman set alamat (tidak di-guard oleh ensure.alamat)
+    Route::get('/pelanggan/set-alamat', [PelangganProfilController::class, 'setAlamat'])->name('pelanggan.set-alamat');
+    Route::post('/pelanggan/set-alamat', [PelangganProfilController::class, 'simpanAlamat'])->name('pelanggan.simpan-alamat');
 
-    // Jemput Sampah
-    Route::get('/pelanggan/jemput-sampah', [JemputSampahController::class, 'index'])->name('pelanggan.jemput-sampah');
-    Route::post('/pelanggan/jemput-sampah', [JemputSampahController::class, 'store'])->name('pelanggan.jemput-sampah.store');
-    Route::get('/pelanggan/jemput-sampah/konfirmasi', [JemputSampahController::class, 'konfirmasi_pesanan'])->name('pelanggan.konfirmasi-pesanan');
-    Route::post('/pelanggan/jemput-sampah/confirm', [JemputSampahController::class, 'confirm_pesanan'])->name('pelanggan.confirm-pesanan');
-    Route::get('/pelanggan/jemput-sampah/{id}/sukses', [JemputSampahController::class, 'order_sukses'])->name('pelanggan.order-sukses');
-    Route::get('/pelanggan/jemput-sampah/{id}/tracking', [JemputSampahController::class, 'tracking_pesanan'])->name('pelanggan.tracking-pesanan');
-    Route::get('/pelanggan/jemput-sampah/{id}/order_selesai', [JemputSampahController::class, 'order_selesai'])->name('pelanggan.order_selesai');
-    Route::get('/pelanggan/riwayat', [RiwayatController::class, 'index'])->name('pelanggan.riwayat');
-    Route::get('/pelanggan/langganan', [LanggananController::class, 'index'])->name('pelanggan.langganan');
-    Route::post('/pelanggan/langganan', [LanggananController::class, 'store'])->name('pelanggan.langganan.store');
-    Route::post('/pelanggan/langganan/{id}/batalkan', [LanggananController::class, 'batalkan'])->name('pelanggan.langganan.batalkan');
+    // Semua fitur pelanggan — wajib punya alamat
+    Route::middleware('ensure.alamat')->group(function () {
+        Route::get('/pelanggan', [BerandaController::class, 'index'])->name('pelanggan.index');
 
-    // Profil Pelanggan
-    Route::get('/pelanggan/profil', [PelangganProfilController::class, 'index'])->name('pelanggan.profil');
-    Route::post('/pelanggan/profil', [PelangganProfilController::class, 'update'])->name('pelanggan.profil.update');
+        // Jemput Sampah
+        Route::get('/pelanggan/jemput-sampah', [JemputSampahController::class, 'index'])->name('pelanggan.jemput-sampah');
+        Route::post('/pelanggan/jemput-sampah', [JemputSampahController::class, 'store'])->name('pelanggan.jemput-sampah.store');
+        Route::get('/pelanggan/jemput-sampah/konfirmasi', [JemputSampahController::class, 'konfirmasi_pesanan'])->name('pelanggan.konfirmasi-pesanan');
+        Route::post('/pelanggan/jemput-sampah/confirm', [JemputSampahController::class, 'confirm_pesanan'])->name('pelanggan.confirm-pesanan');
+        Route::get('/pelanggan/jemput-sampah/{id}/sukses', [JemputSampahController::class, 'order_sukses'])->name('pelanggan.order-sukses');
+        Route::get('/pelanggan/jemput-sampah/{id}/tracking', [JemputSampahController::class, 'tracking_pesanan'])->name('pelanggan.tracking-pesanan');
+        Route::get('/pelanggan/jemput-sampah/{id}/order_selesai', [JemputSampahController::class, 'order_selesai'])->name('pelanggan.order_selesai');
+        Route::get('/pelanggan/riwayat', [RiwayatController::class, 'index'])->name('pelanggan.riwayat');
+        Route::get('/pelanggan/langganan', [LanggananController::class, 'index'])->name('pelanggan.langganan');
+        Route::post('/pelanggan/langganan', [LanggananController::class, 'store'])->name('pelanggan.langganan.store');
+        Route::post('/pelanggan/langganan/{id}/batalkan', [LanggananController::class, 'batalkan'])->name('pelanggan.langganan.batalkan');
 
-    // Dompet Pelanggan
-    Route::get('/pelanggan/dompet', [DompetController::class, 'index'])->name('pelanggan.dompet');
-    Route::post('/pelanggan/dompet/topup', [DompetController::class, 'topUp'])->name('pelanggan.dompet.topup');
-    Route::post('/pelanggan/dompet/tarik', [DompetController::class, 'tarikSaldo'])->name('pelanggan.dompet.tarik');
-    Route::post('/pelanggan/dompet/rekening', [DompetController::class, 'simpanRekening'])->name('pelanggan.dompet.rekening');
+        // Profil Pelanggan
+        Route::get('/pelanggan/profil', [PelangganProfilController::class, 'index'])->name('pelanggan.profil');
+        Route::post('/pelanggan/profil', [PelangganProfilController::class, 'update'])->name('pelanggan.profil.update');
 
-    // Klaim Hadiah Pelanggan
-    Route::get('/pelanggan/klaim', [KlaimController::class, 'index'])->name('pelanggan.klaim.index');
-    Route::post('/pelanggan/klaim', [KlaimController::class, 'store'])->name('pelanggan.klaim.store');
+        // Dompet Pelanggan
+        Route::get('/pelanggan/dompet', [DompetController::class, 'index'])->name('pelanggan.dompet');
+        Route::post('/pelanggan/dompet/topup', [DompetController::class, 'topUp'])->name('pelanggan.dompet.topup');
+        Route::post('/pelanggan/dompet/tarik', [DompetController::class, 'tarikSaldo'])->name('pelanggan.dompet.tarik');
+        Route::post('/pelanggan/dompet/rekening', [DompetController::class, 'simpanRekening'])->name('pelanggan.dompet.rekening');
+
+        // Klaim Hadiah Pelanggan
+        Route::get('/pelanggan/klaim', [KlaimController::class, 'index'])->name('pelanggan.klaim.index');
+        Route::post('/pelanggan/klaim', [KlaimController::class, 'store'])->name('pelanggan.klaim.store');
+    });
 });
 
 // juru Angkut

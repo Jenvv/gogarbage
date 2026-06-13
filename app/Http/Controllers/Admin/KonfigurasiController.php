@@ -20,6 +20,7 @@ class KonfigurasiController extends Controller
             'ongkir_base_fee'      => 'required|numeric|min:0',
             'ongkir_per_km'        => 'required|numeric|min:0',
             'biaya_admin_reguler'  => 'required|numeric|min:0',
+            'komisi_admin_persen'  => 'required|numeric|min:0|max:100',
             'poin_per_kg'          => 'required|numeric|min:0',
             'poin_per_order'       => 'required|numeric|min:0',
             'lat_bank_sampah'      => 'required|numeric',
@@ -29,6 +30,7 @@ class KonfigurasiController extends Controller
         Konfigurasi::setValue('ongkir_base_fee', $request->ongkir_base_fee);
         Konfigurasi::setValue('ongkir_per_km', $request->ongkir_per_km);
         Konfigurasi::setValue('biaya_admin_reguler', $request->biaya_admin_reguler);
+        Konfigurasi::setValue('komisi_admin_persen', $request->komisi_admin_persen);
         Konfigurasi::setValue('poin_per_kg', $request->poin_per_kg);
         Konfigurasi::setValue('poin_per_order', $request->poin_per_order);
         Konfigurasi::setValue('lat_bank_sampah', $request->lat_bank_sampah);

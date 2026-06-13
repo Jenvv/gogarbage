@@ -37,6 +37,9 @@ class KeuanganController extends Controller
 
         $totalBiayaAdmin = Pesanan::where('status', 'selesai')->sum('biaya_admin');
 
+        // Total komisi admin (persentase dari biaya jemput reguler)
+        $totalKomisiAdmin = Pesanan::where('status', 'selesai')->sum('bagian_perusahaan');
+
         // ── Tabel Data ──
         $penarikan = Penarikan::with('pengguna', 'penyetuju')
             ->latest()
@@ -64,6 +67,7 @@ class KeuanganController extends Controller
             'totalTopUpMenunggu',
             'jumlahTopUpMenunggu',
             'totalBiayaAdmin',
+            'totalKomisiAdmin',
             'penarikan',
             'topUps',
             'transaksi',

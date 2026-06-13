@@ -517,7 +517,7 @@
                         <div class="timeline-content">
                             <p id="label1" style="font-size:14px;font-weight:700;color:#111827;">Pesanan Dikonfirmasi
                             </p>
-                            <p style="font-size:12px;color:#9ca3af;margin-top:2px;">14:30</p>
+                            <p style="font-size:12px;color:#9ca3af;margin-top:2px;">{{ $pesanan->created_at->format('H:i') }}</p>
                             <p id="desc1" style="font-size:12px;color:#6b7280;margin-top:4px;font-weight:500;">
                                 Pesanan kamu telah
                                 dikonfirmasi oleh sistem.</p>
@@ -537,13 +537,13 @@
                         </div>
                         <div class="timeline-content">
                             <p style="font-size:14px;font-weight:700;color:#111827;" id="label2">Menuju Lokasi</p>
-                            <p style="font-size:12px;color:#9ca3af;margin-top:2px;" id="time2">14:45</p>
+                            <p style="font-size:12px;color:#9ca3af;margin-top:2px;" id="time2">{{ $pesanan->jam_jemput ? substr($pesanan->jam_jemput, 0, 5) : '--:--' }}</p>
                             <p id="live2"
                                 style="display:none;font-size:12px;color:#16a34a;font-weight:600;margin-top:3px;">
                                 <span class="status-live"><span class="live-dot"></span>Sedang berlangsung...</span>
                             </p>
                             <p style="font-size:12px;color:#6b7280;margin-top:4px;font-weight:500;" id="desc2">Juru
-                                angkut sedang dalam perjalanan menuju lokasamu.</p>
+                                angkut sedang dalam perjalanan menuju lokasimu. Estimasi tiba pukul {{ $pesanan->jam_jemput ? substr($pesanan->jam_jemput, 0, 5) : '--:--' }}.</p>
                         </div>
                     </div>
 

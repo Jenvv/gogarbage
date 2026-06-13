@@ -244,12 +244,7 @@
                             <!-- Harga -->
                             <div class="harga-row">
                                 <span style="font-size:13px;color:#374151;font-weight:500;">Biaya Jemput</span>
-                                <div style="display:flex;align-items:center;gap:6px;">
-                                    <svg width="14" height="14" fill="none" stroke="#16a34a" stroke-width="2"
-                                        viewBox="0 0 24 24">
-                                        <line x1="12" y1="1" x2="12" y2="23" />
-                                        <path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" />
-                                    </svg>
+                                <div style="display:flex;align-items:center;gap:6px;">                        
                                     <span style="font-size:15px;font-weight:800;color:#16a34a;">
                                         @if ($order->biaya_jemput > 0)
                                             Rp {{ number_format($order->biaya_jemput, 0, ',', '.') }}

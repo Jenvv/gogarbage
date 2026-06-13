@@ -48,8 +48,10 @@
             <p class="mt-1 text-xs text-cyan-500 dark:text-cyan-400">{{ $jumlahTopUpMenunggu }} permintaan</p>
         </div>
         <div class="rounded-2xl border border-purple-200 bg-purple-50 p-5 dark:border-purple-800 dark:bg-purple-500/10">
-            <p class="text-sm text-purple-600 dark:text-purple-400 font-medium">Biaya Admin (Total)</p>
-            <h4 class="mt-2 text-2xl font-bold text-purple-700 dark:text-purple-300">Rp {{ number_format($totalBiayaAdmin, 0, ',', '.') }}</h4>
+            <p class="text-sm text-purple-600 dark:text-purple-400 font-medium">Pendapatan Admin</p>
+            <h4 class="mt-2 text-2xl font-bold text-purple-700 dark:text-purple-300">Rp {{ number_format($totalBiayaAdmin + $totalKomisiAdmin, 0, ',', '.') }}</h4>
+            <p class="mt-1 text-xs text-purple-500 dark:text-purple-400">Biaya Admin: Rp {{ number_format($totalBiayaAdmin, 0, ',', '.') }}</p>
+            <p class="text-xs text-purple-500 dark:text-purple-400">Komisi: Rp {{ number_format($totalKomisiAdmin, 0, ',', '.') }}</p>
         </div>
     </div>
 

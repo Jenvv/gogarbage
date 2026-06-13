@@ -239,9 +239,17 @@ class OrderController extends Controller
             $poinBerat = (int) ($totalBerat * $poinPerKg);
             $totalPoin = $poinBerat + $poinPerOrder;
 
-            // Bagi hasil langsung dari kolom ongkir (bukan persentase lagi)
-            $komisi = $pesanan->ongkir_juru_angkut; // hak juru angkut = ongkir berdasarkan jarak
-            $perusahaan = $pesanan->biaya_admin;     // hak admin = platform fee
+            // Bagi hasil: untuk pesanan reguler, admin dapat komisi persentase dari biaya jemput
+            if ($pesanan->tipe_pesanan === 'reguler') {
+                $komisiPersen = (float) Konfigurasi::getValue('komisi_admin_persen', 10);
+                $biayaJemput = (float) $pesanan->biaya_jemput;
+                $perusahaan = round($biayaJemput * ($komisiPersen / 100), 2);
+                $komisi = $biayaJemput - $perusahaan; // sisa untuk juru angkut
+            } else {
+                // Langganan: ongkir subsidi penuh ke juru angkut, admin 0
+                $komisi = $pesanan->ongkir_juru_angkut;
+                $perusahaan = 0;
+            }
 
             // Metode pembayaran ke pelanggan
             $metodePembayaranPelanggan = $request->input('metode_pembayaran_pelanggan');

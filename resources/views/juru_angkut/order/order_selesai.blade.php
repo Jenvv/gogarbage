@@ -283,6 +283,18 @@
                 <span style="font-size:13px;color:rgba(255,255,255,0.7);">Order ID</span>
                 <span style="font-size:13px;font-weight:700;color:#fff;">{{ $pesanan->nomor_pesanan }}</span>
             </div>
+
+            @if($pesanan->tipe_pesanan === 'reguler' && $pesanan->bagian_perusahaan > 0)
+                <hr class="info-divider" />
+                <div class="info-row">
+                    <span style="font-size:13px;color:rgba(255,255,255,0.7);">Total Biaya Jemput</span>
+                    <span style="font-size:13px;font-weight:700;color:#fff;">Rp {{ number_format($pesanan->biaya_jemput ?? 0, 0, ',', '.') }}</span>
+                </div>
+                <div class="info-row">
+                    <span style="font-size:13px;color:rgba(255,255,255,0.7);">Komisi Admin</span>
+                    <span style="font-size:13px;font-weight:600;color:rgba(255,255,255,0.85);">- Rp {{ number_format($pesanan->bagian_perusahaan ?? 0, 0, ',', '.') }}</span>
+                </div>
+            @endif
         </div>
 
         <!-- ── Buttons ── -->

@@ -22,6 +22,8 @@ class User extends Authenticatable
         'role',
         'telepon',
         'alamat',
+        'latitude',
+        'longitude',
         'saldo',
         'poin',
         'foto',

@@ -169,10 +169,21 @@
         }
 
         /* Kategori badge */
-        .kategori-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+        .kategori-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 6px;
+        }
+
         .kategori-chip {
-            font-size: 11px; font-weight: 600; color: #16a34a; background: #f0fdf4;
-            border: 1px solid #bbf7d0; border-radius: 8px; padding: 3px 10px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #16a34a;
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            border-radius: 8px;
+            padding: 3px 10px;
         }
     </style>
 </head>
@@ -183,8 +194,10 @@
         <!-- GREEN HEADER -->
         <div class="header-green">
             <div style="display:flex;align-items:center;gap:12px;margin-bottom:5px;">
-                <a href="{{ route('juru-angkut.order.index') }}" style="background:none;border:none;cursor:pointer;padding:0;display:flex;align-items:center;text-decoration:none;">
-                    <svg width="22" height="22" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24">
+                <a href="{{ route('juru-angkut.order.index') }}"
+                    style="background:none;border:none;cursor:pointer;padding:0;display:flex;align-items:center;text-decoration:none;">
+                    <svg width="22" height="22" fill="none" stroke="#fff" stroke-width="2.5"
+                        viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
                     </svg>
                 </a>
@@ -212,14 +225,15 @@
                             </svg>
                         </div>
                         <div>
-                            <p style="font-size:11.5px;color:#9ca3af;font-weight:500;margin-bottom:4px;">Nama Pelanggan</p>
+                            <p style="font-size:11.5px;color:#9ca3af;font-weight:500;margin-bottom:4px;">Nama Pelanggan
+                            </p>
                             <p style="font-size:15px;font-weight:700;color:#111827;">
                                 {{ $pesanan->pengguna->name ?? 'Pelanggan' }}
                             </p>
-                            @if($pesanan->pengguna && $pesanan->pengguna->telepon)
-                            <p style="font-size:12px;color:#6b7280;margin-top:3px;">
-                                📞 {{ $pesanan->pengguna->telepon }}
-                            </p>
+                            @if ($pesanan->pengguna && $pesanan->pengguna->telepon)
+                                <p style="font-size:12px;color:#6b7280;margin-top:3px;">
+                                    📞 {{ $pesanan->pengguna->telepon }}
+                                </p>
                             @endif
                         </div>
                     </div>
@@ -236,29 +250,11 @@
                             </svg>
                         </div>
                         <div>
-                            <p style="font-size:11.5px;color:#9ca3af;font-weight:500;margin-bottom:4px;">Alamat Penjemputan</p>
+                            <p style="font-size:11.5px;color:#9ca3af;font-weight:500;margin-bottom:4px;">Alamat
+                                Penjemputan</p>
                             <p style="font-size:14px;font-weight:500;color:#111827;line-height:1.6;">
                                 {{ $pesanan->alamat_jemput }}
                             </p>
-                        </div>
-                    </div>
-
-                    <!-- Jenis Sampah -->
-                    <div class="detail-row">
-                        <div class="detail-icon" style="background:#d1fae5;">
-                            <svg width="20" height="20" fill="none" stroke="#059669" stroke-width="2"
-                                viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
-                        </div>
-                        <div>
-                            <p style="font-size:11.5px;color:#9ca3af;font-weight:500;margin-bottom:4px;">Jenis Sampah</p>
-                            <div class="kategori-list">
-                                @foreach($pesanan->detailPesanan as $detail)
-                                <span class="kategori-chip">{{ $detail->kategoriSampah->nama ?? '-' }}</span>
-                                @endforeach
-                            </div>
                         </div>
                     </div>
 
@@ -272,7 +268,8 @@
                             </svg>
                         </div>
                         <div>
-                            <p style="font-size:11.5px;color:#9ca3af;font-weight:500;margin-bottom:4px;">Tipe Pesanan</p>
+                            <p style="font-size:11.5px;color:#9ca3af;font-weight:500;margin-bottom:4px;">Tipe Pesanan
+                            </p>
                             <p style="font-size:15px;font-weight:700;color:#111827;">
                                 {{ $pesanan->tipe_pesanan === 'langganan' ? '🌟 Langganan' : 'Reguler' }}
                             </p>
@@ -311,29 +308,40 @@
                             <div>
                                 <p style="font-size:11.5px;color:#9ca3af;font-weight:500;margin-bottom:4px;">Waktu</p>
                                 <p style="font-size:15px;font-weight:700;color:#111827;">
-                                    {{ $pesanan->jam_jemput ? \Carbon\Carbon::parse($pesanan->jam_jemput)->format('H:i') : '-' }}
+                                    {{ $pesanan->jam_jemput ? substr($pesanan->jam_jemput, 0, 5) : '-' }}
                                 </p>
                             </div>
                         </div>
                     </div>
-
+                    <!-- Catatan Pelanggan -->
+                    @if ($pesanan->catatan)
+                        <div class="detail-row">
+                            <div class="detail-icon" style="background:#d1fae5;">
+                                <svg width="20" height="20" fill="none" stroke="#059669" stroke-width="2"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                            </div>
+                            <div>
+                                <p style="font-size:11.5px;color:#9ca3af;font-weight:500;margin-bottom:4px;">Catatan
+                                    Pelanggan</p>
+                                <p style="font-size:15px;font-weight:500;color:#111827;">
+                                    {{ $pesanan->catatan }}
+                                </p>
+                            </div>
+                        </div>
+                    @endif
                     <!-- Biaya Jemput -->
                     <div class="harga-box">
-                        <div
-                            style="width:34px;height:34px;background:#d1fae5;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                            <svg width="16" height="16" fill="none" stroke="#16a34a" stroke-width="2.2"
-                                viewBox="0 0 24 24">
-                                <line x1="12" y1="1" x2="12" y2="23" />
-                                <path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" />
-                            </svg>
-                        </div>
                         <div>
-                            <p style="font-size:11.5px;color:#6b7280;font-weight:500;margin-bottom:3px;">Biaya Jemput</p>
+                            <p style="font-size:11.5px;color:#6b7280;font-weight:500;margin-bottom:3px;">Biaya Jemput
+                            </p>
                             <p style="font-size:22px;font-weight:800;color:#16a34a;">
-                                @if($pesanan->biaya_jemput > 0)
-                                Rp {{ number_format($pesanan->biaya_jemput, 0, ',', '.') }}
+                                @if ($pesanan->biaya_jemput > 0)
+                                    Rp {{ number_format($pesanan->biaya_jemput, 0, ',', '.') }}
                                 @else
-                                Gratis (Langganan)
+                                    Gratis (Langganan)
                                 @endif
                             </p>
                         </div>
@@ -341,16 +349,6 @@
 
                 </div>
                 <!-- END DETAIL CARD -->
-
-                <!-- CATATAN -->
-                @if($pesanan->catatan)
-                <div style="background:#fffbeb;border-left:4px solid #f59e0b;border-radius:10px;margin:0 16px 14px;padding:14px 16px;">
-                    <p style="font-size:13px;color:#374151;line-height:1.65;">
-                        <span style="font-weight:700;color:#b45309;">Catatan Pelanggan:</span>
-                        {{ $pesanan->catatan }}
-                    </p>
-                </div>
-                @endif
 
                 <!-- INFO BANNER -->
                 <div class="info-banner">
@@ -364,20 +362,22 @@
         </div><!-- end scroll-area -->
 
         <!-- BOTTOM BAR -->
-        @if($pesanan->status === 'menunggu')
-        <div class="bottom-bar">
-            <a href="{{ route('juru-angkut.order.index') }}" class="btn-kembali">Kembali</a>
-            <form action="{{ route('juru-angkut.order.terima', $pesanan->id) }}" method="POST" style="flex:1.4;">
-                @csrf
-                <button type="submit" class="btn-terima" style="width:100%;">Terima Order</button>
-            </form>
-        </div>
+        @if ($pesanan->status === 'menunggu')
+            <div class="bottom-bar">
+                <a href="{{ route('juru-angkut.order.index') }}" class="btn-kembali">Kembali</a>
+                <form action="{{ route('juru-angkut.order.terima', $pesanan->id) }}" method="POST"
+                    style="flex:1.4;">
+                    @csrf
+                    <button type="submit" class="btn-terima" style="width:100%;">Terima Order</button>
+                </form>
+            </div>
         @elseif(in_array($pesanan->status, ['diklaim', 'dalam_perjalanan', 'tiba', 'penimbangan']))
-        <div class="bottom-bar">
-            <a href="{{ route('juru-angkut.order.proses-jemput', $pesanan->id) }}" class="btn-terima" style="flex:1;text-align:center;text-decoration:none;display:block;padding:13px 0;">
-                Proses Jemput
-            </a>
-        </div>
+            <div class="bottom-bar">
+                <a href="{{ route('juru-angkut.order.proses-jemput', $pesanan->id) }}" class="btn-terima"
+                    style="flex:1;text-align:center;text-decoration:none;display:block;padding:13px 0;">
+                    Proses Jemput
+                </a>
+            </div>
         @endif
 
     </div>

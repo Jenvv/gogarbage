@@ -81,7 +81,7 @@
                             </div>
                             <div style="flex:1;min-width:0;">
                                 <p style="font-size:12px;font-weight:700;color:#111827;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ $order->pengguna->name ?? 'Pelanggan' }}</p>
-                                <p style="font-size:10px;color:#9ca3af;margin-top:1px;">{{ Str::limit($order->alamat_jemput ?? '-', 35) }} · {{ $order->jam_jemput ? \Carbon\Carbon::parse($order->jam_jemput)->format('H:i') : '08:00' }}</p>
+                                <p style="font-size:10px;color:#9ca3af;margin-top:1px;">{{ Str::limit($order->alamat_jemput ?? '-', 35) }} · {{ $order->jam_jemput ? substr($order->jam_jemput, 0, 5) : '08:00' }}</p>
                             </div>
                             @if($isToday)
                                 <form action="{{ route('juru-angkut.order.terima', $order->id) }}" method="POST">
